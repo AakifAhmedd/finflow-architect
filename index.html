@@ -665,6 +665,7 @@
     <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-emerald-600 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 transition-all transform translate-y-2">
         <i class="fa-solid fa-circle-check text-sm"></i>
         <span id="toast-message">Action completed successfully</span>
+        <button id="toast-undo" class="hidden ml-2 underline font-semibold">Undo</button>
     </div>
 
     <script>
@@ -856,13 +857,39 @@
             }
         }
 
-        function showToast(message) {
+        let toastTimer = null;
+        function showToast(message, undoable = false) {
             const toast = document.getElementById("toast");
             document.getElementById("toast-message").textContent = message;
+            document.getElementById("toast-undo").classList.toggle("hidden", !undoable);
             toast.classList.remove("hidden");
-            setTimeout(() => {
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
                 toast.classList.add("hidden");
-            }, 2500);
+            }, undoable ? 6000 : 2500);
+        }
+
+        // Undo history for destructive model changes
+        const undoStack = [];
+        function pushUndo() {
+            undoStack.push({
+                flows: JSON.parse(JSON.stringify(currentFlows)),
+                tiers: Array.from(customNodeTiers.entries()),
+                currency: currencySymbol
+            });
+            if (undoStack.length > 30) undoStack.shift();
+        }
+        function undoLast() {
+            const snap = undoStack.pop();
+            if (!snap) { showToast("Nothing to undo"); return; }
+            currentFlows = snap.flows;
+            customNodeTiers.clear();
+            snap.tiers.forEach(([k, v]) => customNodeTiers.set(k, v));
+            currencySymbol = snap.currency;
+            const sel = document.getElementById("select-currency");
+            if (sel) sel.value = currencySymbol;
+            renderFlowBuilder();
+            showToast("Undone");
         }
 
         // Get unique node names
@@ -1076,9 +1103,10 @@
             document.querySelectorAll(".btn-delete-flow-row").forEach(btn => {
                 btn.addEventListener("click", (e) => {
                     const idx = parseInt(e.currentTarget.getAttribute("data-idx"));
+                    pushUndo();
                     currentFlows.splice(idx, 1);
                     renderFlowBuilder();
-                    showToast("Connection deleted");
+                    showToast("Connection deleted", true);
                 });
             });
 
@@ -1086,10 +1114,11 @@
             document.querySelectorAll(".btn-delete-node").forEach(btn => {
                 btn.addEventListener("click", (e) => {
                     const nodeName = e.currentTarget.getAttribute("data-node");
+                    pushUndo();
                     currentFlows = currentFlows.filter(f => f.source !== nodeName && f.target !== nodeName);
                     customNodeTiers.delete(nodeName);
                     renderFlowBuilder();
-                    showToast(`Node "${nodeName}" removed`);
+                    showToast(`Node "${nodeName}" removed`, true);
                 });
             });
 
@@ -1788,6 +1817,7 @@
                 btn.addEventListener("click", (e) => {
                     const presetKey = e.currentTarget.getAttribute("data-preset");
                     if (PRESETS[presetKey]) {
+                        pushUndo();
                         currentFlows = JSON.parse(JSON.stringify(PRESETS[presetKey]));
                         if (presetKey === "lkr_plan") {
                             currencySymbol = "LKR";
@@ -1858,12 +1888,23 @@
                 }
             });
 
+            document.getElementById("toast-undo").addEventListener("click", undoLast);
+            document.addEventListener("keydown", (e) => {
+                if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z") {
+                    const t = e.target.tagName;
+                    if (t === "INPUT" || t === "TEXTAREA" || t === "SELECT") return;
+                    e.preventDefault();
+                    undoLast();
+                }
+            });
+
             // Reset
             document.getElementById("btn-quick-reset").addEventListener("click", () => {
+                pushUndo();
                 currentFlows = JSON.parse(JSON.stringify(PRESETS.tech));
                 customNodeTiers.clear();
                 renderFlowBuilder();
-                showToast("Reset to default model!");
+                showToast("Reset to default model!", true);
             });
 
             // Window Resize
