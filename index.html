@@ -138,16 +138,8 @@
         html.light .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148,163,184,.8); }
         html.light #btn-theme-toggle { color: #6366f1 !important; }
 
-        /* Sankey chart entrance animation */
-        .sankey-anim-link { animation: sankeyLinkIn 0.6s ease forwards; }
-        .sankey-anim-node { animation: sankeyNodeIn 0.5s ease forwards; }
-        @keyframes sankeyLinkIn {
-            from { stroke-opacity: 0; }
-        }
-        @keyframes sankeyNodeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* Sankey chart entrance animation (node fade only; link drawing is done via JS/SVG dash-offset) */
+        .sankey-node-fade { will-change: opacity; }
     </style>
 </head>
 <body class="h-full flex flex-col overflow-hidden text-slate-100 bg-slate-950">
@@ -1513,34 +1505,63 @@
             const labelColor = isLightTheme ? "#0f172a" : "#f8fafc";
             const labelSubColor = isLightTheme ? "#64748b" : "#94a3b8";
 
+            // Animation tuning: links draw left-to-right, tier by tier, like branches growing outward
+            const TIER_STAGGER = 420;   // ms between each depth tier starting to draw
+            const LINK_DURATION = 650;  // ms for a single link to fully draw
+            const LINK_JITTER = 35;     // ms max extra offset between sibling links in the same tier
+
             // Links
             const linkGroup = svg.append("g")
                 .attr("fill", "none")
                 .selectAll("path")
                 .data(graph.links)
                 .join("path")
-                .attr("class", d => animationsEnabled ? "sankey-link sankey-anim-link" : "sankey-link")
+                .attr("class", "sankey-link")
                 .attr("d", d3.sankeyLinkHorizontal())
                 .attr("stroke", d => `url(#${d.gradientId})`)
                 .attr("stroke-width", d => Math.max(1, d.width))
                 .style("stroke-opacity", sankeyConfig.linkOpacity)
-                .style("animation-delay", (d, i) => animationsEnabled ? `${Math.min(i * 30, 600)}ms` : null)
                 .on("mouseover", handleLinkMouseOver)
                 .on("mousemove", handleMouseMove)
                 .on("mouseout", handleMouseOut);
+
+            if (animationsEnabled) {
+                linkGroup.each(function (d) {
+                    const len = this.getTotalLength();
+                    d.__animDelay = d.source.depth * TIER_STAGGER + (d.index || 0) % 5 * LINK_JITTER;
+                    d3.select(this)
+                        .attr("stroke-dasharray", `${len} ${len}`)
+                        .attr("stroke-dashoffset", len);
+                });
+                linkGroup.transition()
+                    .delay(d => d.__animDelay)
+                    .duration(LINK_DURATION)
+                    .ease(d3.easeCubicInOut)
+                    .attr("stroke-dashoffset", 0)
+                    .on("end", function () {
+                        d3.select(this).attr("stroke-dasharray", null).attr("stroke-dashoffset", null);
+                    });
+            }
 
             // Nodes
             const nodeGroup = svg.append("g")
                 .selectAll("g")
                 .data(graph.nodes)
                 .join("g")
-                .attr("class", animationsEnabled ? "sankey-anim-node" : null)
-                .style("animation-delay", (d, i) => animationsEnabled ? `${100 + Math.min(i * 40, 500)}ms` : null)
+                .attr("class", animationsEnabled ? "sankey-node-fade" : null)
+                .style("opacity", animationsEnabled ? 0 : 1)
                 .call(d3.drag()
                     .subject(d => d)
                     .on("start", function() { this.parentNode.appendChild(this); })
                     .on("drag", dragNode)
                 );
+
+            if (animationsEnabled) {
+                nodeGroup.transition()
+                    .delay(d => d.depth === 0 ? 0 : d.depth * TIER_STAGGER + LINK_DURATION * 0.55)
+                    .duration(350)
+                    .style("opacity", 1);
+            }
 
             nodeGroup.append("rect")
                 .attr("class", "node-rect")
