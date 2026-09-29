@@ -288,6 +288,16 @@
                     <button id="btn-add-conn-table" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-lg text-xs font-medium border border-slate-700 transition flex items-center gap-1.5">
                         <i class="fa-solid fa-plus"></i> New Connection Path
                     </button>
+                    <button id="btn-csv-template" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium border border-slate-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-lines"></i> <span class="hidden sm:inline">CSV Template</span>
+                    </button>
+                    <button id="btn-csv-import" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg text-xs font-medium border border-slate-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-import"></i> <span class="hidden sm:inline">Import CSV</span>
+                    </button>
+                    <input type="file" id="input-csv-file" accept=".csv,text/csv" class="hidden" />
+                    <button id="btn-csv-export" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-lg text-xs font-medium border border-slate-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-csv"></i> <span class="hidden sm:inline">Export CSV</span>
+                    </button>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -413,7 +423,7 @@
                     <option value="₹">INR (₹)</option>
                     <option value="¥">JPY (¥)</option>
                     <option value="C$">CAD (C$)</option>
-                    <option value="LKR">LKR (Rs.)</option>
+                    <option value="LKR" selected>LKR (Rs.)</option>
                 </select>
             </div>
 
@@ -737,8 +747,8 @@
         };
 
         // Global Application State
-        let currentFlows = JSON.parse(JSON.stringify(PRESETS.tech));
-        let currencySymbol = "$";
+        let currentFlows = JSON.parse(JSON.stringify(PRESETS.lkr_plan));
+        let currencySymbol = "LKR";
         let colorTheme = "emerald";
         let colorMode = "theme"; // "theme" | "monotone" | "duotone"
         let monotoneColor = "#10b981";
@@ -897,6 +907,96 @@
             renderFlowBuilder();
             showToast("Undone");
         }
+
+        // --- CSV Import / Export ---
+        function csvEscape(val) {
+            const str = String(val);
+            if (/[",\n]/.test(str)) return '"' + str.replace(/"/g, '""') + '"';
+            return str;
+        }
+
+        function flowsToCsv(flows) {
+            const rows = [["source", "target", "value"]];
+            flows.forEach(f => rows.push([f.source, f.target, f.value]));
+            return rows.map(r => r.map(csvEscape).join(",")).join("\r\n");
+        }
+
+        function downloadCsv(content, filename) {
+            const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Minimal RFC4180-style CSV line parser (handles quoted fields with commas/quotes)
+        function parseCsv(text) {
+            const rows = [];
+            let row = [], field = "", inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i];
+                if (inQuotes) {
+                    if (c === '"') {
+                        if (text[i + 1] === '"') { field += '"'; i++; }
+                        else { inQuotes = false; }
+                    } else {
+                        field += c;
+                    }
+                } else if (c === '"') {
+                    inQuotes = true;
+                } else if (c === ",") {
+                    row.push(field); field = "";
+                } else if (c === "\n" || c === "\r") {
+                    if (c === "\r" && text[i + 1] === "\n") i++;
+                    row.push(field); field = "";
+                    if (row.length > 1 || row[0] !== "") rows.push(row);
+                    row = [];
+                } else {
+                    field += c;
+                }
+            }
+            if (field !== "" || row.length > 0) { row.push(field); rows.push(row); }
+            return rows;
+        }
+
+        function csvToFlows(text) {
+            const rows = parseCsv(text).filter(r => r.some(c => c.trim() !== ""));
+            if (rows.length === 0) throw new Error("The CSV file is empty.");
+
+            let dataRows = rows;
+            const header = rows[0].map(h => h.trim().toLowerCase());
+            if (header[0] === "source" && header[1] === "target" && header[2] === "value") {
+                dataRows = rows.slice(1);
+            }
+            if (dataRows.length === 0) throw new Error("No data rows found below the header.");
+
+            const flows = dataRows.map((r, i) => {
+                const source = (r[0] || "").trim();
+                const target = (r[1] || "").trim();
+                const value = parseFloat(r[2]);
+                if (!source || !target) throw new Error(`Row ${i + 1}: source and target are required.`);
+                if (source === target) throw new Error(`Row ${i + 1}: source and target must differ ("${source}").`);
+                if (isNaN(value) || value <= 0) throw new Error(`Row ${i + 1}: value must be a positive number.`);
+                return { source, target, value };
+            });
+            return flows;
+        }
+
+        const CSV_TEMPLATE = 'source,target,value\r\n' +
+            'Primary Tech Salary,Total Cash Flow,450000\r\n' +
+            'Foreign Freelance Retainer,Total Cash Flow,250000\r\n' +
+            'Total Cash Flow,Statutory Deductions,70000\r\n' +
+            'Total Cash Flow,Housing & Rent,180000\r\n' +
+            'Total Cash Flow,Daily Living Costs,220000\r\n' +
+            'Total Cash Flow,Savings & FD Wealth,230000\r\n' +
+            'Statutory Deductions,EPF & APIT Tax,70000\r\n' +
+            'Housing & Rent,Apartment Rent,140000\r\n' +
+            'Daily Living Costs,Supermarket & Groceries,120000\r\n' +
+            'Savings & FD Wealth,High Yield Bank FD,150000';
 
         // Get unique node names
         function getUniqueNodeNames() {
@@ -1837,6 +1937,43 @@
                 });
             });
 
+            // CSV Template / Import / Export
+            document.getElementById("btn-csv-template").addEventListener("click", () => {
+                downloadCsv(CSV_TEMPLATE, "finflow-template.csv");
+                showToast("Template CSV downloaded");
+            });
+
+            document.getElementById("btn-csv-export").addEventListener("click", () => {
+                downloadCsv(flowsToCsv(currentFlows), "finflow-export.csv");
+                showToast("Flows exported to CSV");
+            });
+
+            const inputCsvFile = document.getElementById("input-csv-file");
+            document.getElementById("btn-csv-import").addEventListener("click", () => inputCsvFile.click());
+            inputCsvFile.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    try {
+                        const flows = csvToFlows(evt.target.result);
+                        pushUndo();
+                        currentFlows = flows;
+                        renderFlowBuilder();
+                        showToast(`Imported ${flows.length} connections from CSV`, true);
+                    } catch (err) {
+                        alert("CSV import failed: " + err.message);
+                    } finally {
+                        inputCsvFile.value = "";
+                    }
+                };
+                reader.onerror = () => {
+                    alert("Could not read the selected file.");
+                    inputCsvFile.value = "";
+                };
+                reader.readAsText(file);
+            });
+
             // Add Node Modal
             const modalAddNode = document.getElementById("modal-add-node");
             document.getElementById("btn-add-node-modal").addEventListener("click", () => modalAddNode.classList.remove("hidden"));
@@ -1908,7 +2045,9 @@
             // Reset
             document.getElementById("btn-quick-reset").addEventListener("click", () => {
                 pushUndo();
-                currentFlows = JSON.parse(JSON.stringify(PRESETS.tech));
+                currentFlows = JSON.parse(JSON.stringify(PRESETS.lkr_plan));
+                currencySymbol = "LKR";
+                document.getElementById("select-currency").value = "LKR";
                 customNodeTiers.clear();
                 renderFlowBuilder();
                 showToast("Reset to default model!", true);
