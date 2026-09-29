@@ -1,5 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-slate-950 text-slate-100">
+<script>
+  (function () {
+    try {
+      if (localStorage.getItem("finflow_theme") === "light") {
+        document.documentElement.classList.add("light");
+      }
+    } catch (e) {}
+  })();
+</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -91,6 +100,54 @@
             color: #34d399;
             border-color: rgba(16, 185, 129, 0.4);
         }
+
+        /* ===== Light Mode ===== */
+        html.light, html.light body { background-color: #f1f5f9 !important; color: #1e293b !important; }
+        html.light .bg-slate-950 { background-color: #f1f5f9 !important; }
+        html.light .bg-slate-950\/60 { background-color: rgba(255,255,255,.55) !important; }
+        html.light .bg-slate-900 { background-color: #ffffff !important; }
+        html.light .bg-slate-900\/80 { background-color: rgba(255,255,255,.85) !important; }
+        html.light .bg-slate-900\/90 { background-color: rgba(255,255,255,.9) !important; }
+        html.light .bg-slate-900\/40 { background-color: rgba(255,255,255,.5) !important; }
+        html.light .bg-slate-800 { background-color: #e2e8f0 !important; }
+        html.light .bg-slate-800\/60 { background-color: rgba(226,232,240,.6) !important; }
+        html.light .bg-slate-700 { background-color: #cbd5e1 !important; }
+        html.light .bg-slate-700\/80 { background-color: rgba(203,213,225,.8) !important; }
+        html.light .hover\:bg-slate-700:hover { background-color: #cbd5e1 !important; }
+        html.light .hover\:bg-slate-800:hover { background-color: #e2e8f0 !important; }
+        html.light .hover\:text-white:hover { color: #0f172a !important; }
+        html.light .text-slate-100 { color: #0f172a !important; }
+        html.light .text-slate-200 { color: #1e293b !important; }
+        html.light .text-slate-300 { color: #334155 !important; }
+        html.light .text-slate-400 { color: #64748b !important; }
+        html.light .text-slate-500 { color: #475569 !important; }
+        html.light .border-slate-700 { border-color: #cbd5e1 !important; }
+        html.light .border-slate-700\/60 { border-color: rgba(203,213,225,.6) !important; }
+        html.light .border-slate-800 { border-color: #e2e8f0 !important; }
+        html.light .border-slate-800\/80 { border-color: rgba(226,232,240,.8) !important; }
+        html.light .divide-slate-800\/60 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(226,232,240,.6) !important; }
+        html.light h1, html.light h2, html.light h3, html.light h4 { color: #0f172a !important; }
+        html.light #tooltip { color: #1e293b !important; }
+        html.light #tooltip .text-white,
+        html.light #modal-export .text-white,
+        html.light #analytics-income-breakdown .text-white,
+        html.light #analytics-expense-breakdown .text-white { color: #0f172a !important; }
+        html.light .glass-panel { background: rgba(255,255,255,.85) !important; border-color: rgba(15,23,42,.08) !important; }
+        html.light .glass-card { background: rgba(248,250,252,.7) !important; border-color: rgba(15,23,42,.06) !important; }
+        html.light .custom-scrollbar::-webkit-scrollbar-track { background: rgba(226,232,240,.6); }
+        html.light .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148,163,184,.8); }
+        html.light #btn-theme-toggle { color: #6366f1 !important; }
+
+        /* Sankey chart entrance animation */
+        .sankey-anim-link { animation: sankeyLinkIn 0.6s ease forwards; }
+        .sankey-anim-node { animation: sankeyNodeIn 0.5s ease forwards; }
+        @keyframes sankeyLinkIn {
+            from { stroke-opacity: 0; }
+        }
+        @keyframes sankeyNodeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="h-full flex flex-col overflow-hidden text-slate-100 bg-slate-950">
@@ -149,6 +206,9 @@
 
         <!-- Quick Header Actions -->
         <div class="flex items-center gap-2">
+            <button id="btn-theme-toggle" class="w-8 h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg border border-slate-700 shadow-sm transition" title="Toggle light / dark mode" aria-label="Toggle light or dark mode">
+                <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
+            </button>
             <button id="btn-presets" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition flex items-center gap-1.5 border border-slate-700 shadow-sm" title="Load Scenarios">
                 <i class="fa-solid fa-bookmark text-amber-400"></i>
                 <span class="hidden sm:inline">Presets</span>
@@ -517,6 +577,21 @@
                 </div>
             </div>
 
+            <hr class="border-slate-800">
+
+            <!-- Chart Animations Toggle -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <label for="toggle-animations" class="text-xs text-slate-300 font-medium block">Chart Animations</label>
+                    <p class="text-[10px] text-slate-400">Animate nodes and flows when the Sankey chart renders</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-3">
+                    <input type="checkbox" id="toggle-animations" class="sr-only peer" checked>
+                    <div class="w-10 h-[22px] bg-slate-700 peer-checked:bg-emerald-600 rounded-full transition-colors"></div>
+                    <div class="absolute left-0.5 top-0.5 w-[18px] h-[18px] bg-white rounded-full transition-transform peer-checked:translate-x-[18px]"></div>
+                </label>
+            </div>
+
             <div class="pt-2">
                 <button id="btn-save-settings" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-medium transition shadow-md">
                     Apply & Close
@@ -765,6 +840,7 @@
 
         // Explicit Custom Node Tier Overrides
         let customNodeTiers = new Map();
+        let animationsEnabled = true;
 
         const LOCAL_STORAGE_KEY = "finflow_architect_model_v2";
 
@@ -778,6 +854,7 @@
                     monotoneColor,
                     duotoneColorA,
                     duotoneColorB,
+                    animationsEnabled,
                     sankeyConfig: {
                         nodeWidth: sankeyConfig.nodeWidth,
                         nodePadding: sankeyConfig.nodePadding,
@@ -807,6 +884,7 @@
                 if (parsed.monotoneColor) monotoneColor = parsed.monotoneColor;
                 if (parsed.duotoneColorA) duotoneColorA = parsed.duotoneColorA;
                 if (parsed.duotoneColorB) duotoneColorB = parsed.duotoneColorB;
+                if (typeof parsed.animationsEnabled === "boolean") animationsEnabled = parsed.animationsEnabled;
 
                 if (parsed.sankeyConfig) {
                     sankeyConfig.nodeWidth = parsed.sankeyConfig.nodeWidth || 18;
@@ -883,6 +961,12 @@
             toastTimer = setTimeout(() => {
                 toast.classList.add("hidden");
             }, undoable ? 6000 : 2500);
+        }
+
+        function syncThemeToggleIcon() {
+            const isLight = document.documentElement.classList.contains("light");
+            const icon = document.getElementById("theme-toggle-icon");
+            if (icon) icon.className = isLight ? "fa-solid fa-sun" : "fa-solid fa-moon";
         }
 
         // Undo history for destructive model changes
@@ -1425,17 +1509,22 @@
                 link.gradientId = gradientId;
             });
 
+            const isLightTheme = document.documentElement.classList.contains("light");
+            const labelColor = isLightTheme ? "#0f172a" : "#f8fafc";
+            const labelSubColor = isLightTheme ? "#64748b" : "#94a3b8";
+
             // Links
             const linkGroup = svg.append("g")
                 .attr("fill", "none")
                 .selectAll("path")
                 .data(graph.links)
                 .join("path")
-                .attr("class", "sankey-link")
+                .attr("class", d => animationsEnabled ? "sankey-link sankey-anim-link" : "sankey-link")
                 .attr("d", d3.sankeyLinkHorizontal())
                 .attr("stroke", d => `url(#${d.gradientId})`)
                 .attr("stroke-width", d => Math.max(1, d.width))
-                .attr("stroke-opacity", sankeyConfig.linkOpacity)
+                .style("stroke-opacity", sankeyConfig.linkOpacity)
+                .style("animation-delay", (d, i) => animationsEnabled ? `${Math.min(i * 30, 600)}ms` : null)
                 .on("mouseover", handleLinkMouseOver)
                 .on("mousemove", handleMouseMove)
                 .on("mouseout", handleMouseOut);
@@ -1445,6 +1534,8 @@
                 .selectAll("g")
                 .data(graph.nodes)
                 .join("g")
+                .attr("class", animationsEnabled ? "sankey-anim-node" : null)
+                .style("animation-delay", (d, i) => animationsEnabled ? `${100 + Math.min(i * 40, 500)}ms` : null)
                 .call(d3.drag()
                     .subject(d => d)
                     .on("start", function() { this.parentNode.appendChild(this); })
@@ -1470,12 +1561,12 @@
                 .attr("y", d => (d.y1 + d.y0) / 2)
                 .attr("dy", "0.35em")
                 .attr("text-anchor", d => d.x0 < width / 2 ? "start" : "end")
-                .attr("fill", "#f8fafc")
+                .attr("fill", labelColor)
                 .attr("font-size", "11px")
                 .attr("font-weight", "600")
                 .text(d => d.name)
                 .append("tspan")
-                .attr("fill", "#94a3b8")
+                .attr("fill", labelSubColor)
                 .attr("font-weight", "400")
                 .attr("dx", "4px")
                 .text(d => `(${formatCurrency(d.value)})`);
@@ -1767,7 +1858,10 @@
             document.getElementById("val-link-opacity").textContent = sankeyConfig.linkOpacity;
             document.getElementById("select-align").value = sankeyConfig.alignKey || "sankeyJustify";
 
+            document.getElementById("toggle-animations").checked = animationsEnabled;
+
             updateColorModeContainers();
+            syncThemeToggleIcon();
 
             // Initial Flow Render
             renderFlowBuilder();
@@ -1856,6 +1950,22 @@
                 if (!document.getElementById("view-sankey").classList.contains("hidden")) {
                     renderSankey();
                 }
+            });
+
+            // Light / Dark Mode Toggle
+            document.getElementById("btn-theme-toggle").addEventListener("click", () => {
+                const isLight = document.documentElement.classList.toggle("light");
+                try { localStorage.setItem("finflow_theme", isLight ? "light" : "dark"); } catch (e) {}
+                syncThemeToggleIcon();
+                if (!document.getElementById("view-sankey").classList.contains("hidden")) {
+                    renderSankey();
+                }
+            });
+
+            // Chart Animations Toggle
+            document.getElementById("toggle-animations").addEventListener("change", (e) => {
+                animationsEnabled = e.target.checked;
+                saveStateToLocalStorage();
             });
 
             document.getElementById("select-theme").addEventListener("change", (e) => {
