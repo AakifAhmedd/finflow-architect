@@ -2,13 +2,21 @@
 
 Personal financial flow builder and Sankey visualizer. Single self-contained HTML file (Tailwind, D3, d3-sankey via CDN); state is saved in the browser's `localStorage`.
 
-**Live page:** https://claude.ai/artifact/KsGrWwjtmL9ePcXgFPNfRC
+**Live page:** https://aakifahmedd.github.io/finflow-architect/ (GitHub Pages — enable under repo **Settings → Pages**, source `main` / `/root`, if not already on)
 
 ## Usage
 
 Open `index.html` in a browser. No build step.
 
+## Features
+
+- Drag-and-drop flow builder with a live Sankey chart, defaulting to LKR and a Sri Lankan income/expense preset
+- CSV import/export, with a downloadable template
+- Light / dark mode toggle (header)
+- Left-to-right branch-drawing chart animation, with a Settings toggle to turn it off
+- Undo (button + Ctrl/Cmd+Z) for deletes, resets, and preset/CSV loads
+- Chart export as PNG, JPEG or SVG via the "Share as" button on the chart screen
+
 ## Notes
 
-- `index.html` here is the original file. The published page is a variant that loads D3 from cdnjs and inlines the Font Awesome icons, because the hosting page blocks d3js.org and external icon stylesheets.
-- Saved data is per browser and per origin, so the local file and the published page keep separate state.
+- Saved data (model, currency, theme, settings) is per browser and per origin.
