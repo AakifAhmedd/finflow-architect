@@ -161,22 +161,22 @@
         </div>
 
         <!-- Main View Mode Tabs Navigation -->
-        <nav class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs font-medium">
-            <button id="tab-builder" class="tab-btn active px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
+        <nav class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs font-medium overflow-x-auto custom-scrollbar max-w-full">
+            <button id="tab-builder" class="tab-btn active shrink-0 px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
                 <i class="fa-solid fa-pen-ruler text-emerald-400"></i>
-                <span>Flow Builder</span>
+                <span class="hidden sm:inline">Flow Builder</span>
             </button>
-            <button id="tab-sankey" class="tab-btn px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
+            <button id="tab-sankey" class="tab-btn shrink-0 px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
                 <i class="fa-solid fa-chart-sankey text-teal-400"></i>
-                <span>Visualization</span>
+                <span class="hidden sm:inline">Visualization</span>
             </button>
-            <button id="tab-analytics" class="tab-btn px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
+            <button id="tab-analytics" class="tab-btn shrink-0 px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
                 <i class="fa-solid fa-chart-pie text-indigo-400"></i>
-                <span>Analysis</span>
+                <span class="hidden sm:inline">Analysis</span>
             </button>
-            <button id="tab-tracker" class="tab-btn px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
+            <button id="tab-tracker" class="tab-btn shrink-0 px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
                 <i class="fa-solid fa-calendar-check text-amber-400"></i>
-                <span>Tracker</span>
+                <span class="hidden sm:inline">Tracker</span>
             </button>
         </nav>
 
@@ -342,7 +342,7 @@
                         <p class="text-xs text-slate-400">All money routing paths from source nodes to target nodes</p>
                     </div>
                     <button id="btn-add-conn-table" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-lg text-xs font-medium border border-slate-700 transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus"></i> New Connection Path
+                        <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">New Connection Path</span>
                     </button>
                     <button id="btn-csv-template" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium border border-slate-700 transition flex items-center gap-1.5">
                         <i class="fa-solid fa-file-lines"></i> <span class="hidden sm:inline">CSV Template</span>
@@ -381,15 +381,15 @@
             <div id="chart-container" class="flex-1 w-full h-full relative rounded-2xl border border-slate-800/80 bg-slate-900/40 p-2 overflow-hidden flex items-center justify-center">
 
                 <!-- Plan / Actual Source Toggle -->
-                <div class="absolute top-4 left-4 z-20 flex items-center gap-2 glass-panel p-2 rounded-xl border border-slate-800 shadow-xl">
-                    <div class="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs">
-                        <button id="btn-chart-plan" data-source="plan" class="chart-source-btn px-2.5 py-1 rounded-md font-medium transition bg-emerald-500/20 text-emerald-400">Plan</button>
-                        <button id="btn-chart-actual" data-source="actual" class="chart-source-btn px-2.5 py-1 rounded-md font-medium transition text-slate-400">Actual</button>
+                <div class="absolute top-4 left-4 z-20 flex items-center gap-1.5 sm:gap-2 glass-panel p-1.5 sm:p-2 rounded-xl border border-slate-800 shadow-xl max-w-[calc(100%-2rem)] overflow-x-auto">
+                    <div class="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs shrink-0">
+                        <button id="btn-chart-plan" data-source="plan" class="chart-source-btn px-2 sm:px-2.5 py-1 rounded-md font-medium transition bg-emerald-500/20 text-emerald-400 whitespace-nowrap">Plan</button>
+                        <button id="btn-chart-actual" data-source="actual" class="chart-source-btn px-2 sm:px-2.5 py-1 rounded-md font-medium transition text-slate-400 whitespace-nowrap">Actual</button>
                     </div>
-                    <div id="chart-actual-month-nav" class="hidden items-center gap-1.5">
-                        <button id="btn-chart-prev-month" class="w-6 h-6 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md border border-slate-700 text-[10px]"><i class="fa-solid fa-chevron-left"></i></button>
-                        <span id="chart-actual-month-label" class="text-[11px] text-slate-300 font-medium w-20 text-center">Month</span>
-                        <button id="btn-chart-next-month" class="w-6 h-6 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md border border-slate-700 text-[10px]"><i class="fa-solid fa-chevron-right"></i></button>
+                    <div id="chart-actual-month-nav" class="hidden items-center gap-1 sm:gap-1.5 shrink-0">
+                        <button id="btn-chart-prev-month" class="w-6 h-6 shrink-0 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md border border-slate-700 text-[10px]"><i class="fa-solid fa-chevron-left"></i></button>
+                        <span id="chart-actual-month-label" class="text-[11px] text-slate-300 font-medium w-16 sm:w-20 text-center whitespace-nowrap">Month</span>
+                        <button id="btn-chart-next-month" class="w-6 h-6 shrink-0 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md border border-slate-700 text-[10px]"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
                 
@@ -402,8 +402,8 @@
 
                 <!-- Floating Canvas Overlay Controls -->
                 <div class="absolute bottom-4 left-4 z-20 flex items-center gap-2 glass-panel p-2 rounded-xl border border-slate-800 shadow-xl">
-                    <span class="text-[11px] text-slate-400 px-2"><i class="fa-solid fa-hand-pointer me-1 text-emerald-400"></i> Drag nodes to reorder</span>
-                    <button id="btn-quick-settings" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium border border-slate-700 transition">
+                    <span class="hidden md:inline text-[11px] text-slate-400 px-2"><i class="fa-solid fa-hand-pointer me-1 text-emerald-400"></i> Drag nodes to reorder</span>
+                    <button id="btn-quick-settings" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium border border-slate-700 transition whitespace-nowrap">
                         <i class="fa-solid fa-sliders me-1"></i> Tune Layout
                     </button>
                 </div>
@@ -869,7 +869,7 @@
     </div>
 
     <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-emerald-600 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 transition-all transform translate-y-2">
+    <div id="toast" class="fixed bottom-5 left-4 right-4 sm:left-auto sm:right-5 sm:max-w-sm z-50 hidden bg-emerald-600 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 transition-all transform translate-y-2">
         <i class="fa-solid fa-circle-check text-sm"></i>
         <span id="toast-message">Action completed successfully</span>
         <button id="toast-undo" class="hidden ml-2 underline font-semibold">Undo</button>
