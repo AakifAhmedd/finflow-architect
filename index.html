@@ -140,6 +140,22 @@
 
         /* Sankey chart entrance animation (node fade only; link drawing is done via JS/SVG dash-offset) */
         .sankey-node-fade { will-change: opacity; }
+
+        /* Tracker: keep the daily logging flow calm and readable on small screens. */
+        .tracker-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .tracker-field input, .tracker-field select { min-height: 40px; }
+        .tracker-field input::placeholder { color: #64748b; }
+        .tracker-field input:focus, .tracker-field select:focus {
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+        }
+        .tx-type-btn { min-height: 36px; }
+        .tx-type-btn:focus-visible, #btn-tx-add:focus-visible, #btn-tx-new-category:focus-visible {
+            outline: 2px solid #fbbf24;
+            outline-offset: 2px;
+        }
+        @media (min-width: 768px) {
+            .tracker-form-grid { grid-template-columns: minmax(150px, 1fr) minmax(220px, 1.35fr) minmax(130px, .8fr) minmax(160px, 1fr) auto; }
+        }
     </style>
 </head>
 <body class="h-full flex flex-col overflow-hidden text-slate-100 bg-slate-950">
@@ -518,41 +534,47 @@
             </div>
 
             <!-- Add Transaction -->
-            <div class="glass-panel p-4 md:p-5 rounded-2xl border border-slate-800">
-                <h3 class="font-bold text-white text-sm mb-3 flex items-center gap-2">
+            <form id="tracker-form" class="glass-panel p-4 md:p-5 rounded-2xl border border-slate-800">
+                <div class="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                        <h3 class="font-bold text-white text-sm flex items-center gap-2">
                     <i class="fa-solid fa-plus text-amber-400"></i> Log a Transaction
-                </h3>
-                <div class="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
-                    <div class="col-span-2 md:col-span-1">
+                        </h3>
+                        <p class="text-[11px] text-slate-500 mt-1">Keep it simple. Your totals update as soon as you save.</p>
+                    </div>
+                    <span id="tracker-form-currency" class="text-[11px] font-medium text-slate-500 pt-0.5">LKR</span>
+                </div>
+                <div class="tracker-form-grid grid gap-3 items-end">
+                    <div class="tracker-field col-span-2 md:col-span-1">
                         <label class="text-[11px] text-slate-400 mb-1 block">Type</label>
                         <div class="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs">
-                            <button id="btn-tx-type-expense" data-type="expense" class="tx-type-btn active flex-1 py-1.5 rounded-md font-medium transition bg-rose-500/20 text-rose-400">Expense</button>
-                            <button id="btn-tx-type-income" data-type="income" class="tx-type-btn flex-1 py-1.5 rounded-md font-medium transition text-slate-400">Income</button>
+                            <button type="button" id="btn-tx-type-expense" data-type="expense" aria-pressed="true" class="tx-type-btn active flex-1 py-1.5 rounded-md font-medium transition bg-rose-500/20 text-rose-400">Expense</button>
+                            <button type="button" id="btn-tx-type-income" data-type="income" aria-pressed="false" class="tx-type-btn flex-1 py-1.5 rounded-md font-medium transition text-slate-400">Income</button>
                         </div>
                     </div>
-                    <div class="col-span-2 md:col-span-2">
+                    <div class="tracker-field col-span-2 md:col-span-1">
                         <label class="text-[11px] text-slate-400 mb-1 block">Category</label>
-                        <select id="select-tx-category" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+                        <select id="select-tx-category" aria-label="Transaction category" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
                             <!-- Populated dynamically -->
                         </select>
                     </div>
-                    <div>
+                    <div class="tracker-field">
                         <label class="text-[11px] text-slate-400 mb-1 block">Amount</label>
-                        <input type="number" id="input-tx-amount" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+                        <input type="number" id="input-tx-amount" placeholder="0.00" min="0.01" step="0.01" inputmode="decimal" autocomplete="off" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
                     </div>
-                    <div>
+                    <div class="tracker-field">
                         <label class="text-[11px] text-slate-400 mb-1 block">Date</label>
-                        <input type="date" id="input-tx-date" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+                        <input type="date" id="input-tx-date" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="col-span-2 md:col-span-1 flex gap-2">
-                        <button id="btn-tx-new-category" title="New category" class="w-9 h-9 shrink-0 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700">
+                        <button type="button" id="btn-tx-new-category" title="New category" aria-label="Create a new category" class="w-10 h-10 shrink-0 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700">
                             <i class="fa-solid fa-tag"></i>
                         </button>
-                        <button id="btn-tx-add" class="flex-1 h-9 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold transition">Add</button>
+                        <button type="submit" id="btn-tx-add" class="flex-1 h-10 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold transition">Save transaction</button>
                     </div>
                 </div>
-                <input type="text" id="input-tx-note" placeholder="Note (optional)" class="w-full mt-3 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
-            </div>
+                <input type="text" id="input-tx-note" placeholder="Optional note — e.g. groceries, salary, rent" autocomplete="off" class="w-full mt-3 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+            </form>
 
             <!-- Transaction List -->
             <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden">
@@ -564,6 +586,7 @@
                         <thead>
                             <tr class="text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-800">
                                 <th class="px-4 py-2">Date</th>
+                                <th class="px-4 py-2">Type</th>
                                 <th class="px-4 py-2">Category</th>
                                 <th class="px-4 py-2">Note</th>
                                 <th class="px-4 py-2 text-right">Amount</th>
@@ -998,6 +1021,9 @@
         // --- Tracker state ---
         let transactions = []; // { id, date: 'YYYY-MM-DD', node, type: 'income'|'expense', amount, note }
         let chartDataSource = "plan"; // "plan" | "actual"
+        function getLocalDateKey(date = new Date()) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        }
         function getCurrentMonthKey() {
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -1381,9 +1407,11 @@
             const select = document.getElementById("select-tx-category");
             const prevValue = select.value;
             const options = getTrackerCategoryOptions(getActiveTxType());
-            select.innerHTML = options.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("")
+            select.innerHTML = (options.length ? `<option value="" disabled>Select a category</option>` : `<option value="" disabled>No categories yet</option>`)
+                + options.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("")
                 + `<option value="__new__">+ New category...</option>`;
             if (options.includes(prevValue)) select.value = prevValue;
+            else select.value = "";
         }
 
         function setChartSourceUI() {
@@ -1401,14 +1429,21 @@
         }
 
         function changeTrackerMonth(delta) {
+            const previousMonth = trackerMonth;
             trackerMonth = shiftMonthKey(trackerMonth, delta);
+            const dateInput = document.getElementById("input-tx-date");
+            if (dateInput && (!dateInput.value || getMonthKey(dateInput.value) === previousMonth)) {
+                const day = Math.min(Number(dateInput.value.slice(8, 10)) || 1, new Date(Number(trackerMonth.slice(0, 4)), Number(trackerMonth.slice(5, 7)), 0).getDate());
+                dateInput.value = `${trackerMonth}-${String(day).padStart(2, "0")}`;
+            }
             document.getElementById("chart-actual-month-label").textContent = formatMonthLabel(trackerMonth);
             if (!document.getElementById("view-tracker").classList.contains("hidden")) renderTracker();
             if (!document.getElementById("view-analytics").classList.contains("hidden")) renderAnalytics();
             if (!document.getElementById("view-sankey").classList.contains("hidden") && chartDataSource === "actual") renderSankey();
         }
 
-        function addTransaction() {
+        function addTransaction(event) {
+            event?.preventDefault();
             const type = getActiveTxType();
             const node = document.getElementById("select-tx-category").value;
             const amount = parseFloat(document.getElementById("input-tx-amount").value);
@@ -1416,20 +1451,21 @@
             const note = document.getElementById("input-tx-note").value.trim();
 
             if (!node || node === "__new__") { showToast("Pick a category first"); return; }
-            if (isNaN(amount) || amount <= 0) { showToast("Enter a valid amount"); return; }
+            if (!Number.isFinite(amount) || amount <= 0) { showToast("Enter an amount greater than zero"); document.getElementById("input-tx-amount").focus(); return; }
             if (!date) { showToast("Pick a date"); return; }
 
             pushUndo();
             transactions.push({
                 id: `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-                date, node, type, amount, note
+                date, node, type, amount: Math.round(amount * 100) / 100, note
             });
             saveStateToLocalStorage();
             document.getElementById("input-tx-amount").value = "";
             document.getElementById("input-tx-note").value = "";
             trackerMonth = getMonthKey(date);
             renderTracker();
-            showToast("Transaction logged", true);
+            document.getElementById("input-tx-amount").focus();
+            showToast(`${type === "income" ? "Income" : "Expense"} saved`, true);
         }
 
         function deleteTransaction(id) {
@@ -1444,7 +1480,7 @@
             document.getElementById("tracker-month-label").textContent = formatMonthLabel(trackerMonth);
             populateTxCategorySelect();
 
-            const monthTx = txForMonth(trackerMonth).slice().sort((a, b) => b.date.localeCompare(a.date));
+            const monthTx = txForMonth(trackerMonth).slice().sort((a, b) => b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id)));
             const tbody = document.getElementById("tracker-tx-list");
             const empty = document.getElementById("tracker-tx-empty");
 
@@ -1455,7 +1491,8 @@
                 empty.classList.add("hidden");
                 tbody.innerHTML = monthTx.map(t => `
                     <tr class="hover:bg-slate-800/40 transition">
-                        <td class="px-4 py-2 text-slate-400 whitespace-nowrap">${escapeHtml(t.date)}</td>
+                        <td class="px-4 py-2 text-slate-400 whitespace-nowrap">${escapeHtml(new Date(`${t.date}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }))}</td>
+                        <td class="px-4 py-2 whitespace-nowrap"><span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${t.type === "income" ? "bg-emerald-500/15 text-emerald-400" : "bg-rose-500/15 text-rose-400"}">${t.type === "income" ? "Income" : "Expense"}</span></td>
                         <td class="px-4 py-2 text-slate-200">${escapeHtml(t.node)}</td>
                         <td class="px-4 py-2 text-slate-400">${escapeHtml(t.note || "")}</td>
                         <td class="px-4 py-2 text-right font-medium whitespace-nowrap ${t.type === "income" ? "text-emerald-400" : "text-rose-400"}">${t.type === "income" ? "+" : "-"}${formatCurrency(t.amount)}</td>
@@ -2592,6 +2629,7 @@
             // Settings Inputs
             document.getElementById("select-currency").addEventListener("change", (e) => {
                 currencySymbol = e.target.value;
+                document.getElementById("tracker-form-currency").textContent = currencySymbol;
                 renderFlowBuilder();
                 if (!document.getElementById("view-sankey").classList.contains("hidden")) {
                     renderSankey();
@@ -2615,7 +2653,8 @@
             });
 
             // --- Tracker wiring ---
-            document.getElementById("input-tx-date").value = new Date().toISOString().slice(0, 10);
+            document.getElementById("input-tx-date").value = getLocalDateKey();
+            document.getElementById("tracker-form-currency").textContent = currencySymbol;
 
             document.querySelectorAll(".tx-type-btn").forEach(btn => {
                 btn.addEventListener("click", () => {
@@ -2625,6 +2664,7 @@
                     });
                     btn.classList.remove("text-slate-400");
                     btn.classList.add("active");
+                    document.querySelectorAll(".tx-type-btn").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
                     if (btn.getAttribute("data-type") === "income") {
                         btn.classList.add("bg-emerald-500/20", "text-emerald-400");
                     } else {
@@ -2641,7 +2681,7 @@
                 }
             });
 
-            document.getElementById("btn-tx-add").addEventListener("click", addTransaction);
+            document.getElementById("tracker-form").addEventListener("submit", addTransaction);
 
             document.getElementById("tracker-tx-list").addEventListener("click", (e) => {
                 const btn = e.target.closest(".btn-tx-delete");
@@ -2817,6 +2857,11 @@
                 const tier = document.getElementById("input-node-tier").value;
 
                 if (name !== "") {
+                    if (getUniqueNodeNames().some(existing => existing.toLowerCase() === name.toLowerCase())) {
+                        showToast("A category with that name already exists");
+                        return;
+                    }
+                    pushUndo();
                     customNodeTiers.set(name, tier);
                     if (tier !== "Income Source") {
                         const targetNode = name;
@@ -2829,9 +2874,11 @@
                     document.getElementById("input-node-name").value = "";
                     modalAddNode.classList.add("hidden");
                     renderFlowBuilder();
+                    saveStateToLocalStorage();
                     if (addNodeFromTracker) {
                         populateTxCategorySelect();
                         document.getElementById("select-tx-category").value = name;
+                        document.getElementById("input-tx-amount").focus();
                     }
                     showToast(`Created node "${name}"`);
                 }
