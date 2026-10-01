@@ -418,6 +418,18 @@
 
         <!-- VIEW 3: ANALYTICS & INSIGHTS -->
         <section id="view-analytics" class="flex-1 hidden flex-col p-4 md:p-6 overflow-y-auto custom-scrollbar gap-6">
+            <div class="glass-panel p-3 rounded-2xl border border-slate-800 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <button id="btn-analytics-prev-month" class="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 text-xs" title="Previous month">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div id="analytics-month-label" class="text-xs font-bold text-white w-28 text-center">Month</div>
+                    <button id="btn-analytics-next-month" class="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 text-xs" title="Next month">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider">Based on actual logged transactions</span>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <!-- Health Card 1 -->
                 <div class="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col gap-3">
@@ -1332,6 +1344,7 @@
             trackerMonth = shiftMonthKey(trackerMonth, delta);
             document.getElementById("chart-actual-month-label").textContent = formatMonthLabel(trackerMonth);
             if (!document.getElementById("view-tracker").classList.contains("hidden")) renderTracker();
+            if (!document.getElementById("view-analytics").classList.contains("hidden")) renderAnalytics();
             if (!document.getElementById("view-sankey").classList.contains("hidden") && chartDataSource === "actual") renderSankey();
         }
 
@@ -1984,6 +1997,8 @@
 
         function renderAnalytics() {
             const nodeNames = getUniqueNodeNames();
+            const flows = computeActualFlows(trackerMonth);
+            document.getElementById("analytics-month-label").textContent = formatMonthLabel(trackerMonth);
             const incomeNodes = nodeNames.filter(name => getNodeTier(name) === "Income Source");
             
             let totalIncome = 0;
@@ -1991,13 +2006,13 @@
             incomeBreakdownList.innerHTML = "";
 
             incomeNodes.forEach(name => {
-                const outgoing = currentFlows.filter(f => f.source === name);
+                const outgoing = flows.filter(f => f.source === name);
                 const val = outgoing.reduce((acc, f) => acc + Number(f.value), 0);
                 totalIncome += val;
             });
 
             incomeNodes.forEach(name => {
-                const outgoing = currentFlows.filter(f => f.source === name);
+                const outgoing = flows.filter(f => f.source === name);
                 const val = outgoing.reduce((acc, f) => acc + Number(f.value), 0);
                 const pct = totalIncome > 0 ? ((val / totalIncome) * 100).toFixed(1) : 0;
 
@@ -2022,7 +2037,7 @@
             expenseBreakdownList.innerHTML = "";
 
             categoryNodes.forEach(name => {
-                const incoming = currentFlows.filter(f => f.target === name);
+                const incoming = flows.filter(f => f.target === name);
                 const val = incoming.reduce((acc, f) => acc + Number(f.value), 0);
                 const pct = totalIncome > 0 ? ((val / totalIncome) * 100).toFixed(1) : 0;
 
@@ -2049,7 +2064,7 @@
 
             let totalSavings = 0;
             savingsNodes.forEach(name => {
-                const incoming = currentFlows.filter(f => f.target === name);
+                const incoming = flows.filter(f => f.target === name);
                 totalSavings += incoming.reduce((acc, f) => acc + Number(f.value), 0);
             });
 
@@ -2343,6 +2358,8 @@
             document.getElementById("btn-tracker-next-month").addEventListener("click", () => changeTrackerMonth(1));
             document.getElementById("btn-chart-prev-month").addEventListener("click", () => changeTrackerMonth(-1));
             document.getElementById("btn-chart-next-month").addEventListener("click", () => changeTrackerMonth(1));
+            document.getElementById("btn-analytics-prev-month").addEventListener("click", () => changeTrackerMonth(-1));
+            document.getElementById("btn-analytics-next-month").addEventListener("click", () => changeTrackerMonth(1));
 
             document.getElementById("btn-tracker-view-chart").addEventListener("click", () => {
                 chartDataSource = "actual";
