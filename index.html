@@ -174,6 +174,10 @@
                 <i class="fa-solid fa-chart-pie text-indigo-400"></i>
                 <span>Analysis</span>
             </button>
+            <button id="tab-tracker" class="tab-btn px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
+                <i class="fa-solid fa-calendar-check text-amber-400"></i>
+                <span>Tracker</span>
+            </button>
         </nav>
 
         <!-- Metric Badges -->
@@ -375,6 +379,19 @@
         <section id="view-sankey" class="flex-1 hidden flex-col p-4 relative overflow-hidden bg-slate-950/60">
             <!-- Canvas Container with Horizontal Scroll Support for Mobile -->
             <div id="chart-container" class="flex-1 w-full h-full relative rounded-2xl border border-slate-800/80 bg-slate-900/40 p-2 overflow-hidden flex items-center justify-center">
+
+                <!-- Plan / Actual Source Toggle -->
+                <div class="absolute top-4 left-4 z-20 flex items-center gap-2 glass-panel p-2 rounded-xl border border-slate-800 shadow-xl">
+                    <div class="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs">
+                        <button id="btn-chart-plan" data-source="plan" class="chart-source-btn px-2.5 py-1 rounded-md font-medium transition bg-emerald-500/20 text-emerald-400">Plan</button>
+                        <button id="btn-chart-actual" data-source="actual" class="chart-source-btn px-2.5 py-1 rounded-md font-medium transition text-slate-400">Actual</button>
+                    </div>
+                    <div id="chart-actual-month-nav" class="hidden items-center gap-1.5">
+                        <button id="btn-chart-prev-month" class="w-6 h-6 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md border border-slate-700 text-[10px]"><i class="fa-solid fa-chevron-left"></i></button>
+                        <span id="chart-actual-month-label" class="text-[11px] text-slate-300 font-medium w-20 text-center">Month</span>
+                        <button id="btn-chart-next-month" class="w-6 h-6 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md border border-slate-700 text-[10px]"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
                 
                 <div id="sankey-scroll-wrapper" class="w-full h-full overflow-x-auto overflow-y-hidden custom-scrollbar relative">
                     <svg id="sankey-svg" class="min-w-[720px] md:min-w-full w-full h-full overflow-visible block"></svg>
@@ -447,6 +464,101 @@
                     <div id="analytics-expense-breakdown" class="space-y-3">
                         <!-- Populated dynamically -->
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: DAILY TRACKER -->
+        <section id="view-tracker" class="flex-1 hidden flex-col p-4 md:p-6 overflow-y-auto custom-scrollbar gap-5">
+
+            <!-- Month Navigator + Summary -->
+            <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <button id="btn-tracker-prev-month" class="w-8 h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700" title="Previous month">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div id="tracker-month-label" class="text-sm font-bold text-white w-32 text-center">Month</div>
+                    <button id="btn-tracker-next-month" class="w-8 h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700" title="Next month">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="flex items-center gap-4 text-xs">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Actual Income</span>
+                        <span id="tracker-total-income" class="font-bold text-emerald-400">0</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Actual Spend</span>
+                        <span id="tracker-total-expense" class="font-bold text-rose-400">0</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Net</span>
+                        <span id="tracker-total-net" class="font-bold text-white">0</span>
+                    </div>
+                </div>
+                <button id="btn-tracker-view-chart" class="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-sankey"></i> View in Chart
+                </button>
+            </div>
+
+            <!-- Add Transaction -->
+            <div class="glass-panel p-4 md:p-5 rounded-2xl border border-slate-800">
+                <h3 class="font-bold text-white text-sm mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-plus text-amber-400"></i> Log a Transaction
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="text-[11px] text-slate-400 mb-1 block">Type</label>
+                        <div class="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs">
+                            <button id="btn-tx-type-expense" data-type="expense" class="tx-type-btn active flex-1 py-1.5 rounded-md font-medium transition bg-rose-500/20 text-rose-400">Expense</button>
+                            <button id="btn-tx-type-income" data-type="income" class="tx-type-btn flex-1 py-1.5 rounded-md font-medium transition text-slate-400">Income</button>
+                        </div>
+                    </div>
+                    <div class="col-span-2 md:col-span-2">
+                        <label class="text-[11px] text-slate-400 mb-1 block">Category</label>
+                        <select id="select-tx-category" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-slate-400 mb-1 block">Amount</label>
+                        <input type="number" id="input-tx-amount" placeholder="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-slate-400 mb-1 block">Date</label>
+                        <input type="date" id="input-tx-date" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div class="col-span-2 md:col-span-1 flex gap-2">
+                        <button id="btn-tx-new-category" title="New category" class="w-9 h-9 shrink-0 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700">
+                            <i class="fa-solid fa-tag"></i>
+                        </button>
+                        <button id="btn-tx-add" class="flex-1 h-9 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold transition">Add</button>
+                    </div>
+                </div>
+                <input type="text" id="input-tx-note" placeholder="Note (optional)" class="w-full mt-3 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <!-- Transaction List -->
+            <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden">
+                <h3 class="font-bold text-white text-sm p-4 pb-0 flex items-center gap-2">
+                    <i class="fa-solid fa-list text-slate-400"></i> Transactions This Month
+                </h3>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs mt-3">
+                        <thead>
+                            <tr class="text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                                <th class="px-4 py-2">Date</th>
+                                <th class="px-4 py-2">Category</th>
+                                <th class="px-4 py-2">Note</th>
+                                <th class="px-4 py-2 text-right">Amount</th>
+                                <th class="px-4 py-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tracker-tx-list" class="divide-y divide-slate-800/60">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                    <div id="tracker-tx-empty" class="hidden text-center text-slate-500 text-xs py-8">No transactions logged for this month yet.</div>
                 </div>
             </div>
         </section>
@@ -834,6 +946,15 @@
         let customNodeTiers = new Map();
         let animationsEnabled = true;
 
+        // --- Tracker state ---
+        let transactions = []; // { id, date: 'YYYY-MM-DD', node, type: 'income'|'expense', amount, note }
+        let chartDataSource = "plan"; // "plan" | "actual"
+        function getCurrentMonthKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        }
+        let trackerMonth = getCurrentMonthKey();
+
         const LOCAL_STORAGE_KEY = "finflow_architect_model_v2";
 
         function saveStateToLocalStorage() {
@@ -847,6 +968,7 @@
                     duotoneColorA,
                     duotoneColorB,
                     animationsEnabled,
+                    transactions,
                     sankeyConfig: {
                         nodeWidth: sankeyConfig.nodeWidth,
                         nodePadding: sankeyConfig.nodePadding,
@@ -877,6 +999,7 @@
                 if (parsed.duotoneColorA) duotoneColorA = parsed.duotoneColorA;
                 if (parsed.duotoneColorB) duotoneColorB = parsed.duotoneColorB;
                 if (typeof parsed.animationsEnabled === "boolean") animationsEnabled = parsed.animationsEnabled;
+                if (parsed.transactions && Array.isArray(parsed.transactions)) transactions = parsed.transactions;
 
                 if (parsed.sankeyConfig) {
                     sankeyConfig.nodeWidth = parsed.sankeyConfig.nodeWidth || 18;
@@ -967,7 +1090,8 @@
             undoStack.push({
                 flows: JSON.parse(JSON.stringify(currentFlows)),
                 tiers: Array.from(customNodeTiers.entries()),
-                currency: currencySymbol
+                currency: currencySymbol,
+                transactions: JSON.parse(JSON.stringify(transactions))
             });
             if (undoStack.length > 30) undoStack.shift();
         }
@@ -978,9 +1102,12 @@
             customNodeTiers.clear();
             snap.tiers.forEach(([k, v]) => customNodeTiers.set(k, v));
             currencySymbol = snap.currency;
+            if (snap.transactions) transactions = snap.transactions;
             const sel = document.getElementById("select-currency");
             if (sel) sel.value = currencySymbol;
             renderFlowBuilder();
+            if (!document.getElementById("view-tracker").classList.contains("hidden")) renderTracker();
+            saveStateToLocalStorage();
             showToast("Undone");
         }
 
@@ -1098,6 +1225,179 @@
             if (isCenter) return "Central Pool";
             if (outgoing.length === 0) return "Expense / Savings";
             return "Allocation Category";
+        }
+
+        // --- Tracker helpers ---
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function getMonthKey(dateStr) { return (dateStr || "").slice(0, 7); }
+
+        function shiftMonthKey(monthKey, delta) {
+            const [y, m] = monthKey.split("-").map(Number);
+            const d = new Date(y, m - 1 + delta, 1);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        }
+
+        function formatMonthLabel(monthKey) {
+            const [y, m] = monthKey.split("-").map(Number);
+            return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+        }
+
+        function txForMonth(monthKey) {
+            return transactions.filter(t => getMonthKey(t.date) === monthKey);
+        }
+
+        // Aggregates logged transactions up through the plan's own tier structure,
+        // so the Actual Sankey uses the same topology as the Plan, just real values.
+        function computeActualFlows(monthKey) {
+            const txs = txForMonth(monthKey);
+            const ownSum = {};
+            txs.forEach(t => { ownSum[t.node] = (ownSum[t.node] || 0) + Number(t.amount || 0); });
+
+            const cache = {};
+            const visiting = new Set();
+            function actualValue(node) {
+                if (Object.prototype.hasOwnProperty.call(cache, node)) return cache[node];
+                if (visiting.has(node)) return 0; // guard against accidental cycles
+                visiting.add(node);
+                const tier = getNodeTier(node);
+                const incoming = currentFlows.filter(f => f.target === node);
+                const outgoing = currentFlows.filter(f => f.source === node);
+                let structural = 0;
+                if (tier === "Allocation Category") {
+                    structural = outgoing.reduce((sum, e) => sum + actualValue(e.target), 0);
+                } else if (tier === "Central Pool") {
+                    structural = incoming.reduce((sum, e) => sum + actualValue(e.source), 0);
+                } else if (tier !== "Income Source" && tier !== "Expense / Savings") {
+                    // Unknown/custom tier: infer role from the edges actually present
+                    if (outgoing.length > 0 && incoming.length === 0) {
+                        structural = outgoing.reduce((sum, e) => sum + actualValue(e.target), 0);
+                    } else if (incoming.length > 0) {
+                        structural = incoming.reduce((sum, e) => sum + actualValue(e.source), 0);
+                    }
+                }
+                visiting.delete(node);
+                const val = (ownSum[node] || 0) + structural;
+                cache[node] = val;
+                return val;
+            }
+
+            return currentFlows.map(edge => {
+                const value = getNodeTier(edge.source) === "Income Source" ? actualValue(edge.source) : actualValue(edge.target);
+                return { source: edge.source, target: edge.target, value };
+            });
+        }
+
+        function getTrackerCategoryOptions(type) {
+            return getUniqueNodeNames().filter(n => {
+                const tier = getNodeTier(n);
+                return type === "income" ? tier === "Income Source" : (tier === "Allocation Category" || tier === "Expense / Savings");
+            }).sort();
+        }
+
+        function getActiveTxType() {
+            return document.querySelector(".tx-type-btn.active")?.getAttribute("data-type") || "expense";
+        }
+
+        function populateTxCategorySelect() {
+            const select = document.getElementById("select-tx-category");
+            const prevValue = select.value;
+            const options = getTrackerCategoryOptions(getActiveTxType());
+            select.innerHTML = options.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("")
+                + `<option value="__new__">+ New category...</option>`;
+            if (options.includes(prevValue)) select.value = prevValue;
+        }
+
+        function setChartSourceUI() {
+            const isActual = chartDataSource === "actual";
+            document.getElementById("btn-chart-plan").classList.toggle("bg-emerald-500/20", !isActual);
+            document.getElementById("btn-chart-plan").classList.toggle("text-emerald-400", !isActual);
+            document.getElementById("btn-chart-plan").classList.toggle("text-slate-400", isActual);
+            document.getElementById("btn-chart-actual").classList.toggle("bg-emerald-500/20", isActual);
+            document.getElementById("btn-chart-actual").classList.toggle("text-emerald-400", isActual);
+            document.getElementById("btn-chart-actual").classList.toggle("text-slate-400", !isActual);
+            const nav = document.getElementById("chart-actual-month-nav");
+            nav.classList.toggle("hidden", !isActual);
+            nav.classList.toggle("flex", isActual);
+            document.getElementById("chart-actual-month-label").textContent = formatMonthLabel(trackerMonth);
+        }
+
+        function changeTrackerMonth(delta) {
+            trackerMonth = shiftMonthKey(trackerMonth, delta);
+            document.getElementById("chart-actual-month-label").textContent = formatMonthLabel(trackerMonth);
+            if (!document.getElementById("view-tracker").classList.contains("hidden")) renderTracker();
+            if (!document.getElementById("view-sankey").classList.contains("hidden") && chartDataSource === "actual") renderSankey();
+        }
+
+        function addTransaction() {
+            const type = getActiveTxType();
+            const node = document.getElementById("select-tx-category").value;
+            const amount = parseFloat(document.getElementById("input-tx-amount").value);
+            const date = document.getElementById("input-tx-date").value;
+            const note = document.getElementById("input-tx-note").value.trim();
+
+            if (!node || node === "__new__") { showToast("Pick a category first"); return; }
+            if (isNaN(amount) || amount <= 0) { showToast("Enter a valid amount"); return; }
+            if (!date) { showToast("Pick a date"); return; }
+
+            pushUndo();
+            transactions.push({
+                id: `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+                date, node, type, amount, note
+            });
+            saveStateToLocalStorage();
+            document.getElementById("input-tx-amount").value = "";
+            document.getElementById("input-tx-note").value = "";
+            trackerMonth = getMonthKey(date);
+            renderTracker();
+            showToast("Transaction logged", true);
+        }
+
+        function deleteTransaction(id) {
+            pushUndo();
+            transactions = transactions.filter(t => t.id !== id);
+            saveStateToLocalStorage();
+            renderTracker();
+            showToast("Transaction removed", true);
+        }
+
+        function renderTracker() {
+            document.getElementById("tracker-month-label").textContent = formatMonthLabel(trackerMonth);
+            populateTxCategorySelect();
+
+            const monthTx = txForMonth(trackerMonth).slice().sort((a, b) => b.date.localeCompare(a.date));
+            const tbody = document.getElementById("tracker-tx-list");
+            const empty = document.getElementById("tracker-tx-empty");
+
+            if (monthTx.length === 0) {
+                tbody.innerHTML = "";
+                empty.classList.remove("hidden");
+            } else {
+                empty.classList.add("hidden");
+                tbody.innerHTML = monthTx.map(t => `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="px-4 py-2 text-slate-400 whitespace-nowrap">${escapeHtml(t.date)}</td>
+                        <td class="px-4 py-2 text-slate-200">${escapeHtml(t.node)}</td>
+                        <td class="px-4 py-2 text-slate-400">${escapeHtml(t.note || "")}</td>
+                        <td class="px-4 py-2 text-right font-medium whitespace-nowrap ${t.type === "income" ? "text-emerald-400" : "text-rose-400"}">${t.type === "income" ? "+" : "-"}${formatCurrency(t.amount)}</td>
+                        <td class="px-4 py-2 text-right">
+                            <button class="btn-tx-delete text-slate-500 hover:text-rose-400 transition" data-id="${escapeHtml(t.id)}"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join("");
+            }
+
+            const totalIncome = monthTx.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
+            const totalExpense = monthTx.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
+            document.getElementById("tracker-total-income").textContent = formatCurrency(totalIncome);
+            document.getElementById("tracker-total-expense").textContent = formatCurrency(totalExpense);
+            document.getElementById("tracker-total-net").textContent = formatCurrency(totalIncome - totalExpense);
         }
 
         function renderFlowBuilder() {
@@ -1453,13 +1753,26 @@
             const nodeNames = getUniqueNodeNames();
             const nodes = nodeNames.map(name => ({ name }));
 
-            const links = currentFlows.map(d => ({
+            const sourceFlows = chartDataSource === "actual" ? computeActualFlows(trackerMonth) : currentFlows;
+
+            const links = sourceFlows.map(d => ({
                 source: nodeNames.indexOf(d.source),
                 target: nodeNames.indexOf(d.target),
                 value: Number(d.value)
             })).filter(l => l.value > 0 && l.source !== -1 && l.target !== -1);
 
-            if (nodes.length === 0 || links.length === 0) return;
+            if (nodes.length === 0 || links.length === 0) {
+                if (chartDataSource === "actual") {
+                    svg.append("text")
+                        .attr("x", width / 2)
+                        .attr("y", height / 2)
+                        .attr("text-anchor", "middle")
+                        .attr("fill", document.documentElement.classList.contains("light") ? "#64748b" : "#94a3b8")
+                        .attr("font-size", "13px")
+                        .text(`No transactions logged for ${formatMonthLabel(trackerMonth)} yet`);
+                }
+                return;
+            }
 
             const sankey = d3.sankey()
                 .nodeWidth(sankeyConfig.nodeWidth)
@@ -1891,7 +2204,8 @@
             const tabs = [
                 { btn: "tab-builder", view: "view-builder" },
                 { btn: "tab-sankey", view: "view-sankey" },
-                { btn: "tab-analytics", view: "view-analytics" }
+                { btn: "tab-analytics", view: "view-analytics" },
+                { btn: "tab-tracker", view: "view-tracker" }
             ];
 
             tabs.forEach(t => {
@@ -1911,6 +2225,8 @@
                         setTimeout(renderSankey, 50);
                     } else if (t.view === "view-analytics") {
                         renderAnalytics();
+                    } else if (t.view === "view-tracker") {
+                        renderTracker();
                     }
                 });
             });
@@ -1988,6 +2304,64 @@
                 animationsEnabled = e.target.checked;
                 saveStateToLocalStorage();
             });
+
+            // --- Tracker wiring ---
+            document.getElementById("input-tx-date").value = new Date().toISOString().slice(0, 10);
+
+            document.querySelectorAll(".tx-type-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll(".tx-type-btn").forEach(b => {
+                        b.classList.remove("bg-rose-500/20", "text-rose-400", "bg-emerald-500/20", "text-emerald-400", "active");
+                        b.classList.add("text-slate-400");
+                    });
+                    btn.classList.remove("text-slate-400");
+                    btn.classList.add("active");
+                    if (btn.getAttribute("data-type") === "income") {
+                        btn.classList.add("bg-emerald-500/20", "text-emerald-400");
+                    } else {
+                        btn.classList.add("bg-rose-500/20", "text-rose-400");
+                    }
+                    populateTxCategorySelect();
+                });
+            });
+
+            document.getElementById("select-tx-category").addEventListener("change", (e) => {
+                if (e.target.value === "__new__") {
+                    e.target.value = "";
+                    document.getElementById("btn-tx-new-category").click();
+                }
+            });
+
+            document.getElementById("btn-tx-add").addEventListener("click", addTransaction);
+
+            document.getElementById("tracker-tx-list").addEventListener("click", (e) => {
+                const btn = e.target.closest(".btn-tx-delete");
+                if (btn) deleteTransaction(btn.getAttribute("data-id"));
+            });
+
+            document.getElementById("btn-tracker-prev-month").addEventListener("click", () => changeTrackerMonth(-1));
+            document.getElementById("btn-tracker-next-month").addEventListener("click", () => changeTrackerMonth(1));
+            document.getElementById("btn-chart-prev-month").addEventListener("click", () => changeTrackerMonth(-1));
+            document.getElementById("btn-chart-next-month").addEventListener("click", () => changeTrackerMonth(1));
+
+            document.getElementById("btn-tracker-view-chart").addEventListener("click", () => {
+                chartDataSource = "actual";
+                document.getElementById("tab-sankey").click();
+                setChartSourceUI();
+                renderSankey();
+            });
+
+            document.getElementById("btn-chart-plan").addEventListener("click", () => {
+                chartDataSource = "plan";
+                setChartSourceUI();
+                renderSankey();
+            });
+            document.getElementById("btn-chart-actual").addEventListener("click", () => {
+                chartDataSource = "actual";
+                setChartSourceUI();
+                renderSankey();
+            });
+            setChartSourceUI();
 
             document.getElementById("select-theme").addEventListener("change", (e) => {
                 colorTheme = e.target.value;
@@ -2107,16 +2481,24 @@
 
             // Add Node Modal
             const modalAddNode = document.getElementById("modal-add-node");
-            document.getElementById("btn-add-node-modal").addEventListener("click", () => modalAddNode.classList.remove("hidden"));
+            let addNodeFromTracker = false;
+            document.getElementById("btn-add-node-modal").addEventListener("click", () => { addNodeFromTracker = false; modalAddNode.classList.remove("hidden"); });
             document.getElementById("btn-close-add-node").addEventListener("click", () => modalAddNode.classList.add("hidden"));
             document.getElementById("btn-cancel-add-node").addEventListener("click", () => modalAddNode.classList.add("hidden"));
 
             document.querySelectorAll(".btn-open-add-node-tier").forEach(btn => {
                 btn.addEventListener("click", (e) => {
+                    addNodeFromTracker = false;
                     const tier = e.currentTarget.getAttribute("data-tier");
                     document.getElementById("input-node-tier").value = tier;
                     modalAddNode.classList.remove("hidden");
                 });
+            });
+
+            document.getElementById("btn-tx-new-category").addEventListener("click", () => {
+                addNodeFromTracker = true;
+                document.getElementById("input-node-tier").value = getActiveTxType() === "income" ? "Income Source" : "Allocation Category";
+                modalAddNode.classList.remove("hidden");
             });
 
             document.getElementById("btn-submit-add-node").addEventListener("click", () => {
@@ -2136,6 +2518,10 @@
                     document.getElementById("input-node-name").value = "";
                     modalAddNode.classList.add("hidden");
                     renderFlowBuilder();
+                    if (addNodeFromTracker) {
+                        populateTxCategorySelect();
+                        document.getElementById("select-tx-category").value = name;
+                    }
                     showToast(`Created node "${name}"`);
                 }
             });
