@@ -202,6 +202,10 @@
 
         <!-- Quick Header Actions -->
         <div class="flex items-center gap-2">
+            <button id="btn-sync" class="relative w-8 h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 shadow-sm transition" title="Cloud sync" aria-label="Cloud sync">
+                <i class="fa-solid fa-cloud"></i>
+                <span id="sync-dot" class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-slate-500 border border-slate-900"></span>
+            </button>
             <button id="btn-theme-toggle" class="w-8 h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg border border-slate-700 shadow-sm transition" title="Toggle light / dark mode" aria-label="Toggle light or dark mode">
                 <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
             </button>
@@ -708,11 +712,44 @@
                 </label>
             </div>
 
+            <hr class="border-slate-800">
+
+            <!-- Cloud Sync -->
+            <div class="flex flex-col gap-2">
+                <div>
+                    <label class="text-xs text-slate-300 font-medium block">Cloud Sync (GitHub Gist)</label>
+                    <p class="text-[10px] text-slate-400">Use the same data on other devices. The token stays in this browser only. Auto-checks when you open or return to the app.</p>
+                </div>
+                <input type="password" id="sync-token" placeholder="GitHub token (gist scope)" autocomplete="off" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                <input type="text" id="sync-gist" placeholder="Gist ID (auto-filled after first push)" autocomplete="off" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                <div class="flex gap-2">
+                    <button id="btn-sync-push" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium border border-slate-700 transition">Push</button>
+                    <button id="btn-sync-pull" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium border border-slate-700 transition">Pull</button>
+                    <button id="btn-sync-disconnect" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-rose-400 rounded-lg text-xs font-medium border border-slate-700 transition">Disconnect</button>
+                </div>
+                <p id="sync-status-text" class="text-[10px] text-slate-400"></p>
+            </div>
+
             <div class="pt-2">
                 <button id="btn-save-settings" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-medium transition shadow-md">
                     Apply & Close
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- SYNC CONFLICT -->
+    <div id="modal-sync-conflict" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl flex flex-col gap-4">
+            <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Sync conflict
+            </h3>
+            <p class="text-xs text-slate-300">The cloud copy changed, and so did this device. Choose which one to keep. The other is overwritten.</p>
+            <div class="flex gap-2">
+                <button id="btn-conflict-pull" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium border border-slate-700 transition">Keep cloud</button>
+                <button id="btn-conflict-push" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-medium transition shadow-md">Keep this device</button>
+            </div>
+            <button id="btn-conflict-later" class="text-xs text-slate-400 hover:text-white transition">Decide later</button>
         </div>
     </div>
 
@@ -969,9 +1006,11 @@
 
         const LOCAL_STORAGE_KEY = "finflow_architect_model_v2";
 
-        function saveStateToLocalStorage() {
-            try {
-                const payload = {
+        let localUpdatedAt = 0; // last local edit time; synced with the cloud copy
+
+        function buildPayload() {
+            return {
+                    meta: { updatedAt: localUpdatedAt },
                     currentFlows,
                     currencySymbol,
                     colorTheme,
@@ -988,8 +1027,22 @@
                         alignKey: sankeyConfig.alignKey || "sankeyJustify"
                     },
                     customNodeTiers: Array.from(customNodeTiers.entries())
-                };
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
+            };
+        }
+
+        // Signature of the saved content (ignoring the timestamp), so no-op saves
+        // (e.g. renderFlowBuilder persisting on load) don't count as local edits.
+        let lastSavedSig = null;
+        function stateSig() { return JSON.stringify({ ...buildPayload(), meta: null }); }
+
+        function saveStateToLocalStorage() {
+            try {
+                const sig = stateSig();
+                if (sig !== lastSavedSig) {
+                    localUpdatedAt = Math.max(Date.now(), localUpdatedAt + 1);
+                    lastSavedSig = sig;
+                }
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(buildPayload()));
             } catch (err) {
                 console.warn("Unable to save state to localStorage:", err);
             }
@@ -999,7 +1052,15 @@
             try {
                 const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
                 if (!raw) return;
-                const parsed = JSON.parse(raw);
+                applyPayload(JSON.parse(raw));
+            } catch (err) {
+                console.warn("Unable to load state from localStorage:", err);
+            }
+        }
+
+        function applyPayload(parsed) {
+            {
+                localUpdatedAt = (parsed.meta && parsed.meta.updatedAt) || 0;
 
                 if (parsed.currentFlows && Array.isArray(parsed.currentFlows) && parsed.currentFlows.length > 0) {
                     currentFlows = parsed.currentFlows;
@@ -1027,8 +1088,7 @@
                 if (parsed.customNodeTiers) {
                     customNodeTiers = new Map(parsed.customNodeTiers);
                 }
-            } catch (err) {
-                console.warn("Unable to load state from localStorage:", err);
+                lastSavedSig = stateSig();
             }
         }
 
@@ -2184,11 +2244,247 @@
             img.src = url;
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            // Load state from local storage before rendering
-            loadStateFromLocalStorage();
+        /* ============================================================
+           Cloud sync — optional, via a private GitHub Gist.
+           Token + gist ID live only in this browser's localStorage.
+           ============================================================ */
+        const SYNC_TOKEN_KEY = "finflow.sync.token";
+        const SYNC_GIST_KEY = "finflow.sync.gistId";
+        const SYNC_META_KEY = "finflow.sync.meta";
+        const SYNC_FILE = "finflow-data.json";
 
-            // Synchronize UI Inputs with loaded state
+        const Sync = {
+            getToken() { return localStorage.getItem(SYNC_TOKEN_KEY) || ""; },
+            getGistId() { return localStorage.getItem(SYNC_GIST_KEY) || ""; },
+            setToken(t) { t ? localStorage.setItem(SYNC_TOKEN_KEY, t) : localStorage.removeItem(SYNC_TOKEN_KEY); },
+            setGistId(id) { id ? localStorage.setItem(SYNC_GIST_KEY, id) : localStorage.removeItem(SYNC_GIST_KEY); },
+            isConnected() { return !!(this.getToken() && this.getGistId()); },
+
+            _headers() {
+                const token = this.getToken();
+                if (!token) throw new Error("No GitHub token saved. Add one in Settings first.");
+                return {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/vnd.github+json",
+                    "Content-Type": "application/json"
+                };
+            },
+            _body(data) {
+                return { [SYNC_FILE]: { content: JSON.stringify(data) } };
+            },
+            async createGist(data) {
+                const res = await fetch("https://api.github.com/gists", {
+                    method: "POST",
+                    headers: this._headers(),
+                    body: JSON.stringify({ description: "FinFlow Architect data (do not delete)", public: false, files: this._body(data) })
+                });
+                if (!res.ok) throw new Error(`Could not create gist (${res.status}). Check your token's permissions.`);
+                const json = await res.json();
+                this.setGistId(json.id);
+                return json.id;
+            },
+            async pushToCloud(data) {
+                const gistId = this.getGistId();
+                if (!gistId) return this.createGist(data);
+                const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+                    method: "PATCH",
+                    headers: this._headers(),
+                    body: JSON.stringify({ files: this._body(data) })
+                });
+                if (!res.ok) throw new Error(`Sync failed (${res.status}). Check your token and gist ID.`);
+                return true;
+            },
+            async pullFromCloud() {
+                const gistId = this.getGistId();
+                if (!gistId) throw new Error("No gist connected yet.");
+                const res = await fetch(`https://api.github.com/gists/${gistId}`, { headers: this._headers() });
+                if (!res.ok) throw new Error(`Could not fetch cloud data (${res.status}).`);
+                const json = await res.json();
+                const file = json.files && json.files[SYNC_FILE];
+                if (!file) throw new Error(`Gist does not contain ${SYNC_FILE}.`);
+                if (file.truncated) {
+                    const raw = await fetch(file.raw_url);
+                    if (!raw.ok) throw new Error(`Could not fetch cloud data (${raw.status}).`);
+                    return JSON.parse(await raw.text());
+                }
+                return JSON.parse(file.content);
+            },
+            async fetchRemoteUpdatedAt() {
+                const gistId = this.getGistId();
+                if (!gistId) return null;
+                const res = await fetch(`https://api.github.com/gists/${gistId}`, { headers: this._headers() });
+                if (!res.ok) throw new Error(`Could not check cloud status (${res.status}).`);
+                const json = await res.json();
+                return json.updated_at || null;
+            }
+        };
+
+        function loadSyncMeta() {
+            try {
+                const raw = localStorage.getItem(SYNC_META_KEY);
+                return raw ? JSON.parse(raw) : { lastRemoteUpdatedAt: null, lastSyncedLocalUpdatedAt: 0 };
+            } catch (e) { return { lastRemoteUpdatedAt: null, lastSyncedLocalUpdatedAt: 0 }; }
+        }
+        function saveSyncMeta(meta) {
+            try { localStorage.setItem(SYNC_META_KEY, JSON.stringify(meta)); } catch (e) {}
+        }
+
+        // Re-render everything after the model is replaced by a pull
+        function refreshAfterStateChange() {
+            syncInputsFromState();
+            renderFlowBuilder();
+            const visible = id => !document.getElementById(id).classList.contains("hidden");
+            if (visible("view-sankey")) renderSankey();
+            if (visible("view-analytics")) renderAnalytics();
+            if (visible("view-tracker")) renderTracker();
+        }
+
+        const SyncEngine = {
+            // 'not-connected' | 'syncing' | 'synced' | 'pending' | 'failed' | 'conflict'
+            status: "not-connected",
+            lastError: null,
+            _listeners: [],
+            _retryTimer: null,
+            _retryDelay: 15000,
+
+            onChange(fn) { this._listeners.push(fn); },
+            _setStatus(st, err) {
+                this.status = st;
+                this.lastError = err || null;
+                this._listeners.forEach(fn => { try { fn(st); } catch (e) {} });
+            },
+            hasLocalChangesSinceSync() {
+                return localUpdatedAt > (loadSyncMeta().lastSyncedLocalUpdatedAt || 0);
+            },
+
+            // Called on open / resume. Auto-pulls when remote moved and nothing local is unsynced;
+            // flags a real conflict when both moved.
+            async checkAndAutoSync() {
+                if (!Sync.isConnected()) { this._setStatus("not-connected"); return { notConnected: true }; }
+                this._setStatus("syncing");
+                try {
+                    const remoteUpdatedAt = await Sync.fetchRemoteUpdatedAt();
+                    const meta = loadSyncMeta();
+                    const neverSynced = !meta.lastRemoteUpdatedAt;
+                    const remoteMoved = !!remoteUpdatedAt && remoteUpdatedAt !== meta.lastRemoteUpdatedAt;
+                    const localDirty = this.hasLocalChangesSinceSync();
+
+                    if (neverSynced) {
+                        // No common sync point on this device: user chooses Push or Pull explicitly.
+                        this._setStatus(localDirty ? "pending" : "synced");
+                        this._clearRetry();
+                        return {};
+                    }
+                    if (remoteMoved && localDirty) { this._setStatus("conflict"); return { conflict: true }; }
+                    if (remoteMoved) {
+                        await this.pull({ knownRemoteUpdatedAt: remoteUpdatedAt });
+                        showToast("Synced latest changes from the cloud");
+                        return { pulled: true };
+                    }
+                    this._setStatus(localDirty ? "pending" : "synced");
+                    this._clearRetry();
+                    return {};
+                } catch (err) {
+                    this._setStatus("failed", err);
+                    this._scheduleRetry(() => this.checkAndAutoSync());
+                    throw err;
+                }
+            },
+
+            async push() {
+                this._setStatus("syncing");
+                try {
+                    await Sync.pushToCloud(buildPayload());
+                    const remoteUpdatedAt = await Sync.fetchRemoteUpdatedAt().catch(() => null);
+                    saveSyncMeta({ lastRemoteUpdatedAt: remoteUpdatedAt, lastSyncedLocalUpdatedAt: localUpdatedAt });
+                    this._setStatus("synced");
+                    this._clearRetry();
+                    return true;
+                } catch (err) {
+                    this._setStatus("failed", err);
+                    this._scheduleRetry(() => this.push());
+                    throw err;
+                }
+            },
+
+            async pull(opts = {}) {
+                this._setStatus("syncing");
+                try {
+                    const data = await Sync.pullFromCloud();
+                    if (!data || !Array.isArray(data.currentFlows)) throw new Error("Cloud data isn't a FinFlow backup.");
+                    applyPayload(data);
+                    saveStateToLocalStorage();
+                    refreshAfterStateChange();
+                    const remoteUpdatedAt = opts.knownRemoteUpdatedAt || await Sync.fetchRemoteUpdatedAt().catch(() => null);
+                    saveSyncMeta({ lastRemoteUpdatedAt: remoteUpdatedAt, lastSyncedLocalUpdatedAt: localUpdatedAt });
+                    this._setStatus("synced");
+                    this._clearRetry();
+                    return true;
+                } catch (err) {
+                    this._setStatus("failed", err);
+                    this._scheduleRetry(() => this.pull(opts));
+                    throw err;
+                }
+            },
+
+            // Header button: do the sensible thing for the current state
+            async smartSync() {
+                const res = await this.checkAndAutoSync();
+                if (res.notConnected) { openSettingsModal(); showToast("Add a GitHub token in Settings to sync"); return; }
+                if (res.conflict || res.pulled) return;
+                // First sync on this device: never guess direction, the user picks Push or Pull
+                if (!loadSyncMeta().lastRemoteUpdatedAt) { openSettingsModal(); showToast("First sync: choose Push or Pull"); return; }
+                if (this.status === "pending") { await this.push(); showToast("Pushed to cloud"); }
+                else showToast("Already up to date");
+            },
+
+            disconnect() {
+                this._clearRetry();
+                saveSyncMeta({ lastRemoteUpdatedAt: null, lastSyncedLocalUpdatedAt: 0 });
+                this._setStatus("not-connected");
+            },
+            _scheduleRetry(fn) {
+                this._clearRetry();
+                this._retryTimer = setTimeout(() => { fn().catch(() => {}); }, this._retryDelay);
+                this._retryDelay = Math.min(this._retryDelay * 2, 5 * 60 * 1000);
+            },
+            _clearRetry() {
+                if (this._retryTimer) clearTimeout(this._retryTimer);
+                this._retryTimer = null;
+                this._retryDelay = 15000;
+            }
+        };
+
+        function syncStatusLabel(st) {
+            return { synced: "Synced", pending: "Unsynced changes", syncing: "Syncing…", failed: "Sync failed",
+                     conflict: "Sync conflict", "not-connected": "Not synced" }[st] || "";
+        }
+        function syncStatusDetail(st) {
+            switch (st) {
+                case "synced": {
+                    const t = loadSyncMeta().lastSyncedLocalUpdatedAt;
+                    return t ? `Last synced ${new Date(t).toLocaleString()}` : "Up to date.";
+                }
+                case "pending": return "Local changes haven't been pushed yet.";
+                case "syncing": return "Talking to the cloud…";
+                case "failed": return (SyncEngine.lastError && SyncEngine.lastError.message) || "Something went wrong. Retrying automatically.";
+                case "conflict": return "Cloud and this device both changed.";
+                default: return "Cloud sync isn't set up yet.";
+            }
+        }
+        function openSettingsModal() { document.getElementById("modal-settings").classList.remove("hidden"); }
+        function openSyncConflictModal() { document.getElementById("modal-sync-conflict").classList.remove("hidden"); }
+
+        function updateColorModeContainers() {
+            const mode = document.getElementById("select-color-mode").value;
+            colorMode = mode;
+
+            document.getElementById("container-theme-select").classList.toggle("hidden", mode !== "theme");
+            document.getElementById("container-monotone-select").classList.toggle("hidden", mode !== "monotone");
+            document.getElementById("container-duotone-select").classList.toggle("hidden", mode !== "duotone");
+        }
+
+        function syncInputsFromState() {
             document.getElementById("select-currency").value = currencySymbol;
             document.getElementById("select-color-mode").value = colorMode;
             document.getElementById("select-theme").value = colorTheme;
@@ -2211,6 +2507,13 @@
 
             updateColorModeContainers();
             syncThemeToggleIcon();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Load state from local storage before rendering
+            loadStateFromLocalStorage();
+
+            syncInputsFromState();
 
             // Initial Flow Render
             renderFlowBuilder();
@@ -2258,15 +2561,6 @@
                     renderSankey();
                 }
             });
-
-            function updateColorModeContainers() {
-                const mode = document.getElementById("select-color-mode").value;
-                colorMode = mode;
-
-                document.getElementById("container-theme-select").classList.toggle("hidden", mode !== "theme");
-                document.getElementById("container-monotone-select").classList.toggle("hidden", mode !== "monotone");
-                document.getElementById("container-duotone-select").classList.toggle("hidden", mode !== "duotone");
-            }
 
             document.getElementById("select-color-mode").addEventListener("change", (e) => {
                 updateColorModeContainers();
@@ -2586,6 +2880,68 @@
                 renderFlowBuilder();
                 showToast("Reset to default model!", true);
             });
+
+            // Cloud sync UI
+            const syncDot = document.getElementById("sync-dot");
+            const syncBtn = document.getElementById("btn-sync");
+            const syncStatusText = document.getElementById("sync-status-text");
+            const tokenInput = document.getElementById("sync-token");
+            const gistInput = document.getElementById("sync-gist");
+            const dotColors = { synced: "bg-emerald-500", pending: "bg-amber-400", syncing: "bg-sky-400 animate-pulse",
+                                failed: "bg-rose-500", conflict: "bg-rose-500", "not-connected": "bg-slate-500" };
+            tokenInput.value = Sync.getToken();
+            gistInput.value = Sync.getGistId();
+            const updateSyncUI = (st) => {
+                syncDot.className = "absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-slate-900 " + dotColors[st];
+                syncBtn.title = `${syncStatusLabel(st)} — ${syncStatusDetail(st)}`;
+                syncStatusText.textContent = `${syncStatusLabel(st)} — ${syncStatusDetail(st)}`;
+                gistInput.value = Sync.getGistId();
+            };
+            SyncEngine.onChange(updateSyncUI);
+            updateSyncUI(SyncEngine.status);
+
+            const saveSyncInputs = () => { Sync.setToken(tokenInput.value.trim()); Sync.setGistId(gistInput.value.trim()); };
+            tokenInput.addEventListener("change", saveSyncInputs);
+            gistInput.addEventListener("change", saveSyncInputs);
+
+            const runSync = async (fn, okMsg) => {
+                try { await fn(); showToast(okMsg); }
+                catch (err) { showToast(err.message || "Sync failed"); }
+            };
+            document.getElementById("btn-sync-push").addEventListener("click", () => { saveSyncInputs(); runSync(() => SyncEngine.push(), "Pushed to cloud"); });
+            document.getElementById("btn-sync-pull").addEventListener("click", () => { saveSyncInputs(); runSync(() => SyncEngine.pull(), "Pulled from cloud"); });
+            document.getElementById("btn-sync-disconnect").addEventListener("click", () => {
+                Sync.setToken(""); Sync.setGistId("");
+                tokenInput.value = ""; gistInput.value = "";
+                SyncEngine.disconnect();
+                showToast("Cloud sync disconnected");
+            });
+            syncBtn.addEventListener("click", async () => {
+                try {
+                    await SyncEngine.smartSync();
+                    if (SyncEngine.status === "conflict") openSyncConflictModal();
+                } catch (err) { showToast(err.message || "Sync failed"); }
+            });
+
+            const conflictModal = document.getElementById("modal-sync-conflict");
+            document.getElementById("btn-conflict-later").addEventListener("click", () => conflictModal.classList.add("hidden"));
+            document.getElementById("btn-conflict-pull").addEventListener("click", async () => {
+                conflictModal.classList.add("hidden");
+                await runSync(() => SyncEngine.pull(), "Pulled from cloud: local changes replaced");
+            });
+            document.getElementById("btn-conflict-push").addEventListener("click", async () => {
+                conflictModal.classList.add("hidden");
+                await runSync(() => SyncEngine.push(), "Pushed: cloud overwritten");
+            });
+
+            // Auto-check on open and when returning to the app
+            const autoCheck = () => {
+                SyncEngine.checkAndAutoSync()
+                    .then(r => { if (r && r.conflict) openSyncConflictModal(); })
+                    .catch(() => {});
+            };
+            autoCheck();
+            document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") autoCheck(); });
 
             // Window Resize
             window.addEventListener("resize", () => {
