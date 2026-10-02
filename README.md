@@ -4,6 +4,20 @@ Personal financial flow builder, transaction tracker, and Sankey visualizer. Sin
 
 **Live page:** https://aakifahmedd.github.io/finflow-architect/ (GitHub Pages — enable under repo **Settings → Pages**, source `main` / `/root`, if not already on)
 
+## Personal tool — read this first
+
+This is a **private, single-user tool**. It is built for one person's finances and is not intended to be published, shared, or handed to anyone else. A few consequences of that, stated up front so nothing here reads as an oversight:
+
+- **The default model is personal.** It ships pre-filled with my own spending verticals — vehicles, a cat, badminton and gym, specific subscriptions. Those names are the starting point, not a bug. Resetting the model restores them.
+- **There is no multi-user, sharing, or permissions model**, and no plan is being made for one.
+- **Currency is fixed at LKR.** The formatter contains branches for ₹, €, £ and ¥, but there is no UI to switch currency and none is planned — LKR is simply the only case that matters here.
+- **Onboarding, empty states, and generic templates are deliberately thin.** The app assumes it already knows the shape of the model, because it was written for the one person who built it.
+- **Public-facing polish is not a goal.** The visuals, copy and defaults are tuned for utility to me, not for a first-time visitor or a reviewer.
+
+It is still deployed to GitHub Pages, which makes the URL reachable. Treat that as a convenience for my own devices, not as a distribution channel — the repo being public means the *code* is visible, not that the app is intended for use by anyone else.
+
+If that ever changes, the assumptions above are the list of things to revisit first.
+
 ## Usage
 
 Open `index.html` in a browser, or use the live page above. No build step — but it loads Tailwind, D3, d3-sankey and Font Awesome from CDNs, so the first load needs a network connection.
@@ -25,7 +39,8 @@ Switch views from the header tabs.
 - Edit flow amounts inline on a node card or in the connections matrix
 - Per-node rename and delete, plus add-node and add-connection modals
 - Automatic tier assignment inferred from each node's incoming and outgoing edges, with manual tier overrides
-- Ships with a blank personal-spending model (income → total cash flow → spending verticals → items)
+- Ships with a blank personal-spending model (income → total cash flow → spending verticals → items). These are my own categories — see [Personal tool](#personal-tool--read-this-first).
+- Creating an "Expense / Savings" node attaches it under an existing allocation category; creating any other tier attaches it under the cash flow hub. Nothing is invented for you.
 
 ### Tracking actuals
 
@@ -47,12 +62,12 @@ Switch views from the header tabs.
 
 ### Data
 
-- CSV import and export, plus a downloadable template
+- CSV import and export, plus a downloadable template that mirrors the shipped default model
 - Undo for deletes, resets, node creation, and CSV loads — via **Ctrl/Cmd+Z**, and via the **Undo** button that appears in the confirmation toast for a few seconds after the action
 - Optional cross-device sync via a private GitHub Gist (header cloud button, Settings → Cloud Sync); the token stays in this browser only. When both devices changed, the app merges them instead of prompting.
 
 ## Notes
 
 - Saved data (model, transactions, subscriptions, currency, theme, settings) is per browser and per origin. Clearing site data clears the model.
-- Values are formatted for LKR by default. The formatter also handles ₹, €, £ and ¥, but there is currently no UI to switch currency — it is not yet a user setting.
+- Currency is LKR, fixed. The formatter has ₹, €, £ and ¥ branches but no UI exposes them and none is planned.
 - Plan values start at zero. The Analysis view and the Actual chart stay empty until you log transactions.

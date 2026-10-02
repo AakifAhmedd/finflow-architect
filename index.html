@@ -1185,17 +1185,31 @@
             return flows;
         }
 
+        // Template mirrors the shipped default model so importing it never invents
+        // node names that don't exist in the app (a stale template used to reference
+        // "Primary Tech Salary" / "Statutory Deductions" / "Housing & Rent", none of
+        // which exist anywhere in DEFAULT_MODEL).
         const CSV_TEMPLATE = 'source,target,value\r\n' +
-            'Primary Tech Salary,Total Cash Flow,450000\r\n' +
-            'Foreign Freelance Retainer,Total Cash Flow,250000\r\n' +
-            'Total Cash Flow,Statutory Deductions,70000\r\n' +
-            'Total Cash Flow,Housing & Rent,180000\r\n' +
-            'Total Cash Flow,Daily Living Costs,220000\r\n' +
-            'Total Cash Flow,Savings & FD Wealth,230000\r\n' +
-            'Statutory Deductions,EPF & APIT Tax,70000\r\n' +
-            'Housing & Rent,Apartment Rent,140000\r\n' +
-            'Daily Living Costs,Supermarket & Groceries,120000\r\n' +
-            'Savings & FD Wealth,High Yield Bank FD,150000';
+            'Income,Total Cash Flow,450000\r\n' +
+            'Total Cash Flow,Primary Transport,150000\r\n' +
+            'Total Cash Flow,Food & Social,100000\r\n' +
+            'Total Cash Flow,Health & Sports,80000\r\n' +
+            'Total Cash Flow,Living & Tech,80000\r\n' +
+            'Total Cash Flow,Pet Care,40000\r\n' +
+            'Primary Transport,RayZR Fuel,80000\r\n' +
+            'Primary Transport,PickMe,35000\r\n' +
+            'Primary Transport,RayZR Maintenance,35000\r\n' +
+            'Food & Social,Meals,60000\r\n' +
+            'Food & Social,Dining Out,25000\r\n' +
+            'Food & Social,Snacks,15000\r\n' +
+            'Health & Sports,Gym,40000\r\n' +
+            'Health & Sports,Court Bookings,25000\r\n' +
+            'Health & Sports,Supplements,15000\r\n' +
+            'Living & Tech,Gadgets,50000\r\n' +
+            'Living & Tech,DIY Materials,25000\r\n' +
+            'Living & Tech,Google One,5000\r\n' +
+            'Pet Care,Cat Food,25000\r\n' +
+            'Pet Care,Spot-on Treatments,15000';
 
         // Get unique node names
         function getUniqueNodeNames() {
@@ -2843,9 +2857,17 @@
                     pushUndo();
                     customNodeTiers.set(name, tier);
                     if (tier !== "Income Source") {
-                        const targetNode = name;
-                        const defaultSource = tier === "Expense / Savings" ? "Housing & Utilities" : "Total Cash Flow";
-                        currentFlows.push({ source: defaultSource, target: targetNode, value: 500 });
+                        // Wire the new node under a parent that actually exists. Inventing a
+                        // source name here would create a phantom node that then classifies
+                        // as an Income Source and inflates Total Income.
+                        const defaultSource = tier === "Expense / Savings"
+                            ? (getUniqueNodeNames().find(n => getNodeTier(n) === "Allocation Category" && n !== name)
+                               || getUniqueNodeNames().find(n => getNodeTier(n) === "Central Pool")
+                               || name)
+                            : "Total Cash Flow";
+                        if (defaultSource !== name) {
+                            currentFlows.push({ source: defaultSource, target: name, value: 500 });
+                        }
                     } else {
                         currentFlows.push({ source: name, target: "Total Cash Flow", value: 1000 });
                     }
