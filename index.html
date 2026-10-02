@@ -129,7 +129,6 @@
         html.light h1, html.light h2, html.light h3, html.light h4 { color: #0f172a !important; }
         html.light #tooltip { color: #1e293b !important; }
         html.light #tooltip .text-white,
-        html.light #modal-export .text-white,
         html.light #analytics-income-breakdown .text-white,
         html.light #analytics-expense-breakdown .text-white { color: #0f172a !important; }
         html.light .glass-panel { background: rgba(255,255,255,.85) !important; border-color: rgba(15,23,42,.08) !important; }
@@ -172,7 +171,6 @@
                     FinFlow Architect
                     <span class="text-[10px] md:text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium border border-emerald-500/30">Modeler</span>
                 </h1>
-                <p class="text-xs text-slate-400 hidden sm:block">Design, edit & analyze your financial flow system</p>
             </div>
         </div>
 
@@ -232,10 +230,6 @@
             <button id="btn-settings" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition flex items-center gap-1.5 border border-slate-700 shadow-sm" title="Visualization Settings">
                 <i class="fa-solid fa-gear text-slate-400"></i>
                 <span class="hidden sm:inline">Settings</span>
-            </button>
-            <button id="btn-export-modal" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-medium transition flex items-center gap-1.5 shadow-md shadow-emerald-950">
-                <i class="fa-solid fa-download"></i>
-                <span class="hidden sm:inline">Export</span>
             </button>
         </div>
     </header>
@@ -427,12 +421,6 @@
                         <i class="fa-solid fa-sliders me-1"></i> Tune Layout
                     </button>
                 </div>
-
-                <!-- Share As (opens the export modal) -->
-                <button id="btn-share-as" title="Share as..." aria-label="Share as" class="absolute bottom-4 right-4 z-20 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-medium transition flex items-center gap-1.5 shadow-xl shadow-emerald-950">
-                    <i class="fa-solid fa-file-export"></i>
-                    <span class="hidden sm:inline">Share as</span>
-                </button>
             </div>
         </section>
 
@@ -616,19 +604,6 @@
                 </button>
             </div>
 
-            <!-- Currency Selector -->
-            <div>
-                <label class="text-xs text-slate-300 mb-1.5 block font-medium">Currency Format</label>
-                <select id="select-currency" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
-                    <option value="$">USD ($)</option>
-                    <option value="€">EUR (€)</option>
-                    <option value="£">GBP (£)</option>
-                    <option value="₹">INR (₹)</option>
-                    <option value="¥">JPY (¥)</option>
-                    <option value="C$">CAD (C$)</option>
-                    <option value="LKR" selected>LKR (Rs.)</option>
-                </select>
-            </div>
 
             <!-- Colour Mode Switcher -->
             <div>
@@ -773,57 +748,6 @@
                 <button id="btn-conflict-push" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-medium transition shadow-md">Keep this device</button>
             </div>
             <button id="btn-conflict-later" class="text-xs text-slate-400 hover:text-white transition">Decide later</button>
-        </div>
-    </div>
-
-    <!-- MODAL 2: EXPORT CHART OPTIONS -->
-    <div id="modal-export" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl flex flex-col gap-4">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-white text-base flex items-center gap-2">
-                    <i class="fa-solid fa-file-export text-emerald-400"></i> Export Visual Sankey
-                </h3>
-                <button id="btn-close-export" class="text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            
-            <p class="text-xs text-slate-400">Select format to save your styled chart with current nodes, flows, labels, and color theme:</p>
-
-            <div class="space-y-2.5">
-                <button id="btn-export-png" class="w-full p-3 bg-slate-800 hover:bg-slate-700/80 rounded-xl border border-slate-700 text-left transition flex items-center justify-between group">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-image text-emerald-400 text-lg"></i>
-                        <div>
-                            <span class="text-xs font-semibold text-white block group-hover:text-emerald-300">PNG Image</span>
-                            <span class="text-[10px] text-slate-400">High-resolution raster graphic</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-download text-xs text-slate-500 group-hover:text-white"></i>
-                </button>
-
-                <button id="btn-export-jpeg" class="w-full p-3 bg-slate-800 hover:bg-slate-700/80 rounded-xl border border-slate-700 text-left transition flex items-center justify-between group">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-file-image text-teal-400 text-lg"></i>
-                        <div>
-                            <span class="text-xs font-semibold text-white block group-hover:text-teal-300">JPEG Image</span>
-                            <span class="text-[10px] text-slate-400">Compressed dark-theme image</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-download text-xs text-slate-500 group-hover:text-white"></i>
-                </button>
-
-                <button id="btn-export-svg" class="w-full p-3 bg-slate-800 hover:bg-slate-700/80 rounded-xl border border-slate-700 text-left transition flex items-center justify-between group">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-code text-indigo-400 text-lg"></i>
-                        <div>
-                            <span class="text-xs font-semibold text-white block group-hover:text-indigo-300">SVG Vector</span>
-                            <span class="text-[10px] text-slate-400">Scalable vector graphics XML format</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-download text-xs text-slate-500 group-hover:text-white"></i>
-                </button>
-            </div>
         </div>
     </div>
 
@@ -1096,7 +1020,6 @@
                 if (parsed.currentFlows && Array.isArray(parsed.currentFlows) && parsed.currentFlows.length > 0) {
                     currentFlows = parsed.currentFlows;
                 }
-                if (parsed.currencySymbol) currencySymbol = parsed.currencySymbol;
                 if (parsed.colorTheme) colorTheme = parsed.colorTheme;
                 if (parsed.colorMode) colorMode = parsed.colorMode;
                 if (parsed.monotoneColor) monotoneColor = parsed.monotoneColor;
@@ -1206,8 +1129,6 @@
             snap.tiers.forEach(([k, v]) => customNodeTiers.set(k, v));
             currencySymbol = snap.currency;
             if (snap.transactions) transactions = snap.transactions;
-            const sel = document.getElementById("select-currency");
-            if (sel) sel.value = currencySymbol;
             renderFlowBuilder();
             if (!document.getElementById("view-tracker").classList.contains("hidden")) renderTracker();
             saveStateToLocalStorage();
@@ -2211,81 +2132,6 @@
             document.getElementById("modal-add-conn").classList.remove("hidden");
         }
 
-        // Export Utilities for SVG, PNG, and JPEG
-        function exportSVG() {
-            const svgEl = document.getElementById("sankey-svg");
-            const serializer = new XMLSerializer();
-            let source = serializer.serializeToString(svgEl);
-
-            if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
-                source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-            }
-            if(!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)){
-                source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
-            }
-
-            source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
-            const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
-
-            const downloadLink = document.createElement("a");
-            downloadLink.href = url;
-            downloadLink.download = "finflow_sankey_model.svg";
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-
-            showToast("Sankey diagram exported as SVG!");
-        }
-
-        function exportImageFormat(format) {
-            const svgEl = document.getElementById("sankey-svg");
-            const bbox = svgEl.getBoundingClientRect();
-            
-            // Render high-DPI raster graphic canvas
-            const scale = 2; // 2x resolution
-            const width = (parseInt(svgEl.getAttribute("width")) || bbox.width || 800) * scale;
-            const height = (parseInt(svgEl.getAttribute("height")) || bbox.height || 500) * scale;
-
-            const serializer = new XMLSerializer();
-            let svgString = serializer.serializeToString(svgEl);
-
-            if(!svgString.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
-                svgString = svgString.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-            }
-
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext("2d");
-
-            // Fill background color matching theme
-            ctx.fillStyle = "#020617"; // Slate 950
-            ctx.fillRect(0, 0, width, height);
-
-            const img = new Image();
-            const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-            const url = URL.createObjectURL(svgBlob);
-
-            img.onload = function() {
-                ctx.drawImage(img, 0, 0, width, height);
-                URL.revokeObjectURL(url);
-
-                const mimeType = format === "png" ? "image/png" : "image/jpeg";
-                const imgData = canvas.toDataURL(mimeType, 0.95);
-
-                const downloadLink = document.createElement("a");
-                downloadLink.href = imgData;
-                downloadLink.download = `finflow_sankey_model.${format}`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-
-                showToast(`Sankey diagram exported as ${format.toUpperCase()}!`);
-            };
-
-            img.src = url;
-        }
-
         /* ============================================================
            Cloud sync — optional, via a private GitHub Gist.
            Token + gist ID live only in this browser's localStorage.
@@ -2527,7 +2373,6 @@
         }
 
         function syncInputsFromState() {
-            document.getElementById("select-currency").value = currencySymbol;
             document.getElementById("select-color-mode").value = colorMode;
             document.getElementById("select-theme").value = colorTheme;
             document.getElementById("input-monotone-color").value = monotoneColor;
@@ -2646,14 +2491,6 @@
             });
 
             // Settings Inputs
-            document.getElementById("select-currency").addEventListener("change", (e) => {
-                currencySymbol = e.target.value;
-                document.getElementById("tracker-form-currency").textContent = currencySymbol;
-                renderFlowBuilder();
-                if (!document.getElementById("view-sankey").classList.contains("hidden")) {
-                    renderSankey();
-                }
-            });
 
             // Light / Dark Mode Toggle
             document.getElementById("btn-theme-toggle").addEventListener("click", () => {
@@ -2769,27 +2606,6 @@
                 if (!document.getElementById("view-sankey").classList.contains("hidden")) renderSankey();
             });
 
-            // Export Modal
-            const modalExport = document.getElementById("modal-export");
-            document.getElementById("btn-export-modal").addEventListener("click", () => modalExport.classList.remove("hidden"));
-            document.getElementById("btn-share-as").addEventListener("click", () => modalExport.classList.remove("hidden"));
-            document.getElementById("btn-close-export").addEventListener("click", () => modalExport.classList.add("hidden"));
-
-            document.getElementById("btn-export-svg").addEventListener("click", () => {
-                modalExport.classList.add("hidden");
-                exportSVG();
-            });
-
-            document.getElementById("btn-export-png").addEventListener("click", () => {
-                modalExport.classList.add("hidden");
-                exportImageFormat("png");
-            });
-
-            document.getElementById("btn-export-jpeg").addEventListener("click", () => {
-                modalExport.classList.add("hidden");
-                exportImageFormat("jpeg");
-            });
-
             // Presets Modal
             const modalPresets = document.getElementById("modal-presets");
             document.getElementById("btn-presets").addEventListener("click", () => modalPresets.classList.remove("hidden"));
@@ -2803,7 +2619,6 @@
                         currentFlows = JSON.parse(JSON.stringify(PRESETS[presetKey]));
                         if (presetKey === "lkr_plan") {
                             currencySymbol = "LKR";
-                            document.getElementById("select-currency").value = "LKR";
                         }
                         renderFlowBuilder();
                         modalPresets.classList.add("hidden");
@@ -2941,7 +2756,6 @@
                 pushUndo();
                 currentFlows = JSON.parse(JSON.stringify(PRESETS.lkr_plan));
                 currencySymbol = "LKR";
-                document.getElementById("select-currency").value = "LKR";
                 customNodeTiers.clear();
                 renderFlowBuilder();
                 showToast("Reset to default model!", true);
