@@ -194,18 +194,18 @@
             </button>
         </nav>
 
-        <!-- Metric Badges -->
+        <!-- Metric Badges — reflect the selected month's logged transactions -->
         <div class="hidden lg:flex items-center gap-4 text-xs">
             <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800">
-                <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Total Income</span>
+                <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Month Income</span>
                 <span id="metric-income" class="font-bold text-emerald-400 text-sm">$0</span>
             </div>
             <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800">
-                <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Total Expenses</span>
+                <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Month Spend</span>
                 <span id="metric-expenses" class="font-bold text-rose-400 text-sm">$0</span>
             </div>
             <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800">
-                <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Savings / Surplus</span>
+                <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Net</span>
                 <span id="metric-savings" class="font-bold text-teal-300 text-sm">$0</span>
             </div>
             <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800">
@@ -397,9 +397,9 @@
                         <button id="btn-chart-actual" data-source="actual" class="chart-source-btn px-2 sm:px-2.5 py-1 rounded-md font-medium transition text-slate-400 whitespace-nowrap">Actual</button>
                     </div>
                     <div id="chart-actual-month-nav" class="hidden items-center gap-1 sm:gap-1.5 shrink-0">
-                        <button id="btn-chart-prev-month" class="w-6 h-6 shrink-0 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md border border-slate-700 text-[10px]"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button id="btn-chart-prev-month" aria-label="Previous month" title="Previous month" class="w-6 h-6 shrink-0 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md border border-slate-700 text-[10px]"><i class="fa-solid fa-chevron-left"></i></button>
                         <span id="chart-actual-month-label" class="text-[11px] text-slate-300 font-medium w-16 sm:w-20 text-center whitespace-nowrap">Month</span>
-                        <button id="btn-chart-next-month" class="w-6 h-6 shrink-0 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md border border-slate-700 text-[10px]"><i class="fa-solid fa-chevron-right"></i></button>
+                        <button id="btn-chart-next-month" aria-label="Next month" title="Next month" class="w-6 h-6 shrink-0 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md border border-slate-700 text-[10px]"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
                 
@@ -456,7 +456,7 @@
                 <div class="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col gap-3">
                     <span class="text-xs text-slate-400 uppercase tracking-wider">Net Monthly Surplus</span>
                     <div id="analytics-surplus" class="text-3xl font-extrabold text-teal-300">$0</div>
-                    <p class="text-xs text-slate-400 leading-relaxed">Unallocated funds earmarked for debt reduction, emergency reserves, or high-yield investments.</p>
+                    <p class="text-xs text-slate-400 leading-relaxed">Logged income minus logged expenses for the selected month.</p>
                 </div>
             </div>
 
@@ -509,7 +509,7 @@
                     </div>
                     <div>
                         <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Net</span>
-                        <span id="tracker-total-net" class="font-bold text-white">0</span>
+                        <span id="tracker-total-net" class="font-bold text-teal-300">0</span>
                     </div>
                 </div>
                 <button id="btn-tracker-view-chart" class="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-medium transition flex items-center gap-1.5">
@@ -1042,7 +1042,11 @@
         let nodeColorMap = new Map();
 
         function formatCurrency(val) {
-            const num = Math.round(val || 0);
+            // Round half away from zero so a magnitude and its negative display
+            // identically (Math.round alone sends -1250.5 toward zero). The
+            // || 0 also collapses -0, which would otherwise print as "Rs. -0".
+            const raw = Number(val) || 0;
+            const num = Math.sign(raw) * Math.round(Math.abs(raw)) || 0;
             if (currencySymbol === "LKR") {
                 return `Rs. ${num.toLocaleString('en-LK')}`;
             } else if (currencySymbol === "₹") {
@@ -1477,7 +1481,14 @@
             const totalExpense = monthTx.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
             document.getElementById("tracker-total-income").textContent = formatCurrency(totalIncome);
             document.getElementById("tracker-total-expense").textContent = formatCurrency(totalExpense);
-            document.getElementById("tracker-total-net").textContent = formatCurrency(totalIncome - totalExpense);
+            const net = totalIncome - totalExpense;
+            const netEl = document.getElementById("tracker-total-net");
+            netEl.textContent = formatCurrency(net);
+            // Mirror the Flow Builder's balance badge: colour carries the sign, so a
+            // deficit is not rendered in the surplus accent.
+            netEl.classList.toggle("text-rose-400", net < 0);
+            netEl.classList.toggle("text-teal-300", net >= 0);
+            updateGlobalMetrics();
         }
 
         function renderFlowBuilder() {
@@ -1532,15 +1543,15 @@
                         <div class="flex justify-between items-start gap-2">
                             <div>
                                 <h4 class="font-bold text-xs text-white group-hover:text-emerald-300 transition flex items-center gap-1.5">
-                                    ${nodeName}
+                                    ${escapeHtml(nodeName)}
                                 </h4>
                                 <span class="text-[11px] font-semibold text-emerald-400 block mt-0.5">${formatCurrency(nodeVal)}</span>
                             </div>
                             <div class="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition">
-                                <button data-node="${nodeName}" class="btn-edit-node-name text-slate-400 hover:text-white text-[11px] p-1" title="Rename Node">
+                                <button data-node="${escapeHtml(nodeName)}" class="btn-edit-node-name text-slate-400 hover:text-white text-[11px] p-1" title="Rename Node">
                                     <i class="fa-solid fa-pen text-[10px]"></i>
                                 </button>
-                                <button data-node="${nodeName}" class="btn-delete-node text-slate-500 hover:text-rose-400 text-[11px] p-1" title="Delete Node">
+                                <button data-node="${escapeHtml(nodeName)}" class="btn-delete-node text-slate-500 hover:text-rose-400 text-[11px] p-1" title="Delete Node">
                                     <i class="fa-solid fa-trash-can text-[10px]"></i>
                                 </button>
                             </div>
@@ -1551,16 +1562,16 @@
                                 <span class="block text-[9px] uppercase tracking-wider text-slate-500 font-medium">Outflow Routes (${outgoing.length})</span>
                                 ${outgoing.map((f, i) => `
                                     <div class="flex items-center justify-between text-slate-300">
-                                        <span class="truncate max-w-[100px] text-slate-400">&rarr; ${f.target}</span>
+                                        <span class="truncate max-w-[100px] text-slate-400">&rarr; ${escapeHtml(f.target)}</span>
                                         <div class="flex items-center gap-1">
-                                            <input type="number" value="${f.value}" data-source="${f.source}" data-target="${f.target}" class="input-inline-flow w-16 bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-[10px] text-emerald-300 focus:outline-none focus:border-emerald-500 text-right">
+                                            <input type="number" value="${f.value}" data-source="${escapeHtml(f.source)}" data-target="${escapeHtml(f.target)}" class="input-inline-flow w-16 bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-[10px] text-emerald-300 focus:outline-none focus:border-emerald-500 text-right">
                                         </div>
                                     </div>
                                 `).join('')}
                             </div>
                         ` : ''}
 
-                        <button data-node="${nodeName}" class="btn-quick-connect w-full mt-1 py-1 bg-slate-900/90 hover:bg-slate-800 text-[10px] text-slate-300 rounded border border-slate-800 transition flex items-center justify-center gap-1">
+                        <button data-node="${escapeHtml(nodeName)}" class="btn-quick-connect w-full mt-1 py-1 bg-slate-900/90 hover:bg-slate-800 text-[10px] text-slate-300 rounded border border-slate-800 transition flex items-center justify-center gap-1">
                             <i class="fa-solid fa-plus text-[9px] text-indigo-400"></i> Outflow Connection
                         </button>
                     `;
@@ -1611,13 +1622,13 @@
                     <td class="py-2 px-3 font-medium text-slate-200">
                         <span class="inline-flex items-center gap-1.5">
                             <i class="fa-solid fa-circle text-[6px] text-emerald-400"></i>
-                            ${flow.source}
+                            ${escapeHtml(flow.source)}
                         </span>
                     </td>
                     <td class="py-2 px-3 font-medium text-slate-200">
                         <span class="inline-flex items-center gap-1.5">
                             <i class="fa-solid fa-circle text-[6px] text-teal-400"></i>
-                            ${flow.target}
+                            ${escapeHtml(flow.target)}
                         </span>
                     </td>
                     <td class="py-2 px-3">
@@ -1714,35 +1725,23 @@
         }
 
         function updateGlobalMetrics() {
-            const nodeNames = getUniqueNodeNames();
-            
-            // Nodes with no incoming links -> Total Inflow Income
-            const incomeNodes = nodeNames.filter(name => getNodeTier(name) === "Income Source");
-            let totalIncome = 0;
-            incomeNodes.forEach(name => {
-                const outgoing = currentFlows.filter(f => f.source === name);
-                totalIncome += outgoing.reduce((acc, f) => acc + Number(f.value), 0);
-            });
-
-            // Find Savings Nodes
-            const savingsNodes = nodeNames.filter(name => {
-                const lower = name.toLowerCase();
-                return lower.includes("savings") || lower.includes("investment") || lower.includes("wealth") || lower.includes("401k") || lower.includes("reserve") || lower.includes("stock") || lower.includes("fd");
-            });
-
-            let totalSavings = 0;
-            savingsNodes.forEach(name => {
-                const incoming = currentFlows.filter(f => f.target === name);
-                totalSavings += incoming.reduce((acc, f) => acc + Number(f.value), 0);
-            });
-
-            const totalExpenses = Math.max(0, totalIncome - totalSavings);
-            const savingsRate = totalIncome > 0 ? Math.min(100, (totalSavings / totalIncome) * 100) : 0;
+            // Header badges describe the selected month's logged transactions, matching
+            // the Tracker and Analysis tabs. They previously read the plan's own flows,
+            // which made "Total Expenses" a residual of income and left these figures
+            // contradicting the rest of the app.
+            const monthTx = txForMonth(trackerMonth);
+            const totalIncome = monthTx.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
+            const totalExpenses = monthTx.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
+            const net = totalIncome - totalExpenses;
+            const savingsRate = totalIncome > 0 ? (net / totalIncome) * 100 : 0;
 
             // DOM Update
             document.getElementById("metric-income").textContent = formatCurrency(totalIncome);
             document.getElementById("metric-expenses").textContent = formatCurrency(totalExpenses);
-            document.getElementById("metric-savings").textContent = formatCurrency(totalSavings);
+            const netEl = document.getElementById("metric-savings");
+            netEl.textContent = formatCurrency(net);
+            netEl.classList.toggle("text-rose-400", net < 0);
+            netEl.classList.toggle("text-teal-300", net >= 0);
             document.getElementById("metric-savings-rate").textContent = `${savingsRate.toFixed(1)}%`;
         }
 
@@ -1835,6 +1834,15 @@
 
             const sourceFlows = chartDataSource === "actual" ? computeActualFlows(trackerMonth) : currentFlows;
 
+            // Give assistive tech something to read: the chart is otherwise
+            // entirely unavailable outside the visual rendering.
+            svg.attr("role", "img").attr(
+                "aria-label",
+                chartDataSource === "actual"
+                    ? `Cash flow Sankey for ${formatMonthLabel(trackerMonth)}, based on logged transactions`
+                    : "Cash flow Sankey, based on planned flow amounts"
+            );
+
             const links = sourceFlows.map(d => ({
                 source: nodeNames.indexOf(d.source),
                 target: nodeNames.indexOf(d.target),
@@ -1842,15 +1850,18 @@
             })).filter(l => l.value > 0 && l.source !== -1 && l.target !== -1);
 
             if (nodes.length === 0 || links.length === 0) {
-                if (chartDataSource === "actual") {
-                    svg.append("text")
-                        .attr("x", width / 2)
-                        .attr("y", height / 2)
-                        .attr("text-anchor", "middle")
-                        .attr("fill", document.documentElement.classList.contains("light") ? "#64748b" : "#94a3b8")
-                        .attr("font-size", "13px")
-                        .text(`No transactions logged for ${formatMonthLabel(trackerMonth)} yet`);
-                }
+                // Both modes get an explanation. Plan used to render a bare canvas
+                // with no nodes and no message, which reads as a broken chart.
+                const message = chartDataSource === "actual"
+                    ? `No transactions logged for ${formatMonthLabel(trackerMonth)} yet`
+                    : "No plan amounts set yet — enter amounts in Flow Builder to see the chart";
+                svg.append("text")
+                    .attr("x", width / 2)
+                    .attr("y", height / 2)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", document.documentElement.classList.contains("light") ? "#64748b" : "#94a3b8")
+                    .attr("font-size", "13px")
+                    .text(message);
                 return;
             }
 
@@ -2013,13 +2024,13 @@
 
             tooltip.html(`
                 <div class="font-bold text-emerald-400 mb-1 flex items-center gap-1.5">
-                    <span>${d.source.name}</span>
+                    <span>${escapeHtml(d.source.name)}</span>
                     <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
-                    <span>${d.target.name}</span>
+                    <span>${escapeHtml(d.target.name)}</span>
                 </div>
                 <div class="text-sm font-semibold text-white mb-0.5">${formatCurrency(d.value)}</div>
                 <div class="text-[11px] text-slate-400">
-                    Share of ${d.source.name}: <span class="text-slate-200 font-medium">${((d.value / d.source.value) * 100).toFixed(1)}%</span>
+                    Share of ${escapeHtml(d.source.name)}: <span class="text-slate-200 font-medium">${((d.value / d.source.value) * 100).toFixed(1)}%</span>
                 </div>
             `).style("display", "block");
         }
@@ -2036,7 +2047,7 @@
             const outgoingTotal = d3.sum(d.sourceLinks, l => l.value);
 
             tooltip.html(`
-                <div class="font-bold text-white text-xs mb-1">${d.name}</div>
+                <div class="font-bold text-white text-xs mb-1">${escapeHtml(d.name)}</div>
                 <div class="text-sm font-bold text-emerald-400 mb-1">${formatCurrency(d.value)}</div>
                 ${incomingTotal > 0 ? `<div class="text-[11px] text-slate-400">Total Inflow: <span class="text-slate-200">${formatCurrency(incomingTotal)}</span></div>` : ''}
                 ${outgoingTotal > 0 ? `<div class="text-[11px] text-slate-400">Total Outflow: <span class="text-slate-200">${formatCurrency(outgoingTotal)}</span></div>` : ''}
@@ -2088,7 +2099,7 @@
                 item.innerHTML = `
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-circle text-[8px] text-emerald-400"></i>
-                        <span class="text-xs font-medium text-slate-200">${name}</span>
+                        <span class="text-xs font-medium text-slate-200">${escapeHtml(name)}</span>
                     </div>
                     <div class="text-right">
                         <span class="text-xs font-bold text-white block">${formatCurrency(val)}</span>
@@ -2113,7 +2124,7 @@
                 item.innerHTML = `
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-circle text-[8px] text-amber-400"></i>
-                        <span class="text-xs font-medium text-slate-200">${name}</span>
+                        <span class="text-xs font-medium text-slate-200">${escapeHtml(name)}</span>
                     </div>
                     <div class="text-right">
                         <span class="text-xs font-bold text-white block">${formatCurrency(val)}</span>
@@ -2123,27 +2134,33 @@
                 expenseBreakdownList.appendChild(item);
             });
 
-            // Health Cards
-            const savingsNodes = nodeNames.filter(name => {
-                const lower = name.toLowerCase();
-                return lower.includes("savings") || lower.includes("investment") || lower.includes("wealth") || lower.includes("401k") || lower.includes("reserve") || lower.includes("fd");
-            });
+            // Health Cards — driven by logged transactions for the month, not the plan.
+            // Savings is measured as income minus expenses: the previous version
+            // subtracted only flows into savings-named nodes, so it reported the
+            // whole of income as "surplus" no matter how much was spent.
+            const monthTx = txForMonth(trackerMonth);
+            const totalExpense = monthTx.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
+            const net = totalIncome - totalExpense;
+            const savingsRate = totalIncome > 0 ? (net / totalIncome) * 100 : 0;
+            const activeIncomeStreams = incomeNodes.filter(name =>
+                flows.filter(f => f.source === name).some(f => Number(f.value) > 0)
+            ).length;
 
-            let totalSavings = 0;
-            savingsNodes.forEach(name => {
-                const incoming = flows.filter(f => f.target === name);
-                totalSavings += incoming.reduce((acc, f) => acc + Number(f.value), 0);
-            });
-
-            const savingsRate = totalIncome > 0 ? Math.min(100, (totalSavings / totalIncome) * 100) : 0;
-            
             document.getElementById("analytics-savings-rate").textContent = `${savingsRate.toFixed(1)}%`;
-            document.getElementById("analytics-savings-bar").style.width = `${Math.min(100, savingsRate)}%`;
-            document.getElementById("analytics-income-count").textContent = `${incomeNodes.length} Streams`;
-            document.getElementById("analytics-surplus").textContent = formatCurrency(totalIncome - totalSavings);
+            document.getElementById("analytics-savings-bar").style.width = `${Math.max(0, Math.min(100, savingsRate))}%`;
+            document.getElementById("analytics-income-count").textContent =
+                `${activeIncomeStreams} ${activeIncomeStreams === 1 ? "Stream" : "Streams"}`;
+            const surplusEl = document.getElementById("analytics-surplus");
+            surplusEl.textContent = formatCurrency(net);
+            surplusEl.classList.toggle("text-rose-400", net < 0);
+            surplusEl.classList.toggle("text-teal-300", net >= 0);
 
             const msg = document.getElementById("analytics-savings-msg");
-            if (savingsRate >= 20) {
+            if (monthTx.length === 0) {
+                msg.textContent = "No transactions logged for this month yet.";
+            } else if (net < 0) {
+                msg.textContent = `Spending exceeds income by ${formatCurrency(Math.abs(net))}. Review the categories above to close the gap.`;
+            } else if (savingsRate >= 20) {
                 msg.textContent = "Excellent savings rate! You exceed the standard 20% wealth creation benchmark.";
             } else if (savingsRate >= 10) {
                 msg.textContent = "Moderate savings rate. Consider allocating more surplus into long-term assets.";

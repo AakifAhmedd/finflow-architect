@@ -1,0 +1,11 @@
+{
+  "name": "finflow-architect-tests",
+  "private": true,
+  "description": "Headless regression tests for index.html. The app itself has no build step and no dependencies; these are dev-only.",
+  "scripts": {
+    "test": "node tests/regression.js && node tests/regression-a11y-colour.js"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^23.0.0"
+  }
+}
