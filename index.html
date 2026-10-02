@@ -748,21 +748,6 @@
         </div>
     </div>
 
-    <!-- SYNC CONFLICT -->
-    <div id="modal-sync-conflict" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl flex flex-col gap-4">
-            <h3 class="font-bold text-white text-base flex items-center gap-2">
-                <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Sync conflict
-            </h3>
-            <p class="text-xs text-slate-300">The cloud copy changed, and so did this device. Choose which one to keep. The other is overwritten.</p>
-            <div class="flex gap-2">
-                <button id="btn-conflict-pull" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium border border-slate-700 transition">Keep cloud</button>
-                <button id="btn-conflict-push" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-medium transition shadow-md">Keep this device</button>
-            </div>
-            <button id="btn-conflict-later" class="text-xs text-slate-400 hover:text-white transition">Decide later</button>
-        </div>
-    </div>
-
     <!-- MODAL 3: ADD NODE -->
     <div id="modal-add-node" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl flex flex-col gap-4">
@@ -900,6 +885,7 @@
         ];
 
         // --- Tracker state ---
+        let deletedTx = {}; // id -> deletion time, so merged syncs do not resurrect deleted transactions
         let transactions = []; // { id, date: 'YYYY-MM-DD', node, type: 'income'|'expense', amount, note }
         let chartDataSource = "plan"; // "plan" | "actual"
         function getLocalDateKey(date = new Date()) {
@@ -928,6 +914,7 @@
                     animationsEnabled,
                     merchantMap,
                     transactions,
+                    deletedTransactions: deletedTx,
                     sankeyConfig: {
                         nodeWidth: sankeyConfig.nodeWidth,
                         nodePadding: sankeyConfig.nodePadding,
@@ -981,6 +968,7 @@
                 if (typeof parsed.animationsEnabled === "boolean") animationsEnabled = parsed.animationsEnabled;
                 if (Array.isArray(parsed.merchantMap)) merchantMap = parsed.merchantMap;
                 if (parsed.transactions && Array.isArray(parsed.transactions)) transactions = parsed.transactions;
+                deletedTx = (parsed.deletedTransactions && typeof parsed.deletedTransactions === "object") ? { ...parsed.deletedTransactions } : {};
 
                 if (parsed.sankeyConfig) {
                     sankeyConfig.nodeWidth = parsed.sankeyConfig.nodeWidth || 18;
@@ -1082,7 +1070,12 @@
             customNodeTiers.clear();
             snap.tiers.forEach(([k, v]) => customNodeTiers.set(k, v));
             currencySymbol = snap.currency;
-            if (snap.transactions) transactions = snap.transactions;
+            if (snap.transactions) {
+                const keep = new Set(snap.transactions.map(t => t.id));
+                transactions.forEach(t => { if (!keep.has(t.id)) deletedTx[t.id] = Date.now(); });
+                transactions = snap.transactions;
+                transactions.forEach(t => { delete deletedTx[t.id]; });
+            }
             renderFlowBuilder();
             if (!document.getElementById("view-tracker").classList.contains("hidden")) renderTracker();
             saveStateToLocalStorage();
@@ -1352,6 +1345,7 @@
 
         function deleteTransaction(id) {
             pushUndo();
+            deletedTx[id] = Date.now();
             transactions = transactions.filter(t => t.id !== id);
             saveStateToLocalStorage();
             renderTracker();
@@ -2183,6 +2177,29 @@
             if (visible("view-tracker")) renderTracker();
         }
 
+        // Merge two payloads after both sides changed: transactions are unioned by id
+        // (minus deletions); everything else (structure, settings) takes the newer copy.
+        function mergePayloads(local, remote) {
+            const localAt = (local.meta && local.meta.updatedAt) || 0;
+            const remoteAt = (remote.meta && remote.meta.updatedAt) || 0;
+            const base = remoteAt > localAt ? remote : local;
+            const tombstones = { ...(remote.deletedTransactions || {}) };
+            Object.entries(local.deletedTransactions || {}).forEach(([id, at]) => { tombstones[id] = Math.max(at, tombstones[id] || 0); });
+            const seen = new Set();
+            const merged = [];
+            [...(local.transactions || []), ...(remote.transactions || [])].forEach(t => {
+                if (!t || seen.has(t.id) || tombstones[t.id]) return;
+                seen.add(t.id);
+                merged.push(t);
+            });
+            return {
+                ...base,
+                meta: { updatedAt: Math.max(Date.now(), localAt, remoteAt) + 1 },
+                transactions: merged,
+                deletedTransactions: tombstones
+            };
+        }
+
         const SyncEngine = {
             // 'not-connected' | 'syncing' | 'synced' | 'pending' | 'failed' | 'conflict'
             status: "not-connected",
@@ -2202,7 +2219,7 @@
             },
 
             // Called on open / resume. Auto-pulls when remote moved and nothing local is unsynced;
-            // flags a real conflict when both moved.
+            // merges both copies (no prompt) when both moved.
             async checkAndAutoSync() {
                 if (!Sync.isConnected()) { this._setStatus("not-connected"); return { notConnected: true }; }
                 this._setStatus("syncing");
@@ -2219,7 +2236,11 @@
                         this._clearRetry();
                         return {};
                     }
-                    if (remoteMoved && localDirty) { this._setStatus("conflict"); return { conflict: true }; }
+                    if (remoteMoved && localDirty) {
+                        await this.mergeWithRemote();
+                        showToast("Merged changes from the other device");
+                        return { merged: true };
+                    }
                     if (remoteMoved) {
                         await this.pull({ knownRemoteUpdatedAt: remoteUpdatedAt });
                         showToast("Synced latest changes from the cloud");
@@ -2233,6 +2254,16 @@
                     this._scheduleRetry(() => this.checkAndAutoSync());
                     throw err;
                 }
+            },
+
+            // Both sides changed: merge instead of asking, then push the merged copy
+            async mergeWithRemote() {
+                const remote = await Sync.pullFromCloud();
+                if (!remote || !Array.isArray(remote.currentFlows)) throw new Error("Cloud data isn't a FinFlow backup.");
+                applyPayload(mergePayloads(buildPayload(), remote));
+                saveStateToLocalStorage();
+                refreshAfterStateChange();
+                await this.push();
             },
 
             async push() {
@@ -2275,7 +2306,7 @@
             async smartSync() {
                 const res = await this.checkAndAutoSync();
                 if (res.notConnected) { openSettingsModal(); showToast("Add a GitHub token in Settings to sync"); return; }
-                if (res.conflict || res.pulled) return;
+                if (res.merged || res.pulled) return;
                 // First sync on this device: never guess direction, the user picks Push or Pull
                 if (!loadSyncMeta().lastRemoteUpdatedAt) { openSettingsModal(); showToast("First sync: choose Push or Pull"); return; }
                 if (this.status === "pending") { await this.push(); showToast("Pushed to cloud"); }
@@ -2345,7 +2376,6 @@
         }
 
         function openSettingsModal() { renderMerchantMap(); document.getElementById("modal-settings").classList.remove("hidden"); }
-        function openSyncConflictModal() { document.getElementById("modal-sync-conflict").classList.remove("hidden"); }
 
         function updateColorModeContainers() {
             const mode = document.getElementById("select-color-mode").value;
@@ -2789,25 +2819,12 @@
             syncBtn.addEventListener("click", async () => {
                 try {
                     await SyncEngine.smartSync();
-                    if (SyncEngine.status === "conflict") openSyncConflictModal();
                 } catch (err) { showToast(err.message || "Sync failed"); }
-            });
-
-            const conflictModal = document.getElementById("modal-sync-conflict");
-            document.getElementById("btn-conflict-later").addEventListener("click", () => conflictModal.classList.add("hidden"));
-            document.getElementById("btn-conflict-pull").addEventListener("click", async () => {
-                conflictModal.classList.add("hidden");
-                await runSync(() => SyncEngine.pull(), "Pulled from cloud: local changes replaced");
-            });
-            document.getElementById("btn-conflict-push").addEventListener("click", async () => {
-                conflictModal.classList.add("hidden");
-                await runSync(() => SyncEngine.push(), "Pushed: cloud overwritten");
             });
 
             // Auto-check on open and when returning to the app
             const autoCheck = () => {
                 SyncEngine.checkAndAutoSync()
-                    .then(r => { if (r && r.conflict) openSyncConflictModal(); })
                     .catch(() => {});
             };
             autoCheck();
