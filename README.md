@@ -10,12 +10,11 @@ Open `index.html` in a browser. No build step.
 
 ## Features
 
-- Drag-and-drop flow builder with a live Sankey chart, defaulting to LKR and a Sri Lankan income/expense preset
+- Drag-and-drop flow builder with a live Sankey chart, in LKR, starting from a blank model of personal spending verticals
 - CSV import/export, with a downloadable template
 - Light / dark mode toggle (header)
 - Left-to-right branch-drawing chart animation, with a Settings toggle to turn it off
-- Undo (button + Ctrl/Cmd+Z) for deletes, resets, and preset/CSV loads
-- Chart export as PNG, JPEG or SVG via the "Share as" button on the chart screen
+- Undo (button + Ctrl/Cmd+Z) for deletes, resets, and CSV loads
 - Optional cross-device sync via a private GitHub Gist (header cloud button, Settings → Cloud Sync); the token stays in the browser only
 
 ## Notes

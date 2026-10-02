@@ -223,10 +223,6 @@
             <button id="btn-theme-toggle" class="w-8 h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg border border-slate-700 shadow-sm transition" title="Toggle light / dark mode" aria-label="Toggle light or dark mode">
                 <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
             </button>
-            <button id="btn-presets" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition flex items-center gap-1.5 border border-slate-700 shadow-sm" title="Load Scenarios">
-                <i class="fa-solid fa-bookmark text-amber-400"></i>
-                <span class="hidden sm:inline">Presets</span>
-            </button>
             <button id="btn-settings" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition flex items-center gap-1.5 border border-slate-700 shadow-sm" title="Visualization Settings">
                 <i class="fa-solid fa-gear text-slate-400"></i>
                 <span class="hidden sm:inline">Settings</span>
@@ -823,35 +819,6 @@
         </div>
     </div>
 
-    <!-- MODAL 5: PRESETS -->
-    <div id="modal-presets" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-white text-base flex items-center gap-2">
-                    <i class="fa-solid fa-bookmark text-amber-400"></i> Budget Scenario Presets
-                </h3>
-                <button id="btn-close-presets" class="text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-3">
-                <button data-preset="tech" class="btn-preset-item w-full p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-xl text-left border border-slate-700/60 transition group">
-                    <div class="font-semibold text-xs text-teal-400 group-hover:text-teal-300">High Savings & Investment Focus</div>
-                    <div class="text-[11px] text-slate-400 mt-0.5">Tech salary with equity/dividends aggressively allocated towards index funds, retirement & reserves.</div>
-                </button>
-                <button data-preset="lkr_plan" class="btn-preset-item w-full p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-xl text-left border border-slate-700/60 transition group">
-                    <div class="font-semibold text-xs text-amber-400 group-hover:text-amber-300">Sri Lanka Household Flow (LKR Rs.)</div>
-                    <div class="text-[11px] text-slate-400 mt-0.5">Tailored Sri Lankan budget with local salary, freelance earnings, rent, statutory deductions, and living expenses.</div>
-                </button>
-                <button data-preset="freelance" class="btn-preset-item w-full p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-xl text-left border border-slate-700/60 transition group">
-                    <div class="font-semibold text-xs text-indigo-400 group-hover:text-indigo-300">Freelancer & Business Owner Flow</div>
-                    <div class="text-[11px] text-slate-400 mt-0.5">Multiple revenue channels, business operations, estimated taxes, and variable lifestyle costs.</div>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Notification Toast -->
     <!-- Quick Add FAB -->
     <button id="btn-quick-add" type="button" title="Log a transaction" aria-label="Log a transaction" class="fixed bottom-5 right-4 md:right-6 z-40 w-14 h-14 rounded-full bg-amber-600 hover:bg-amber-500 text-white shadow-xl shadow-slate-950/50 flex items-center justify-center text-xl transition">
@@ -865,69 +832,30 @@
     </div>
 
     <script>
-        // Preset Scenarios (Standard Household preset removed as requested)
-        const PRESETS = {
-            tech: [
-                { source: "Base Salary", target: "Total Cash Flow", value: 10500 },
-                { source: "Stock Vests (RSU)", target: "Total Cash Flow", value: 3500 },
-                { source: "Consulting", target: "Total Cash Flow", value: 2000 },
-
-                { source: "Total Cash Flow", target: "Taxes", value: 4200 },
-                { source: "Total Cash Flow", target: "Essentials", value: 3200 },
-                { source: "Total Cash Flow", target: "Discretionary", value: 1800 },
-                { source: "Total Cash Flow", target: "Wealth Building", value: 6800 },
-
-                { source: "Taxes", target: "Federal & State Tax", value: 4200 },
-                { source: "Essentials", target: "Luxury Rent", value: 2500 },
-                { source: "Essentials", target: "Groceries & Health", value: 700 },
-                { source: "Discretionary", target: "Travel & Vacations", value: 1200 },
-                { source: "Discretionary", target: "Gadgets & Dining", value: 600 },
-                { source: "Wealth Building", target: "Index Funds", value: 4500 },
-                { source: "Wealth Building", target: "Crypto Portfolio", value: 1000 },
-                { source: "Wealth Building", target: "High Yield Savings", value: 1300 }
-            ],
-            lkr_plan: [
-                { source: "Primary Tech Salary", target: "Total Cash Flow", value: 450000 },
-                { source: "Foreign Freelance Retainer", target: "Total Cash Flow", value: 250000 },
-
-                { source: "Total Cash Flow", target: "Statutory Deductions", value: 70000 },
-                { source: "Total Cash Flow", target: "Housing & Rent", value: 180000 },
-                { source: "Total Cash Flow", target: "Daily Living Costs", value: 220000 },
-                { source: "Total Cash Flow", target: "Savings & FD Wealth", value: 230000 },
-
-                { source: "Statutory Deductions", target: "EPF & APIT Tax", value: 70000 },
-
-                { source: "Housing & Rent", target: "Apartment Rent", value: 140000 },
-                { source: "Housing & Rent", target: "Electricity & Water (CEB)", value: 25000 },
-                { source: "Housing & Rent", target: "SLT Fiber Internet", value: 15000 },
-
-                { source: "Daily Living Costs", target: "Supermarket & Groceries", value: 120000 },
-                { source: "Daily Living Costs", target: "Fuel & Transportation", value: 50000 },
-                { source: "Daily Living Costs", target: "Dining & Family Expenses", value: 50000 },
-
-                { source: "Savings & FD Wealth", target: "High Yield Bank FD", value: 150000 },
-                { source: "Savings & FD Wealth", target: "Unit Trust / Stocks", value: 80000 }
-            ],
-            freelance: [
-                { source: "Client Retainers", target: "Gross Revenue", value: 8000 },
-                { source: "Project Bonuses", target: "Gross Revenue", value: 2500 },
-                { source: "Digital Products", target: "Gross Revenue", value: 1500 },
-
-                { source: "Gross Revenue", target: "Business Operations", value: 2000 },
-                { source: "Gross Revenue", target: "Personal Take-Home", value: 10000 },
-
-                { source: "Business Operations", target: "Software & SaaS", value: 600 },
-                { source: "Business Operations", target: "Contractors & Legal", value: 1400 },
-
-                { source: "Personal Take-Home", target: "Taxes & Reserve", value: 2800 },
-                { source: "Personal Take-Home", target: "Personal Housing", value: 2400 },
-                { source: "Personal Take-Home", target: "Personal Lifestyle", value: 2800 },
-                { source: "Personal Take-Home", target: "Personal Savings", value: 2000 }
-            ]
+        // Default model: Income -> Total Cash Flow -> spending verticals -> items.
+        // Values start at 0 (blank slate); the Tracker fills the actuals.
+        const DEFAULT_MODEL = {
+            income: ["Income"],
+            verticals: {
+                "Primary Transport": ["RayZR Fuel", "RayZR Maintenance", "RayZR Mods", "PickMe", "Uber"],
+                "Secondary Auto": ["Vitz Shared Costs", "Vitz Maintenance"],
+                "Health & Sports": ["Badminton Gear", "Court Bookings", "Gym", "Supplements", "Swimming"],
+                "Food & Social": ["Meals", "Snacks", "Dining Out", "Gifts"],
+                "Pet Care": ["Cat Food", "Spot-on Treatments", "Tracker Subscriptions"],
+                "Living & Tech": ["DIY Materials", "Google One", "Gadgets"]
+            }
         };
+        function buildDefaultFlows() {
+            const flows = DEFAULT_MODEL.income.map(n => ({ source: n, target: "Total Cash Flow", value: 0 }));
+            Object.entries(DEFAULT_MODEL.verticals).forEach(([vertical, items]) => {
+                flows.push({ source: "Total Cash Flow", target: vertical, value: 0 });
+                items.forEach(item => flows.push({ source: vertical, target: item, value: 0 }));
+            });
+            return flows;
+        }
 
         // Global Application State
-        let currentFlows = JSON.parse(JSON.stringify(PRESETS.lkr_plan));
+        let currentFlows = buildDefaultFlows();
         let currencySymbol = "LKR";
         let colorTheme = "emerald";
         let colorMode = "theme"; // "theme" | "monotone" | "duotone"
@@ -2606,27 +2534,6 @@
                 if (!document.getElementById("view-sankey").classList.contains("hidden")) renderSankey();
             });
 
-            // Presets Modal
-            const modalPresets = document.getElementById("modal-presets");
-            document.getElementById("btn-presets").addEventListener("click", () => modalPresets.classList.remove("hidden"));
-            document.getElementById("btn-close-presets").addEventListener("click", () => modalPresets.classList.add("hidden"));
-
-            document.querySelectorAll(".btn-preset-item").forEach(btn => {
-                btn.addEventListener("click", (e) => {
-                    const presetKey = e.currentTarget.getAttribute("data-preset");
-                    if (PRESETS[presetKey]) {
-                        pushUndo();
-                        currentFlows = JSON.parse(JSON.stringify(PRESETS[presetKey]));
-                        if (presetKey === "lkr_plan") {
-                            currencySymbol = "LKR";
-                        }
-                        renderFlowBuilder();
-                        modalPresets.classList.add("hidden");
-                        showToast("Preset scenario loaded!");
-                    }
-                });
-            });
-
             // CSV Template / Import / Export
             document.getElementById("btn-csv-template").addEventListener("click", () => {
                 downloadCsv(CSV_TEMPLATE, "finflow-template.csv");
@@ -2754,7 +2661,7 @@
             // Reset
             document.getElementById("btn-quick-reset").addEventListener("click", () => {
                 pushUndo();
-                currentFlows = JSON.parse(JSON.stringify(PRESETS.lkr_plan));
+                currentFlows = buildDefaultFlows();
                 currencySymbol = "LKR";
                 customNodeTiers.clear();
                 renderFlowBuilder();
