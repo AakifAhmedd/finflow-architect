@@ -178,9 +178,9 @@
 
         <!-- Main View Mode Tabs Navigation -->
         <nav class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs font-medium overflow-x-auto custom-scrollbar max-w-full">
-            <button id="tab-builder" class="tab-btn active shrink-0 px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
-                <i class="fa-solid fa-pen-ruler text-emerald-400"></i>
-                <span class="hidden sm:inline">Flow Builder</span>
+            <button id="tab-tracker" class="tab-btn active shrink-0 px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
+                <i class="fa-solid fa-calendar-check text-amber-400"></i>
+                <span class="hidden sm:inline">Tracker</span>
             </button>
             <button id="tab-sankey" class="tab-btn shrink-0 px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
                 <i class="fa-solid fa-chart-sankey text-teal-400"></i>
@@ -190,9 +190,9 @@
                 <i class="fa-solid fa-chart-pie text-indigo-400"></i>
                 <span class="hidden sm:inline">Analysis</span>
             </button>
-            <button id="tab-tracker" class="tab-btn shrink-0 px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
-                <i class="fa-solid fa-calendar-check text-amber-400"></i>
-                <span class="hidden sm:inline">Tracker</span>
+            <button id="tab-builder" class="tab-btn shrink-0 px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-transparent transition-all flex items-center gap-2 text-slate-300 hover:text-white">
+                <i class="fa-solid fa-pen-ruler text-emerald-400"></i>
+                <span class="hidden sm:inline">Flow Builder</span>
             </button>
         </nav>
 
@@ -244,7 +244,7 @@
     <main class="flex-1 overflow-hidden relative flex flex-col">
         
         <!-- VIEW 1: FLOW BUILDER / FINANCIAL MODEL EDITOR -->
-        <section id="view-builder" class="flex-1 flex flex-col p-4 md:p-6 overflow-y-auto custom-scrollbar gap-6">
+        <section id="view-builder" class="flex-1 hidden flex-col p-4 md:p-6 pb-24 md:pb-24 overflow-y-auto custom-scrollbar gap-6">
             
             <!-- Builder Control & Flow Health Bar -->
             <div class="glass-panel p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4 border border-slate-800">
@@ -437,7 +437,7 @@
         </section>
 
         <!-- VIEW 3: ANALYTICS & INSIGHTS -->
-        <section id="view-analytics" class="flex-1 hidden flex-col p-4 md:p-6 overflow-y-auto custom-scrollbar gap-6">
+        <section id="view-analytics" class="flex-1 hidden flex-col p-4 md:p-6 pb-24 md:pb-24 overflow-y-auto custom-scrollbar gap-6">
             <div class="glass-panel p-3 rounded-2xl border border-slate-800 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
                     <button id="btn-analytics-prev-month" class="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 text-xs" title="Previous month">
@@ -501,7 +501,7 @@
         </section>
 
         <!-- VIEW 4: DAILY TRACKER -->
-        <section id="view-tracker" class="flex-1 hidden flex-col p-4 md:p-6 overflow-y-auto custom-scrollbar gap-5">
+        <section id="view-tracker" class="flex-1 flex flex-col p-4 md:p-6 pb-24 md:pb-24 overflow-y-auto custom-scrollbar gap-5">
 
             <!-- Month Navigator + Summary -->
             <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
@@ -929,6 +929,11 @@
     </div>
 
     <!-- Notification Toast -->
+    <!-- Quick Add FAB -->
+    <button id="btn-quick-add" type="button" title="Log a transaction" aria-label="Log a transaction" class="fixed bottom-5 right-4 md:right-6 z-40 w-14 h-14 rounded-full bg-amber-600 hover:bg-amber-500 text-white shadow-xl shadow-slate-950/50 flex items-center justify-center text-xl transition">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
     <div id="toast" class="fixed bottom-5 left-4 right-4 sm:left-auto sm:right-5 sm:max-w-sm z-50 hidden bg-emerald-600 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 transition-all transform translate-y-2">
         <i class="fa-solid fa-circle-check text-sm"></i>
         <span id="toast-message">Action completed successfully</span>
@@ -2585,6 +2590,20 @@
                     }
                 });
             });
+
+            // Opens on the Tracker; render it once at load
+            renderTracker();
+
+            // Quick Add FAB: jump to the log form from anywhere and focus the amount
+            const quickAddBtn = document.getElementById("btn-quick-add");
+            quickAddBtn.addEventListener("click", () => {
+                document.getElementById("tab-tracker").click();
+                document.getElementById("view-tracker").scrollTo({ top: 0 });
+                document.getElementById("input-tx-amount").focus();
+            });
+            new IntersectionObserver(([entry]) => {
+                quickAddBtn.classList.toggle("hidden", entry.isIntersecting);
+            }).observe(document.getElementById("tracker-form"));
 
             // Settings Modal & Color Mode Toggle Logic
             const modalSettings = document.getElementById("modal-settings");
