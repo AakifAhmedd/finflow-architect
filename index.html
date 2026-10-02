@@ -708,6 +708,22 @@
 
             <hr class="border-slate-800">
 
+            <!-- Merchant -> category auto-select -->
+            <div class="flex flex-col gap-2">
+                <div>
+                    <label class="text-xs text-slate-300 font-medium block">Auto-category from note</label>
+                    <p class="text-[10px] text-slate-400">When the note contains a keyword, the category is picked for you. Longest match wins.</p>
+                </div>
+                <div id="merchant-map-list" class="flex flex-col gap-1.5"></div>
+                <div class="flex gap-2">
+                    <input type="text" id="input-merchant-keyword" placeholder="Keyword" autocomplete="off" class="min-w-0 flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                    <select id="select-merchant-node" aria-label="Category for keyword" class="min-w-0 flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"></select>
+                    <button type="button" id="btn-merchant-add" class="px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium border border-slate-700 transition">Add</button>
+                </div>
+            </div>
+
+            <hr class="border-slate-800">
+
             <!-- Cloud Sync -->
             <div class="flex flex-col gap-2">
                 <div>
@@ -875,6 +891,14 @@
         let customNodeTiers = new Map();
         let animationsEnabled = true;
 
+        // Note keyword -> category (auto-select while logging a transaction)
+        let merchantMap = [
+            { keyword: "pickme", node: "PickMe" },
+            { keyword: "uber eats", node: "Dining Out" },
+            { keyword: "uber", node: "Uber" },
+            { keyword: "cafe 4 u", node: "Dining Out" }
+        ];
+
         // --- Tracker state ---
         let transactions = []; // { id, date: 'YYYY-MM-DD', node, type: 'income'|'expense', amount, note }
         let chartDataSource = "plan"; // "plan" | "actual"
@@ -902,6 +926,7 @@
                     duotoneColorA,
                     duotoneColorB,
                     animationsEnabled,
+                    merchantMap,
                     transactions,
                     sankeyConfig: {
                         nodeWidth: sankeyConfig.nodeWidth,
@@ -954,6 +979,7 @@
                 if (parsed.duotoneColorA) duotoneColorA = parsed.duotoneColorA;
                 if (parsed.duotoneColorB) duotoneColorB = parsed.duotoneColorB;
                 if (typeof parsed.animationsEnabled === "boolean") animationsEnabled = parsed.animationsEnabled;
+                if (Array.isArray(parsed.merchantMap)) merchantMap = parsed.merchantMap;
                 if (parsed.transactions && Array.isArray(parsed.transactions)) transactions = parsed.transactions;
 
                 if (parsed.sankeyConfig) {
@@ -1296,6 +1322,7 @@
             if (!document.getElementById("view-sankey").classList.contains("hidden") && chartDataSource === "actual") renderSankey();
         }
 
+        let txCategoryPicked = false; // user chose a category by hand, so notes stop auto-picking
         function addTransaction(event) {
             event?.preventDefault();
             const type = getActiveTxType();
@@ -1314,6 +1341,7 @@
                 date, node, type, amount: Math.round(amount * 100) / 100, note
             });
             saveStateToLocalStorage();
+            txCategoryPicked = false;
             document.getElementById("input-tx-amount").value = "";
             document.getElementById("input-tx-note").value = "";
             trackerMonth = getMonthKey(date);
@@ -2288,7 +2316,35 @@
                 default: return "Cloud sync isn't set up yet.";
             }
         }
-        function openSettingsModal() { document.getElementById("modal-settings").classList.remove("hidden"); }
+        // --- Merchant map ---
+        function renderMerchantMap() {
+            const list = document.getElementById("merchant-map-list");
+            list.innerHTML = merchantMap.length ? merchantMap.map((m, i) => `
+                <div class="flex items-center gap-2 text-xs bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5">
+                    <span class="text-slate-200 truncate">${escapeHtml(m.keyword)}</span>
+                    <i class="fa-solid fa-arrow-right text-[10px] text-slate-500"></i>
+                    <span class="text-emerald-400 truncate flex-1">${escapeHtml(m.node)}${getUniqueNodeNames().includes(m.node) ? "" : " (missing)"}</span>
+                    <button type="button" data-idx="${i}" class="btn-merchant-remove text-slate-500 hover:text-rose-400 transition" aria-label="Remove keyword"><i class="fa-solid fa-xmark"></i></button>
+                </div>`).join("") : `<p class="text-[10px] text-slate-500">No keywords yet.</p>`;
+            const sel = document.getElementById("select-merchant-node");
+            const prev = sel.value;
+            const names = getUniqueNodeNames().filter(n => getNodeTier(n) !== "Income Source" && getNodeTier(n) !== "Central Pool").sort();
+            sel.innerHTML = names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("");
+            if (names.includes(prev)) sel.value = prev;
+        }
+
+        // Pick the category for the note being typed (longest keyword wins)
+        function matchMerchantCategory(note, type) {
+            const text = (note || "").toLowerCase();
+            if (!text) return null;
+            const options = getTrackerCategoryOptions(type);
+            const hit = merchantMap
+                .filter(m => m.keyword && text.includes(m.keyword.toLowerCase()) && options.includes(m.node))
+                .sort((a, b) => b.keyword.length - a.keyword.length)[0];
+            return hit ? hit.node : null;
+        }
+
+        function openSettingsModal() { renderMerchantMap(); document.getElementById("modal-settings").classList.remove("hidden"); }
         function openSyncConflictModal() { document.getElementById("modal-sync-conflict").classList.remove("hidden"); }
 
         function updateColorModeContainers() {
@@ -2380,8 +2436,8 @@
 
             // Settings Modal & Color Mode Toggle Logic
             const modalSettings = document.getElementById("modal-settings");
-            document.getElementById("btn-settings").addEventListener("click", () => modalSettings.classList.remove("hidden"));
-            document.getElementById("btn-quick-settings").addEventListener("click", () => modalSettings.classList.remove("hidden"));
+            document.getElementById("btn-settings").addEventListener("click", openSettingsModal);
+            document.getElementById("btn-quick-settings").addEventListener("click", openSettingsModal);
             document.getElementById("btn-close-settings").addEventListener("click", () => modalSettings.classList.add("hidden"));
             document.getElementById("btn-save-settings").addEventListener("click", () => {
                 saveStateToLocalStorage();
@@ -2454,6 +2510,7 @@
                     } else {
                         btn.classList.add("bg-rose-500/20", "text-rose-400");
                     }
+                    txCategoryPicked = false;
                     populateTxCategorySelect();
                 });
             });
@@ -2463,6 +2520,32 @@
                     e.target.value = "";
                     document.getElementById("btn-tx-new-category").click();
                 }
+            });
+
+            // Merchant map editing + note-driven category auto-select
+            document.getElementById("btn-merchant-add").addEventListener("click", () => {
+                const kwInput = document.getElementById("input-merchant-keyword");
+                const keyword = kwInput.value.trim().toLowerCase();
+                const node = document.getElementById("select-merchant-node").value;
+                if (!keyword || !node) { showToast("Enter a keyword and pick a category"); return; }
+                merchantMap = merchantMap.filter(m => m.keyword.toLowerCase() !== keyword);
+                merchantMap.push({ keyword, node });
+                kwInput.value = "";
+                saveStateToLocalStorage();
+                renderMerchantMap();
+            });
+            document.getElementById("merchant-map-list").addEventListener("click", (e) => {
+                const btn = e.target.closest(".btn-merchant-remove");
+                if (!btn) return;
+                merchantMap.splice(Number(btn.getAttribute("data-idx")), 1);
+                saveStateToLocalStorage();
+                renderMerchantMap();
+            });
+            document.getElementById("select-tx-category").addEventListener("change", () => { txCategoryPicked = true; });
+            document.getElementById("input-tx-note").addEventListener("input", (e) => {
+                if (txCategoryPicked) return;
+                const node = matchMerchantCategory(e.target.value, getActiveTxType());
+                if (node) document.getElementById("select-tx-category").value = node;
             });
 
             document.getElementById("tracker-form").addEventListener("submit", addTransaction);
