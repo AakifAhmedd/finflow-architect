@@ -11,6 +11,7 @@ Until that milestone is ready, use 0.x.x versions for incremental improvements. 
 - [x] Keep the primary phone expense flow visible on the first screen.
 - [x] Add category breakdowns, daily spending charts, and monthly navigation.
 - [x] Support expense editing, deletion, and undo.
+- [x] Set up named monthly expenses once, catch up due charges, and manage or stop future recurrence.
 - [x] Preserve personal defaults and migrate existing logged expenses without changing the original saved data.
 - [x] Keep the application self-contained in index.html with no runtime dependencies.
 - [x] Add regression checks for persistence, totals, migration, storage failures, accessibility, and responsive layouts.

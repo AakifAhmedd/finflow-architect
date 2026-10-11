@@ -1,6 +1,6 @@
 # FinFlow
 
-A personal finance app for quickly logging expenses and understanding where money went. **Track first, visualize second.** Current version: **0.1.0**.
+A personal finance app for quickly logging expenses and understanding where money went. **Track first, visualize second.** Current version: **0.2.0**.
 
 [Open FinFlow](https://aakifahmedd.github.io/finflow-architect/)
 
@@ -11,6 +11,7 @@ See [the to-do list](TODO.md) for the roadmap to **1.0.0**, the full PWA release
 Open `index.html` directly, or serve it with any static server. The entire app is in one HTML file, with no build step, runtime dependencies, fonts, CDN requests, or network requirement.
 
 - **Track:** enter an amount with the large keypad, choose one of eight main categories, select its subcategory (including Other), and save. Use Back to change the main category. Optionally add a note or change the date. Keyboard entry and decimal amounts are supported. Recent expenses and monthly spending sit alongside the form on desktop and below it on mobile.
+- **Monthly expenses:** expand Add details, enable Repeat monthly, name the expense (Google One or YouTube, for example), and choose its first charge date. FinFlow logs a charge on that day each month, using the last day for shorter months. Future first-charge dates are supported. Manage or stop a schedule from the Monthly expenses card; changing a schedule affects future charges, and stopping keeps past expenses. Individual logged charges can still be edited/deleted without changing the schedule.
 - **Spending:** switch months, compare total spending with the previous full month, view category shares and daily totals, and select a category to filter its expenses. Daily average includes every calendar day in the month, or days elapsed so far for the current month. Selecting a main category also shows its subcategory totals. Each chart has a text alternative; exact expenses remain available below it.
 - Open any expense to edit or delete it. Saved additions, edits, and deletions can be undone with the toast's Undo button or Ctrl/Cmd+Z outside text inputs. Undo covers the most recent change in the current session.
 
@@ -20,11 +21,13 @@ This remains a private, single-user tool. Currency is fixed at **LKR**. Its eigh
 
 Expenses are stored in this browser's localStorage under `finflow_tracker_v1`. Amounts use integer cents to avoid floating-point aggregation errors. Reloads keep your expenses; different browsers/devices and origins have separate data. Clearing browser site data removes it. Browser storage is local, not encrypted.
 
+Monthly rules live in the same browser storage. Due charges are added on opening/returning to FinFlow, and while the app remains open; missed months are caught up. A closed app does not run background jobs. Each schedule has a deterministic charge ID per month and an atomic posting cursor, so reloads do not duplicate charges and deleted charges are not recreated. Future scheduled amounts are excluded from actual-spending analytics until due. Automatic catch-up clears session Undo to protect newly posted charges.
+
 Expenses store both `mainCategory` and `subCategory`. An additive, idempotent migration groups existing expenses into the new eight-category hierarchy, retaining their original labels in `previousClassification` and the previous registry in `previousCategories`. Known items (such as RayZR Fuel and Cat Food) map to their corresponding subcategories. Broader old categories use Other; unfamiliar custom labels use Lifestyle & Social → Other, with the original label shown alongside the expense. Amounts, IDs, dates, and notes are preserved.
 
-On first use at the **same origin** as FinFlow Architect, valid existing logged expenses and their custom categories are imported automatically. Original data in `finflow_architect_model_v2` is left intact. The migration respects previously deleted transactions and runs only when the new storage key is absent. It does not create recurring expenses. Income, flow plans, subscriptions, and sync settings remain in the old key, outside the new app. Invalid data or unavailable storage produces a visible warning and pauses saving instead of silently overwriting data. Conflicting writes from another tab also require a reload via Retry.
+On first use at the **same origin** as FinFlow Architect, valid existing logged expenses and their custom categories are imported automatically. Original data in `finflow_architect_model_v2` is left intact. The migration respects previously deleted transactions and runs only when the new storage key is absent. It does not reactivate legacy subscriptions; create monthly schedules explicitly in FinFlow. Income, flow plans, subscriptions, and sync settings remain in the old key, outside the new app. Invalid data or unavailable storage produces a visible warning and pauses saving instead of silently overwriting data. Conflicting writes from another tab also require a reload via Retry.
 
-The earlier Flow Builder, plan/actual Sankey, income analysis, recurring subscription automation, cloud sync, CSV tools, and styling settings have been removed from the active app. FinFlow focuses on actual expenses.
+The earlier Flow Builder, plan/actual Sankey, income analysis, cloud sync, CSV tools, and styling settings have been removed from the active app. FinFlow focuses on actual expenses.
 
 ## Development and verification
 
