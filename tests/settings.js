@@ -13,6 +13,7 @@ async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={d
    for(const id of ['transport','food','sports','pet','housing','tech','lifestyle','community']){await page.click(`[data-category="${id}"]`);await page.click('[data-subcategory="Other"]');const subfit=await page.evaluate(()=>({save:document.getElementById('save-expense').getBoundingClientRect().bottom,nav:document.querySelector('.nav').getBoundingClientRect().top,scroll:scrollY}));assert.ok(subfit.save<=subfit.nav);assert.equal(subfit.scroll,0);await page.click('#categories-back');}
   }
   await page.setViewport({width:390,height:740});await page.click('#nav-track');await page.evaluate(()=>{document.querySelector('.nav').style.paddingBottom='43px';window.scrollTo(0,0);});
+  await page.waitForFunction(()=>Math.abs(document.querySelector('.entry-actions').getBoundingClientRect().bottom-document.querySelector('.nav').getBoundingClientRect().top)<1);
   const safe=await page.evaluate(()=>({save:document.getElementById('save-expense').getBoundingClientRect().bottom,nav:document.querySelector('.nav').getBoundingClientRect().top}));assert.ok(safe.save<=safe.nav,`Simulated safe area covers entry: ${JSON.stringify(safe)}`);await page.evaluate(()=>document.querySelector('.nav').style.paddingBottom='');
   await page.setViewport({width:390,height:844});await page.screenshot({path:'/tmp/finflow-phone-entry-0.3.png'});await page.setViewport({width:1440,height:1000});
  });

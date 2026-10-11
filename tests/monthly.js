@@ -91,7 +91,7 @@ async function setup(page,name,amount,date,sub='Cloud Storage & Software'){
   });
   await check('Monthly setup and management fit phone and desktop layouts, including labeled controls',async()=>{
    for(const width of [320,390,1440]){
-    await page.setViewport({width,height:844});await page.click('[data-monthly]');
+    await page.setViewport({width,height:844});await page.click(width<768?'#nav-spending':'#nav-track');await page.click('[data-monthly]');
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     const overflow=await page.$eval('#monthly-dialog',e=>e.scrollWidth>e.clientWidth);assert.equal(overflow,false);
     const unnamed=await page.$$eval('#monthly-dialog input,#monthly-dialog select',es=>es.filter(e=>!e.labels.length).map(e=>e.id));assert.deepEqual(unnamed,[]);
