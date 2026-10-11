@@ -9,9 +9,9 @@ async function at(page,date){
  await page.evaluate(value=>localStorage.setItem('finflow_test_clock',value),date+'T12:00:00+05:30');
  await page.reload({waitUntil:'load'});
 }
-async function setup(page,name,amount,date,sub='Cloud Storage & Software'){
+async function setup(page,name,amount,date,sub='Software & Cloud Services'){
  await fill(page,'amount',amount);if(await page.$eval('#categories-back',e=>!e.hidden))await page.click('#categories-back');
- await page.click('[data-category="tech"]');await page.click(`[data-subcategory="${sub}"]`);
+ await page.click('[data-category="personal"]');await page.click(`[data-subcategory="${sub}"]`);
  await page.$eval('#entry-details',e=>e.open=true);await page.click('#repeat-monthly');await fill(page,'recurring-name',name);await fill(page,'date',date);await page.click('#save-expense');
 }
 (async()=>{
@@ -23,7 +23,7 @@ async function setup(page,name,amount,date,sub='Cloud Storage & Software'){
    await fill(page,'recurring-name','Google One');await page.click('#save-expense');
    const data=await stored(page);assert.equal(data.recurringRules.length,1);assert.equal(data.expenses.length,1);
    const r=data.recurringRules[0],e=data.expenses[0];assert.equal(r.day,31);assert.equal(r.nextMonth,'2024-02');assert.equal(r.cents,100050);
-   assert.equal(e.recurringId,r.id);assert.equal(e.recurringName,'Google One');assert.equal(e.date,'2024-01-31');assert.equal(e.subCategory,'Cloud Storage & Software');
+   assert.equal(e.recurringId,r.id);assert.equal(e.recurringName,'Google One');assert.equal(e.date,'2024-01-31');assert.equal(e.subCategory,'Software & Cloud Services');
    assert.match(await text(page,'monthly-list'),/29 Feb/);assert.match(await text(page,'recent-list'),/Google One/);assert.match(await text(page,'recent-list'),/Monthly/);
   });
   await check('Reloading does not duplicate charges or alter the monthly cursor',async()=>{
@@ -79,7 +79,7 @@ async function setup(page,name,amount,date,sub='Cloud Storage & Software'){
    assert.equal((await stored(other)).expenses.length,10);await page.bringToFront();await page.reload({waitUntil:'load'});assert.equal((await stored(page)).expenses.length,10);await other.close();
   });
   await check('A non-leap February clamps day 31 to February 28',async()=>{
-   await setup(page,'Month-end subscription','50','2025-01-31','Digital Tools');assert.equal((await stored(page)).expenses.length,10);
+   await setup(page,'Month-end subscription','50','2025-01-31','Software & Cloud Services');assert.equal((await stored(page)).expenses.length,10);
    await at(page,'2025-01-31');assert.equal((await stored(page)).expenses.length,11);
    await at(page,'2025-02-28');const data=await stored(page),r=data.recurringRules[2],charges=data.expenses.filter(e=>e.recurringId===r.id);
    assert.deepEqual(charges.map(e=>e.date),['2025-01-31','2025-02-28']);assert.equal(r.nextMonth,'2025-03');

@@ -38,3 +38,5 @@ The 0.2.0 monthly-expense feature adds `recurringRules` within schema 1. Older t
 
 
 The 0.3.0 Settings update adds `categorySettingsVersion: 1`, removal flags, subscription markers, built-in icon overrides, and general preferences within schema 1. Older registries are validated before generic-label migration. Category removal is non-destructive: historical references stay valid and affected schedules stop. Tokens are tab-only and never part of storage or the Gist snapshot. Gist restore validates the same schema before a single local save. The future 2.0.0 SMS milestone does not authorize breaking data changes or constitute the present release.
+
+The compatible 0.4.0 update adds `taxonomyVersion: 1` and optional `directEntry` category metadata within schema 1. Prior formats remain readable, including Gist backups. Recognized old defaults migrate to the six-category structure once; original registries and classifications are retained. Ambiguous labels are never split by guessing. Customized registries and financial values remain intact, and monthly charge IDs/cursors do not change. New Gist snapshots include the taxonomy marker and retained old registry.

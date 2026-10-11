@@ -12,12 +12,12 @@ async function layout(page){return page.evaluate(()=>{
  await check('Mobile Tracks has only entry, fits both picker steps on common phones, and pins Save above navigation',async()=>{
   for(const [width,height] of [[390,740],[390,844],[393,852],[412,823],[414,896],[430,932],[360,800],[767,900]]){
    await page.setViewport({width,height});await page.click('#nav-track');
-   for(const step of ['main','sub']){
-    if(step==='sub')await page.click('[data-category="food"]');
+   for(const step of ['main','transport','food','sports','personal','community']){
+    if(step!=='main')await page.click(`[data-category="${step}"]`);
     const l=await layout(page);assert.equal(l.review,false);assert.equal(l.width,l.viewport);assert.ok(l.scrollHeight<=height,`${width}x${height} ${step} scrolls: ${JSON.stringify(l)}`);
     assert.equal(l.scroll,0);assert.ok(l.amount.top>=0);assert.ok(l.controls.every(r=>r.height>=43.99&&r.bottom<=l.actions.top),`Entry clipped: ${JSON.stringify(l)}`);
     assert.ok(l.save.bottom<=l.nav.top);assert.ok(Math.abs(l.actions.bottom-l.nav.top)<1);assert.ok(l.nav.bottom<=height);
-    if(step==='sub')await page.click('#categories-back');
+    if(step!=='main')await page.click('#categories-back');
    }
   }
   await page.setViewport({width:390,height:844});await page.screenshot({path:'/tmp/finflow-phone-dedicated-track.png'});
@@ -40,9 +40,9 @@ async function layout(page){return page.evaluate(()=>{
  await check('A phone save persists classification and details, clears inputs, and immediately readies the keypad with a brief Undo confirmation',async()=>{
   await page.setViewport({width:390,height:844});await page.click('#nav-track');
   for(const key of ['1','2','3','.','4','5'])await page.click(`[data-key="${key}"]`);
-  await page.click('[data-category="food"]');await page.click('[data-subcategory="Cafes & Dining"]');
+  await page.click('[data-category="food"]');await page.click('[data-subcategory="Cafes"]');
   await page.click('#details-summary');await fill(page,'note','Quick coffee');await page.click('#save-expense');
-  const data=await stored(page);assert.equal(data.expenses.length,1);assert.equal(data.expenses[0].cents,12345);assert.equal(data.expenses[0].mainCategory,'Food & Dining');assert.equal(data.expenses[0].subCategory,'Cafes & Dining');assert.equal(data.expenses[0].note,'Quick coffee');
+  const data=await stored(page);assert.equal(data.expenses.length,1);assert.equal(data.expenses[0].cents,12345);assert.equal(data.expenses[0].mainCategory,'Food & Dining');assert.equal(data.expenses[0].subCategory,'Cafes');assert.equal(data.expenses[0].note,'Quick coffee');
   const clean=await page.evaluate(()=>({amount:document.getElementById('amount').value,note:document.getElementById('note').value,details:document.getElementById('entry-details').open,repeat:document.getElementById('repeat-monthly').checked,selected:[...document.querySelectorAll('#categories [aria-pressed="true"]')].length,disabled:document.getElementById('save-expense').disabled,focus:document.activeElement.dataset.key,scroll:scrollY}));
   assert.deepEqual(clean,{amount:'',note:'',details:false,repeat:false,selected:0,disabled:true,focus:'1',scroll:0});assert.equal(await text(page,'toast-message'),'Expense saved');assert.equal(await page.$eval('#undo',e=>e.hidden),false);
   await page.click('[data-key="8"]');assert.equal(await page.$eval('#amount',e=>e.value),'8');

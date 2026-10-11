@@ -1,5 +1,5 @@
 const {acceptConfirmation,launch,fresh,stored,fill,add,text,check,today,assert,KEY}=require('./helpers');
-async function settings(page,id='tech',sub){await page.click('#nav-settings');await fill(page,'settings-category',id);if(sub)await fill(page,'settings-subcategory',sub);}
+async function settings(page,id='personal',sub){await page.click('#nav-settings');await fill(page,'settings-category',id);if(sub)await fill(page,'settings-subcategory',sub);}
 async function saveSub(page,name,subscription=false,icon=''){await fill(page,'subcategory-name',name);await fill(page,'subcategory-icon',icon);await page.$eval('#subcategory-subscription',(e,v)=>e.checked=v,subscription);await page.click('#subcategory-settings-form button[type="submit"]');}
 async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={data,requests:[],fail:false,beforeRead:null};window.fetch=async(url,options)=>{const m=window.gistMock;m.requests.push({url,method:options.method,body:options.body});if(m.fail)throw Error('network');if(options.method==='PATCH')Object.assign(m.data.files,JSON.parse(options.body).files);return {ok:true,status:200,json:async()=>structuredClone(m.data)};};},data);}
 (async()=>{
@@ -10,37 +10,37 @@ async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={d
    await page.setViewport({width,height});await page.click('#nav-track');await page.evaluate(()=>window.scrollTo(0,0));
    const fit=await page.evaluate(()=>{const rect=id=>document.getElementById(id).getBoundingClientRect();return {save:rect('save-expense').bottom,nav:document.querySelector('.nav').getBoundingClientRect().top,top:rect('amount').top,keys:[...document.querySelectorAll('[data-key]')].map(e=>e.getBoundingClientRect().height),overflow:document.documentElement.scrollWidth>innerWidth};});
    assert.ok(fit.save<=fit.nav,`Main step clipped at ${width}x${height}: ${JSON.stringify(fit)}`);assert.ok(fit.top>=0);assert.ok(fit.keys.every(h=>h>=44));assert.equal(fit.overflow,false);
-   for(const id of ['transport','food','sports','pet','housing','tech','lifestyle','community']){await page.click(`[data-category="${id}"]`);await page.click('[data-subcategory="Other"]');const subfit=await page.evaluate(()=>({save:document.getElementById('save-expense').getBoundingClientRect().bottom,nav:document.querySelector('.nav').getBoundingClientRect().top,scroll:scrollY}));assert.ok(subfit.save<=subfit.nav);assert.equal(subfit.scroll,0);await page.click('#categories-back');}
+   for(const id of ['transport','food','sports','personal','community']){await page.click(`[data-category="${id}"]`);await page.click('[data-subcategory="Other"]');const subfit=await page.evaluate(()=>({save:document.getElementById('save-expense').getBoundingClientRect().bottom,nav:document.querySelector('.nav').getBoundingClientRect().top,scroll:scrollY}));assert.ok(subfit.save<=subfit.nav);assert.equal(subfit.scroll,0);await page.click('#categories-back');}
   }
   await page.setViewport({width:390,height:740});await page.click('#nav-track');await page.evaluate(()=>{document.querySelector('.nav').style.paddingBottom='43px';window.scrollTo(0,0);});
   await page.waitForFunction(()=>Math.abs(document.querySelector('.entry-actions').getBoundingClientRect().bottom-document.querySelector('.nav').getBoundingClientRect().top)<1);
   const safe=await page.evaluate(()=>({save:document.getElementById('save-expense').getBoundingClientRect().bottom,nav:document.querySelector('.nav').getBoundingClientRect().top}));assert.ok(safe.save<=safe.nav,`Simulated safe area covers entry: ${JSON.stringify(safe)}`);await page.evaluate(()=>document.querySelector('.nav').style.paddingBottom='');
   await page.setViewport({width:390,height:844});await page.screenshot({path:'/tmp/finflow-phone-entry-0.3.png'});await page.setViewport({width:1440,height:1000});
  });
- await add(page,'25','tech',{subCategory:'Cloud Storage & Software'});await add(page,'15','food',{subCategory:'Cafes & Dining'});
+ await add(page,'25','personal',{subCategory:'Software & Cloud Services'});await add(page,'15','food',{subCategory:'Cafes'});
  await check('Settings is a third labeled navigation destination and category rename updates stored and displayed classifications',async()=>{
   await settings(page);assert.equal(await page.$eval('#nav-settings',e=>e.getAttribute('aria-current')),'page');assert.equal(await page.$eval('#settings-view',e=>e.hidden),false);
   await fill(page,'category-name','Technology');await fill(page,'category-icon','other');await page.click('#category-settings-form button[type="submit"]');
-  const data=await stored(page);assert.equal(data.categories.find(c=>c.id==='tech').icon,'other');assert.equal(data.expenses[0].mainCategory,'Technology');assert.equal(data.expenses[0].cents,2500);await page.click('#nav-spending');assert.match(await text(page,'breakdown-list'),/Technology/);
+  const data=await stored(page);assert.equal(data.categories.find(c=>c.id==='personal').icon,'other');assert.equal(data.expenses[0].mainCategory,'Technology');assert.equal(data.expenses[0].cents,2500);await page.click('#nav-spending');assert.match(await text(page,'breakdown-list'),/Technology/);
  });
  await check('Subcategory rename, icon, and subscription default persist and set up one named monthly rule only after saving',async()=>{
-  await settings(page,'tech','Cloud Storage & Software');await saveSub(page,'Software subscriptions',true,'tech');
+  await settings(page,'personal','Software & Cloud Services');await saveSub(page,'Software subscriptions',true,'tech');
   let data=await stored(page);assert.equal(data.expenses[0].subCategory,'Software subscriptions');assert.equal(data.recurringRules.length,0);
-  await page.click('#nav-track');await fill(page,'amount','99');await page.click('[data-category="tech"]');await page.click('[data-subcategory="Software subscriptions"]');
+  await page.click('#nav-track');await fill(page,'amount','99');await page.click('[data-category="personal"]');await page.click('[data-subcategory="Software subscriptions"]');
   assert.equal(await page.$eval('#repeat-monthly',e=>e.checked),true);assert.equal(await page.$eval('#recurring-name',e=>e.value),'Software subscriptions');await page.click('#save-expense');
   data=await stored(page);assert.equal(data.recurringRules.length,1);assert.equal(data.recurringRules[0].cents,9900);assert.equal(data.expenses.length,3);await page.reload();
-  assert.equal((await stored(page)).categories.find(c=>c.id==='tech').subscriptions[0],'Software subscriptions');
+  assert.equal((await stored(page)).categories.find(c=>c.id==='personal').subscriptions[0],'Software subscriptions');
  });
  await check('Removing a subcategory retains history and totals, pauses its schedule, and Undo restores it',async()=>{
-  await settings(page,'tech','Software subscriptions');await page.click('#remove-subcategory');await acceptConfirmation(page);let data=await stored(page);
-  assert.equal(data.expenses.length,3);assert.equal(data.recurringRules[0].active,false);await page.click('#nav-track');await page.click('[data-category="tech"]');assert.equal(await page.$$eval('[data-subcategory="Software subscriptions"]',es=>es.length),0);await page.click('#categories-back');
-  await page.click('#undo');data=await stored(page);assert.equal(data.recurringRules[0].active,true);await page.click('[data-category="tech"]');assert.equal(await page.$$eval('[data-subcategory="Software subscriptions"]',es=>es.length),1);await page.click('#categories-back');
-  await settings(page,'tech','Software subscriptions');await page.click('#remove-subcategory');await acceptConfirmation(page);await page.click('#restore-subcategory');assert.equal((await stored(page)).recurringRules[0].active,false);
+  await settings(page,'personal','Software subscriptions');await page.click('#remove-subcategory');await acceptConfirmation(page);let data=await stored(page);
+  assert.equal(data.expenses.length,3);assert.equal(data.recurringRules[0].active,false);await page.click('#nav-track');await page.click('[data-category="personal"]');assert.equal(await page.$$eval('[data-subcategory="Software subscriptions"]',es=>es.length),0);await page.click('#categories-back');
+  await page.click('#undo');data=await stored(page);assert.equal(data.recurringRules[0].active,true);await page.click('[data-category="personal"]');assert.equal(await page.$$eval('[data-subcategory="Software subscriptions"]',es=>es.length),1);await page.click('#categories-back');
+  await settings(page,'personal','Software subscriptions');await page.click('#remove-subcategory');await acceptConfirmation(page);await page.click('#restore-subcategory');assert.equal((await stored(page)).recurringRules[0].active,false);
  });
  await check('Removing and restoring a main category keeps spending accessible and monthly charges stopped',async()=>{
-  await page.click('#remove-category');await acceptConfirmation(page);let data=await stored(page);assert.equal(data.expenses.length,3);await page.click('#nav-track');assert.equal(await page.$$eval('[data-category="tech"]',es=>es.length),0);
-  await page.click('#nav-spending');assert.equal(await text(page,'spending-total'),'Rs. 139');await page.click('[data-filter="tech"]');assert.equal(await text(page,'filtered-count'),'2 expenses');await page.click('#clear-filter');
-  await settings(page);await page.click('#restore-category');data=await stored(page);assert.equal(data.categories.find(c=>c.id==='tech').removed,false);assert.equal(data.recurringRules[0].active,false);
+  await page.click('#remove-category');await acceptConfirmation(page);let data=await stored(page);assert.equal(data.expenses.length,3);await page.click('#nav-track');assert.equal(await page.$$eval('[data-category="personal"]',es=>es.length),0);
+  await page.click('#nav-spending');assert.equal(await text(page,'spending-total'),'Rs. 139');await page.click('[data-filter="personal"]');assert.equal(await text(page,'filtered-count'),'2 expenses');await page.click('#clear-filter');
+  await settings(page);await page.click('#restore-category');data=await stored(page);assert.equal(data.categories.find(c=>c.id==='personal').removed,false);assert.equal(data.recurringRules[0].active,false);
  });
  await check('Custom categories and subcategories support inert names, icons, reload, and exact analytics',async()=>{
   await settings(page);await page.click('#new-category');await fill(page,'category-name','Personal projects');await fill(page,'category-icon','work');await page.click('#category-settings-form button[type="submit"]');
@@ -97,7 +97,7 @@ async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={d
  const old=await fresh(browser),p=old.page;
  await check('Previous branded hierarchy and monthly rules migrate generically without losing values or repeated writes',async()=>{
   const fixture=await p.evaluate(()=>({schema:1,categorizationVersion:1,categories:structuredClone(PRIOR_CATEGORIES),expenses:[{id:'old-cloud',date:localDate(),cents:12345,category:'tech',item:'Cloud Storage & Software (Google One)',mainCategory:'Tech & Subscriptions',subCategory:'Cloud Storage & Software (Google One)',note:'keep note'}],recurringRules:[{id:'old-monthly',name:'Google One',cents:12345,category:'tech',mainCategory:'Tech & Subscriptions',subCategory:'Cloud Storage & Software (Google One)',note:'keep rule',day:1,startDate:'2026-01-01',nextMonth:shiftMonth(localDate().slice(0,7),1),active:true}]}));
-  await p.evaluate((key,data)=>localStorage.setItem(key,JSON.stringify(data)),KEY,fixture);await p.reload();const next=await stored(p);assert.equal(next.categorySettingsVersion,1);assert.equal(next.expenses[0].subCategory,'Cloud Storage & Software');assert.equal(next.expenses[0].item,fixture.expenses[0].item);assert.equal(next.recurringRules[0].subCategory,'Cloud Storage & Software');assert.equal(next.recurringRules[0].name,'Google One');assert.equal(next.expenses[0].cents,12345);const serialized=JSON.stringify(next);await p.reload();assert.equal(JSON.stringify(await stored(p)),serialized);
+  await p.evaluate((key,data)=>localStorage.setItem(key,JSON.stringify(data)),KEY,fixture);await p.reload();const next=await stored(p);assert.equal(next.categorySettingsVersion,1);assert.equal(next.expenses[0].subCategory,'Software & Cloud Services');assert.equal(next.expenses[0].item,fixture.expenses[0].item);assert.equal(next.recurringRules[0].subCategory,'Software & Cloud Services');assert.equal(next.recurringRules[0].name,'Google One');assert.equal(next.expenses[0].cents,12345);const serialized=JSON.stringify(next);await p.reload();assert.equal(JSON.stringify(await stored(p)),serialized);
  });
  await check('Pausing monthly posting preserves due schedules and resuming catches up once',async()=>{
   const fixture=await stored(p);fixture.settings.monthlyPosting=false;fixture.recurringRules[0].nextMonth=today().slice(0,7);await p.evaluate((key,data)=>localStorage.setItem(key,JSON.stringify(data)),KEY,fixture);await p.reload();assert.equal((await stored(p)).expenses.length,1);await p.click('#nav-settings');await p.$eval('#monthly-posting',e=>e.checked=true);await p.click('#behavior-form button[type="submit"]');assert.equal((await stored(p)).expenses.length,2);await p.reload();assert.equal((await stored(p)).expenses.length,2);

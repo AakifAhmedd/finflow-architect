@@ -9,23 +9,24 @@ npm install
 npm test
 ```
 
-This runs `node tests/regression.js`, `node tests/regression-a11y-colour.js`, `node tests/categories.js`, `node tests/monthly.js`, `node tests/settings.js`, `node tests/confirmations.js`, and `node tests/mobile-tracking.js`. All seven resolve `index.html` relative to the repository, open it using `file://`, and use isolated Chrome browser contexts. No server, network access, backend, build, or real financial data is needed.
+This runs `node tests/regression.js`, `node tests/regression-a11y-colour.js`, `node tests/categories.js`, `node tests/monthly.js`, `node tests/settings.js`, `node tests/confirmations.js`, `node tests/mobile-tracking.js`, and `node tests/taxonomy.js`. All eight resolve `index.html` relative to the repository, open it using `file://`, and use isolated Chrome browser contexts. No server, network access, backend, build, or real financial data is needed.
 
 The default Chrome path is `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. Set the `CHROME` environment variable for a different executable. Browser dates use Asia/Colombo.
 
 ## Coverage
 
 - Baseline version consistency; default categories and honest empty states.
-- The default eight main categories and all 32 generic subcategory choices, Back navigation, selection highlight, Save gating, and both classification fields in storage.
+- The default six main categories and all 31 stored classification choices, Back navigation, selection highlight, Save gating, and both classification fields in storage.
 - Large keypad, keyboard entry, decimal precision, input validation, optional notes/date, and historical expenses.
 - Save/reload persistence, integer-cent totals, category filtering, monthly navigation, editing, deletion, and undo.
+- Six-category migration: precise/ambiguous splits, Personal merging, custom registries/collisions, old removals/icons/subscription defaults, active/stopped monthly schedules, full prior metadata, Gist round-trip, idempotence, invalid input, and failed saves. Direct Other supports notes, editing, switching categories, reset, remembered-category behavior, and customized subcategories.
 - Legacy migration, migration from the flat tracker registry, retained prior classifications, deletion tombstones, idempotence, original-data preservation, and unreadable data.
 - Stored XSS protection in notes/categories; browser storage failures and conflicting writes in another tab.
 - Monthly setup, future start dates, leap/non-leap short months, missed-month catch-up, deduplication, edit/stop/undo, individual charge deletion, atomic storage recovery, inert names, older-data migration, and phone management layouts.
 - Settings navigation, category/subcategory add/rename/remove/restore, custom names/icons, subscription defaults, behavior persistence, startup view, category memory, and reduced motion.
 - Previous branded hierarchy and monthly-rule migration; malformed custom settings remain protected.
 - Mocked Gist origin validation, tab-only credentials, read-only preview, confirmation/cancel, validated restore/Undo, upload whitelisting, unrelated-file preservation, public/truncated/malformed payload rejection, changed local/remote snapshots, disconnect, and network failure. Tests make no real GitHub requests.
-- Default entry stays above navigation in both picker steps at 390 × 740/844, 393 × 852, 412 × 823, 414 × 896, 430 × 932, and 360 × 800, without scrolling and with 44 px keypad targets, plus a simulated 34 px bottom safe area at 390 × 740.
+- Default six-category entry stays above navigation in both picker steps at 390 × 740/844, 393 × 852, 412 × 823, 414 × 896, 430 × 932, and 360 × 800, without scrolling and with 44 px keypad targets, plus a simulated 34 px bottom safe area at 390 × 740.
 - Shared destructive warnings: deletion, stopping/removal, Gist disconnect/change/replacement, and monthly-posting pause. Cancel/Enter/Escape preservation, nested-dialog focus, single execution, async busy state, stored XSS, phone/desktop sizing, failed saves, and stale-tab protection.
 - Dedicated phone Tracks: no analytics/list/footer or vertical scroll at standard sizes, both category steps, sticky Save, changing safe areas, the 768 px boundary, responsive monthly-card placement, reset/brief toast/next entry, focus return, Spending review/edit, and small-screen/expanded-details scrolling.
 - Offline operation, named controls, chart text alternatives, dialog keyboard behavior, reduced motion, and touch targets.

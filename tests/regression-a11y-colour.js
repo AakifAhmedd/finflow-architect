@@ -6,10 +6,10 @@ const {launch,fresh,stored,add,text,check,today,assert,ROOT,fs}=require('./helpe
   const external=[];page.on('request',r=>{if(/^https?:/.test(r.url()))external.push(r.url());});
   await page.setOfflineMode(true);await page.reload({waitUntil:'load'});
   await check('The app works offline and requests no CDN scripts, images, fonts, or other external resources',async()=>{
-   await add(page,'1800','food',{subCategory:'Cafes & Dining'});assert.equal((await stored(page)).expenses.length,1);assert.deepEqual(external,[]);
+   await add(page,'1800','food',{subCategory:'Cafes'});assert.equal((await stored(page)).expenses.length,1);assert.deepEqual(external,[]);
   });
-  await add(page,'2500','transport',{subCategory:'Fuel & Scooter Maintenance'});await add(page,'1200','pet',{subCategory:'Cat Food & Litter'});await add(page,'10000','sports',{subCategory:'Gym Memberships'});
-  await add(page,'2800','tech',{subCategory:'Cloud Storage & Software'});await add(page,'650','food',{subCategory:'Other'});await add(page,'6500','housing',{subCategory:'Rent & Utilities'});
+  await add(page,'2500','transport',{subCategory:'Fuel'});await add(page,'1200','personal',{subCategory:'Pets'});await add(page,'10000','sports',{subCategory:'Gym'});
+  await add(page,'2800','personal',{subCategory:'Software & Cloud Services'});await add(page,'650','food',{subCategory:'Other'});await add(page,'6500','other',{subCategory:'Other'});
   const seeded=await page.evaluate(()=>{
    const key='finflow_tracker_v1',data=JSON.parse(localStorage.getItem(key)),base=data.expenses[0].date.slice(0,7);
    // Exercise daily plots with multiple dates without shipping demonstration data.
@@ -45,7 +45,7 @@ const {launch,fresh,stored,add,text,check,today,assert,ROOT,fs}=require('./helpe
   await check('Charts have meaningful month-specific text alternatives and exact category amounts',async()=>{
    assert.equal(await page.$eval('.donut',e=>e.getAttribute('role')),'img');assert.match(await page.$eval('.donut',e=>e.getAttribute('aria-label')),/Exact amounts/);
    assert.equal(await page.$eval('.daily-chart',e=>e.getAttribute('role')),'img');assert.match(await page.$eval('.daily-chart',e=>e.getAttribute('aria-label')),/Highest day/);
-   assert.equal(await page.$$eval('[data-filter]',e=>e.length),6);assert.match(await text(page,'breakdown-list'),/Rs\. 10,000/);
+   assert.equal(await page.$$eval('[data-filter]',e=>e.length),5);assert.match(await text(page,'breakdown-list'),/Rs\. 10,000/);
   });
   await check('Navigation state, dialogs, focus return, and Escape support keyboard use',async()=>{
    assert.equal(await page.$eval('#nav-spending',e=>e.getAttribute('aria-current')),'page');

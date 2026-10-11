@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f6f0">
 <meta name="description" content="FinFlow — personal expense tracking and a clearer view of your spending.">
-<meta name="application-version" content="0.3.2">
+<meta name="application-version" content="0.4.0">
 <title>FinFlow · Personal expenses</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%232c513e'/%3E%3Cpath d='M18 44V20h28M18 32h20' stroke='%23dcecbd' stroke-width='7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
@@ -63,7 +63,7 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
  body[data-view="track"] main{padding:8px 12px calc(var(--mobile-nav-height,63px) + var(--mobile-actions-height,73px) + 8px)}
  #track-view{animation:none}
  #track-view .entry-card{min-height:calc(100svh - var(--mobile-nav-height,63px) - var(--mobile-actions-height,73px) - 16px);display:flex;flex-direction:column}
- #track-view .keypad button{min-height:clamp(44px,calc((100svh - var(--mobile-nav-height,63px) - 500px)/4),60px)}
+ #track-view .keypad button{min-height:clamp(44px,calc((100svh - var(--mobile-nav-height,63px) - 512px)/4),60px)}
  #track-view .entry-details{margin-top:auto;padding-top:8px}
  #track-view .entry-actions{position:fixed;z-index:8;left:0;right:0;bottom:var(--mobile-nav-height,63px);padding:10px 12px;background:var(--bg);border-top:1px solid var(--line)}
  #track-view .save-button{margin-top:0;min-height:52px}
@@ -76,6 +76,13 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
  #track-view .keypad,#track-view .categories{gap:4px}
  #track-view .entry-details{padding-top:4px}
 }
+@media(max-width:767.98px){
+ #categories{min-height:191px;align-content:start}
+ .categories.subcategories .category-button{min-height:44px;flex-direction:row;justify-content:flex-start;text-align:left;gap:6px;padding:6px 7px;font-size:10px}
+ .categories.subcategories .category-button .icon{width:18px;height:18px}
+ .categories.subcategories .category-button small{font-size:8px}
+}
+@media(max-width:767.98px) and (max-height:780px){#categories{min-height:188px}}
 </style>
 </head>
 <body>
@@ -132,7 +139,7 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <div class="settings-stack"><section class="card settings-card" aria-labelledby="behavior-title"><h2 id="behavior-title">App behavior</h2><form id="behavior-form"><div class="field"><label for="start-view">Open FinFlow on</label><select id="start-view"><option value="track">Tracks</option><option value="spending">Spending</option><option value="settings">Settings</option></select></div><label class="monthly-toggle" for="remember-category"><input id="remember-category" type="checkbox">Remember the last main category after saving</label><label class="monthly-toggle" for="reduce-motion"><input id="reduce-motion" type="checkbox">Reduce motion</label><label class="monthly-toggle" for="monthly-posting"><input id="monthly-posting" type="checkbox">Log due monthly expenses automatically</label><p class="muted monthly-hint">When paused, schedules are kept. Turning this on catches up missed months.</p><button class="primary" type="submit">Save behavior</button></form></section>
 <section class="card settings-card" aria-labelledby="gist-title"><h2 id="gist-title">GitHub Gist</h2><p class="muted settings-intro">Optional manual sync through an existing secret Gist. A Gist is stored on GitHub and is not encrypted; anyone with its link can read it. Only connect if you want to upload your spending there.</p><form id="gist-config-form"><div class="field"><label for="gist-id">Gist ID or link</label><input id="gist-id" autocomplete="off" spellcheck="false" placeholder="A secret Gist’s ID or URL"></div><div class="field"><label for="gist-token">GitHub token — this tab only</label><input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="Token with Gists read/write permission"></div><p class="muted monthly-hint">Your token is never saved or included in backups. Reloading clears it. Sync uses finflow.json and replaces a whole snapshot; it does not merge devices.</p><div class="settings-actions"><button class="primary" type="submit">Save connection</button><button id="gist-disconnect" class="delete-button" type="button">Disconnect</button></div></form><button id="gist-preview-button" class="text-button" type="button">Preview Gist</button><p id="gist-status" class="muted settings-intro" role="status" aria-live="polite">No Gist preview loaded.</p><div id="gist-actions" class="settings-actions" hidden><button id="gist-pull" class="delete-button" type="button">Replace browser data from Gist</button><button id="gist-push" class="delete-button" type="button">Replace Gist from this browser</button></div></section></div>
 </div></section>
-<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.3.2</span></span></footer>
+<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.4.0</span></span></footer>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toast-message"></span><button id="undo" type="button" hidden>Undo</button></div>
 <dialog id="expense-dialog" class="edit-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><div><p class="eyebrow" style="margin-bottom:10px">Expense details</p><h2 id="dialog-title"></h2></div><button id="close-dialog" class="icon-button" type="button" aria-label="Close expense details"></button></div><p id="dialog-amount" class="dialog-amount num"></p><p id="dialog-note" class="dialog-note"></p><p class="muted monthly-hint" id="charge-hint" hidden>Editing or deleting this charge changes only this expense.</p><div class="dialog-actions"><button id="manage-monthly-charge" class="text-button" type="button" hidden>Manage monthly expense</button><button id="edit-expense" class="primary" type="button">Edit expense</button><button id="delete-expense" class="delete-button" type="button">Delete expense</button></div></dialog>
@@ -146,7 +153,7 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <script>
 'use strict';
 // App release version is independent of the additive local data schema.
-const APP_VERSION = '0.3.2';
+const APP_VERSION = '0.4.0';
 const STORAGE_KEY = 'finflow_tracker_v1';
 const LEGACY_KEY = 'finflow_architect_model_v2';
 const LEGACY_CATEGORIES = [
@@ -179,7 +186,15 @@ const GENERIC_LABELS = {
 const genericLabel = label => Object.hasOwn(GENERIC_LABELS,label)?GENERIC_LABELS[label]:label;
 const ICONS = ['bike','car','sport','food','pet','home','other','tech','social','work'];
 const DEFAULT_SETTINGS = {startView:'track',rememberCategory:false,reducedMotion:false,monthlyPosting:true,gistId:''};
-const DEFAULT_CATEGORIES = PRIOR_CATEGORIES.map(c=>({...c,subcategories:c.subcategories.map(genericLabel),items:c.subcategories.map(genericLabel),removed:false,removedSubs:[],subscriptions:[],subIcons:{}}));
+const EIGHT_CATEGORIES = PRIOR_CATEGORIES.map(c=>({...c,subcategories:c.subcategories.map(genericLabel),items:c.subcategories.map(genericLabel),removed:false,removedSubs:[],subscriptions:[],subIcons:{}}));
+const DEFAULT_CATEGORIES = [
+ {id:'transport',name:'Transport',icon:'bike',color:'#42634d',subcategories:['Fuel','Vehicle Maintenance','Public Transport','Parking','Ride Sharing','Other']},
+ {id:'food',name:'Food & Dining',icon:'food',color:'#d38d72',subcategories:['Food Delivery','Restaurants','Cafes','Snacks & Drinks','Groceries','Other']},
+ {id:'sports',name:'Fitness & Health',icon:'sport',color:'#d2ab68',subcategories:['Gym','Supplements','Sports Activities','Sports Gear','Medical Visits','Medicines','Other']},
+ {id:'personal',name:'Personal',icon:'social',color:'#aca5ba',subcategories:['Pets','Gifts','Personal Care','Clothing & Accessories','Software & Cloud Services','Other'],subIcons:{Pets:'pet','Software & Cloud Services':'tech'}},
+ {id:'community',name:'Professional & Community',icon:'work',color:'#648f8a',subcategories:['Work Expenses','Volunteering','Courses','Community Events','Other']},
+ {id:'other',name:'Other',icon:'other',color:'#899dad',subcategories:['Other'],directEntry:true}
+].map(c=>({...c,short:c.name,items:[...c.subcategories],removed:false,removedSubs:[],subscriptions:[],subIcons:c.subIcons||{}}));
 const $ = id => document.getElementById(id);
 const clone = data => JSON.parse(JSON.stringify(data));
 const icon = name => `<svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-${name}"/></svg>`;
@@ -191,13 +206,14 @@ function dateLabel(key){return new Date(`${key}T12:00:00`).toLocaleDateString('e
 function shiftMonth(key,delta){const [y,m]=key.split('-').map(Number);return localDate(new Date(y,m-1+delta,1)).slice(0,7);}
 function money(cents){return `Rs. ${number(cents)}`;}
 function number(cents){return (cents/100).toLocaleString('en-GB',{minimumFractionDigits:cents%100?2:0,maximumFractionDigits:2});}
-function freshState(){return {schema:1,categorizationVersion:1,categorySettingsVersion:1,categories:clone(DEFAULT_CATEGORIES),expenses:[],recurringRules:[],settings:clone(DEFAULT_SETTINGS)};}
+function freshState(){return {schema:1,categorizationVersion:1,categorySettingsVersion:1,taxonomyVersion:1,categories:clone(DEFAULT_CATEGORIES),expenses:[],recurringRules:[],settings:clone(DEFAULT_SETTINGS)};}
 let state=freshState(),formSelection={mainCategory:null,subCategory:null},editingId=null,dialogId=null;
 let month=localDate().slice(0,7),view='track',filter=null,listLimit=30,undoState=null,toastTimer;
 let storageBlocked=false,storageSnapshot=null,monthlyDialogId=null;
 function warning(message){$('storage-warning-text').textContent=message;$('storage-warning').hidden=false;}
 function validateState(data, hierarchical=false){
  if(!data||data.schema!==1||!Array.isArray(data.categories)||!Array.isArray(data.expenses)||!data.categories.length)throw Error('Unsupported saved data');
+ if(data.taxonomyVersion!==undefined&&data.taxonomyVersion!==1)throw Error('Unsupported category taxonomy');
  const ids=new Set();
  data.categories.forEach(c=>{if(!c||typeof c.id!=='string'||ids.has(c.id)||typeof c.name!=='string'||!c.name.trim()||typeof c.short!=='string'||!Array.isArray(c.items)||!c.items.every(i=>typeof i==='string')||!['bike','car','sport','food','pet','home','other','tech','social','work'].includes(c.icon)||!/^#[0-9a-f]{6}$/i.test(c.color))throw Error('Invalid category');ids.add(c.id);});
  const txIds=new Set();
@@ -230,6 +246,7 @@ function validateState(data, hierarchical=false){
   if(data.categorySettingsVersion!==1)throw Error('Unsupported category settings');
   const names=new Set();
   data.categories.forEach(c=>{
+   if(c.directEntry!==undefined&&typeof c.directEntry!=='boolean')throw Error('Invalid direct category');
    if(c.name.length>80||names.has(c.name)||typeof c.removed!=='boolean'||!Array.isArray(c.removedSubs)||!Array.isArray(c.subscriptions)||!c.removedSubs.every(sub=>c.subcategories.includes(sub))||!c.subscriptions.every(sub=>c.subcategories.includes(sub))||!c.subIcons||typeof c.subIcons!=='object'||Array.isArray(c.subIcons)||!Object.entries(c.subIcons).every(([sub,i])=>c.subcategories.includes(sub)&&ICONS.includes(i)))throw Error('Invalid category settings');
    if(!c.removed&&!c.subcategories.some(sub=>!c.removedSubs.includes(sub)))throw Error('Category has no available subcategories');
    names.add(c.name);
@@ -239,6 +256,7 @@ function validateState(data, hierarchical=false){
   if(!p||Object.keys(p).some(k=>!Object.hasOwn(DEFAULT_SETTINGS,k))||!['track','spending','settings'].includes(p.startView)||!['rememberCategory','reducedMotion','monthlyPosting'].every(k=>typeof p[k]==='boolean')||typeof p.gistId!=='string'||(p.gistId&&!/^[a-f0-9]{5,64}$/i.test(p.gistId)))throw Error('Invalid preferences');
   if(data.recurringRules?.some(r=>r.active&&data.categories.some(c=>c.id===r.category&&(c.removed||c.removedSubs.includes(r.subCategory)))))throw Error('Removed category has active schedule');
  }
+ for(const record of [...data.expenses,...(data.recurringRules||[])])if(record.classificationHistory!==undefined&&(!Array.isArray(record.classificationHistory)||!record.classificationHistory.every(h=>h&&['categoryId','mainCategory','subCategory'].every(k=>typeof h[k]==='string'))))throw Error('Invalid classification history');
  return data;
 }
 // Old labels are retained on each migrated expense; unfamiliar labels use Other.
@@ -252,13 +270,13 @@ function classifyPrevious(name,item){
   'DIY Materials':['housing',2],'Google One':['tech',0],'Gadgets':['tech',1]
  };
  const specific=Object.hasOwn(aliases,item)?aliases[item]:Object.hasOwn(aliases,name)?aliases[name]:null;
- if(specific){const c=DEFAULT_CATEGORIES.find(c=>c.id===specific[0]);return {c,sub:c.subcategories[specific[1]]};}
- const exact=DEFAULT_CATEGORIES.find(c=>c.name===name);
+ if(specific){const c=EIGHT_CATEGORIES.find(c=>c.id===specific[0]);return {c,sub:c.subcategories[specific[1]]};}
+ const exact=EIGHT_CATEGORIES.find(c=>c.name===name);
  if(exact)return {c:exact,sub:exact.subcategories.includes(item)?item:'Other'};
- const itemCategory=item&&item!=='Other'?DEFAULT_CATEGORIES.find(c=>c.subcategories.includes(item)):null;
+ const itemCategory=item&&item!=='Other'?EIGHT_CATEGORIES.find(c=>c.subcategories.includes(item)):null;
  if(itemCategory)return {c:itemCategory,sub:item};
  const groups={'Primary Transport':'transport','Secondary Auto':'transport','Health & Sports':'sports','Food & Social':'food','Pet Care':'pet','Living & Tech':'housing'};
- const c=DEFAULT_CATEGORIES.find(c=>c.id===(Object.hasOwn(groups,name)?groups[name]:'lifestyle'));
+ const c=EIGHT_CATEGORIES.find(c=>c.id===(Object.hasOwn(groups,name)?groups[name]:'lifestyle'));
  return {c,sub:'Other'};
 }
 function normalizeCategorization(data){
@@ -271,7 +289,7 @@ function normalizeCategorization(data){
   return {...e,category:c.id,mainCategory:c.name,subCategory:sub,
    previousClassification:e.previousClassification||{categoryId:e.category,mainCategory:original.name,subCategory:e.item}};
  });
- return validateState({...data,categorizationVersion:1,categorySettingsVersion:1,settings:clone(DEFAULT_SETTINGS),previousCategories:data.previousCategories||clone(categories),categories:clone(DEFAULT_CATEGORIES),expenses},true);
+ return validateState({...data,categorizationVersion:1,categorySettingsVersion:1,settings:clone(DEFAULT_SETTINGS),previousCategories:data.previousCategories||clone(categories),categories:clone(EIGHT_CATEGORIES),expenses},true);
 }
 function migrateLegacy(old){
  if(!old||!Array.isArray(old.transactions))throw Error('Invalid legacy data');
@@ -314,7 +332,68 @@ function normalizeState(data){
   next.recurringRules.forEach(r=>r.subCategory=genericLabel(r.subCategory));
   next.categorySettingsVersion=1;next.settings=clone(DEFAULT_SETTINGS);
  }
+ validateState(next,true);
+ return next.taxonomyVersion===undefined?migratePersonalTaxonomy(next):next;
+}
+// Upgrade only recognizable defaults. User-renamed/custom registries remain available as configured.
+function migratePersonalTaxonomy(next){
+ const original=clone(next.categories);
+ const recognized=original.filter(c=>{const old=EIGHT_CATEGORIES.find(d=>d.id===c.id);return old&&c.name===old.name&&c.subcategories.every(sub=>old.subcategories.includes(sub));});
+ const recognizedIds=new Set(recognized.map(c=>c.id));
+ const retained=original.filter(c=>!recognizedIds.has(c.id));
+ const ids=new Set(retained.map(c=>c.id)),names=new Set(retained.map(c=>c.name)),targets=new Map();
+ const categories=DEFAULT_CATEGORIES.map(d=>{
+  const c=clone(d);let n=1;
+  while(ids.has(c.id))c.id=`finflow-${d.id}-${n++}`;
+  n=1;while(names.has(c.name))c.name=`${d.name} (FinFlow ${n++})`;
+  c.short=c.name;ids.add(c.id);names.add(c.name);targets.set(d.id,c);
+  const old=recognized.find(old=>old.id===d.id);
+  if(old){c.icon=old.icon;c.color=old.color;c.removed=old.removed;}
+  return c;
+ });
+ const mapping={
+  transport:{'Fuel & Scooter Maintenance':['transport','Other'],'Ride-Sharing':['transport','Ride Sharing'],'Public Transport & Parking':['transport','Other'],Other:['transport','Other']},
+  food:{'Food Delivery':['food','Food Delivery'],'Cafes & Dining':['food','Other'],'Groceries & Supermarket':['food','Groceries'],Other:['food','Other']},
+  sports:{'Gym Memberships':['sports','Gym'],'Supplements (Protein/Creatine)':['sports','Supplements'],'Sports & Gear (Badminton/Swimming)':['sports','Other'],Other:['sports','Other']},
+  pet:Object.fromEntries(EIGHT_CATEGORIES.find(c=>c.id==='pet').subcategories.map(sub=>[sub,['personal','Pets']])),
+  housing:Object.fromEntries(EIGHT_CATEGORIES.find(c=>c.id==='housing').subcategories.map(sub=>[sub,['other','Other']])),
+  tech:{'Cloud Storage & Software':['personal','Software & Cloud Services'],'Digital Tools':['personal','Software & Cloud Services'],'Gadgets & Hardware':['personal','Other'],Other:['personal','Other']},
+  lifestyle:{'Entertainment & Gaming':['personal','Other'],'Outings & Gifts':['personal','Other'],'Personal Care':['personal','Personal Care'],Other:['personal','Other']},
+  community:{'Community & Volunteering':['community','Volunteering'],'Work-Related':['community','Work Expenses'],'Development & Courses':['community','Courses'],Other:['community','Other']}
+ };
+ const destination=(id,sub)=>{const [target,label]=mapping[id][sub];return {c:targets.get(target),sub:label};};
+ // Carry subscription defaults and removals only when every contributing old choice agrees.
+ for(const c of categories)for(const sub of c.subcategories){
+  const sources=recognized.flatMap(old=>old.subcategories.filter(label=>{const d=destination(old.id,label);return d.c.id===c.id&&d.sub===sub;}).map(label=>({old,label})));
+  if(sources.length&&sources.every(({old,label})=>old.removed||old.removedSubs.includes(label)))c.removedSubs.push(sub);
+  const available=sources.filter(({old,label})=>!old.removed&&!old.removedSubs.includes(label));
+  if(available.length&&available.every(({old,label})=>old.subscriptions.includes(label)))c.subscriptions.push(sub);
+  const icons=sources.map(({old,label})=>Object.hasOwn(old.subIcons,label)?old.subIcons[label]:null);
+  if(icons.length&&icons[0]&&icons.every(i=>i===icons[0]))Object.defineProperty(c.subIcons,sub,{value:icons[0],enumerable:true,writable:true,configurable:true});
+  if(!c.removed&&c.removedSubs.length===c.subcategories.length)c.removed=true;
+ }
+ const specific={'RayZR Fuel':['transport','Fuel'],'RayZR Maintenance':['transport','Vehicle Maintenance'],'RayZR Mods':['transport','Vehicle Maintenance'],'Dining Out':['food','Restaurants'],'Badminton Gear':['sports','Sports Gear'],'Court Bookings':['sports','Sports Activities'],'Swimming':['sports','Sports Activities'],'Gifts':['personal','Gifts']};
+ for(const record of [...next.expenses,...next.recurringRules]){
+  if(!recognizedIds.has(record.category))continue;
+  const old={categoryId:record.category,mainCategory:record.mainCategory,subCategory:record.subCategory};
+  let d=destination(record.category,record.subCategory);
+  const prior=record.previousClassification?.subCategory;
+  if(d.sub==='Other'&&Object.hasOwn(specific,prior)){const [id,sub]=specific[prior];if(targets.get(id).id===d.c.id)d={c:targets.get(id),sub};}
+  if(old.categoryId!==d.c.id||old.mainCategory!==d.c.name||old.subCategory!==d.sub){
+   record.previousClassification ||= old;
+   record.classificationHistory=[...(record.classificationHistory||[]),old];
+   record.category=d.c.id;record.mainCategory=d.c.name;record.subCategory=d.sub;
+  }
+  // Previously stopped rules stay stopped; active rules retain their dates and posting cursor.
+  if(record.active&&d.c.removedSubs.includes(d.sub))d.c.removedSubs=d.c.removedSubs.filter(sub=>sub!==d.sub);
+ }
+ next.previousCategoryRegistry=original;next.categories=[...categories,...retained];next.taxonomyVersion=1;
  return validateState(next,true);
+}
+function directCategory(c){return !!c?.directEntry&&c.subcategories.filter(sub=>!c.removedSubs.includes(sub)).length===1;}
+function selectSubcategory(c,sub){
+ formSelection.subCategory=sub;
+ if(!editingId){$('repeat-monthly').checked=c.subscriptions.includes(sub);if($('repeat-monthly').checked){$('entry-details').open=true;$('recurring-name').value=sub;}updateRepeatUI();}
 }
 function monthlyDate(key,day){
  const [year,month]=key.split('-').map(Number);
@@ -437,11 +516,12 @@ function categoryTotals(expenses){return state.categories.map(c=>({c,cents:total
 function renderCategories(){
  let c=category(formSelection.mainCategory);
  if(c&&(c.removed&&!editingId||!c.subcategories.includes(formSelection.subCategory)&&formSelection.subCategory!==null)){formSelection={mainCategory:null,subCategory:null};c=null;}
- $('categories-back').hidden=!c;$('category-label').textContent=c?c.name:'What was it for?';
- $('category-step-label').textContent=c?'Step 2 of 2':'Step 1 of 2';$('category-step-label').classList.toggle('sr-only',!!c);
- $('categories').className=c?'categories subcategories':'categories main-categories';
- $('categories').innerHTML=c?c.subcategories.filter(sub=>!c.removedSubs.includes(sub)||editingId&&formSelection.subCategory===sub).map(sub=>`<button type="button" class="category-button" data-subcategory="${escapeHtml(sub)}" aria-pressed="${formSelection.subCategory===sub}">${icon(Object.hasOwn(c.subIcons,sub)?c.subIcons[sub]:c.icon)}<span>${escapeHtml(sub)}</span>${c.subscriptions.includes(sub)?'<small>Subscription</small>':''}</button>`).join(''):
- state.categories.filter(c=>!c.removed).map(c=>`<button type="button" class="category-button" data-category="${escapeHtml(c.id)}">${icon(c.icon)}<span>${escapeHtml(c.name)}</span></button>`).join('');
+ const direct=directCategory(c);
+ $('categories-back').hidden=!c||direct;$('category-label').textContent=c&&!direct?c.name:'What was it for?';
+ $('category-step-label').textContent=direct?'Ready to save':c?'Step 2 of 2':'Step 1 of 2';$('category-step-label').classList.toggle('sr-only',!!c&&!direct);
+ $('categories').className=c&&!direct?'categories subcategories':'categories main-categories';
+ $('categories').innerHTML=c&&!direct?c.subcategories.filter(sub=>!c.removedSubs.includes(sub)||editingId&&formSelection.subCategory===sub).map(sub=>`<button type="button" class="category-button" data-subcategory="${escapeHtml(sub)}" aria-pressed="${formSelection.subCategory===sub}">${icon(Object.hasOwn(c.subIcons,sub)?c.subIcons[sub]:c.icon)}<span>${escapeHtml(sub)}</span>${c.subscriptions.includes(sub)?'<small>Subscription</small>':''}</button>`).join(''):
+ state.categories.filter(c=>!c.removed).map(c=>`<button type="button" class="category-button" data-category="${escapeHtml(c.id)}" aria-pressed="${formSelection.mainCategory===c.name}">${icon(c.icon)}<span>${escapeHtml(c.name)}</span></button>`).join('');
  $('save-expense').disabled=!c||!c.subcategories.includes(formSelection.subCategory)||!editingId&&(c.removed||c.removedSubs.includes(formSelection.subCategory));
 }
 function previousLabel(e){
@@ -503,7 +583,7 @@ function switchView(next,focus=true){
 }
 function changeMonth(delta){const next=shiftMonth(month,delta);if(next<'1900-01'||next>localDate().slice(0,7))return;month=next;filter=null;listLimit=30;render();}
 function feedback(message,focus){$('form-feedback').textContent=message;$('form-feedback').hidden=false;if(focus)$(focus).focus();}
-function resetForm(){const remembered=state.settings.rememberCategory?category(formSelection.mainCategory):null;editingId=null;$('amount').value='';$('note').value='';$('date').value=localDate();formSelection={mainCategory:remembered&&!remembered.removed?remembered.name:null,subCategory:null};$('entry-title').textContent='Add an expense';$('save-label').textContent='Save expense';$('entry-hint').textContent='Amount → category → save';$('cancel-edit').hidden=true;$('form-feedback').hidden=true;$('entry-details').open=false;$('repeat-monthly').checked=false;$('recurring-name').value='';updateRepeatUI();renderCategories();}
+function resetForm(){const remembered=state.settings.rememberCategory?category(formSelection.mainCategory):null;editingId=null;$('amount').value='';$('note').value='';$('date').value=localDate();formSelection={mainCategory:remembered&&!remembered.removed&&!directCategory(remembered)?remembered.name:null,subCategory:null};$('entry-title').textContent='Add an expense';$('save-label').textContent='Save expense';$('entry-hint').textContent='Amount → category → save';$('cancel-edit').hidden=true;$('form-feedback').hidden=true;$('entry-details').open=false;$('repeat-monthly').checked=false;$('recurring-name').value='';updateRepeatUI();renderCategories();}
 function updateDateSummary(){const date=$('date').value;$('details-summary').textContent=`${date===localDate()?'Today':validDate(date)?dateLabel(date):'Choose date'} · ${$('repeat-monthly').checked&&!editingId?'Repeats monthly':'Add details or repeat monthly'}`;}
 function saveExpense(event){
  event.preventDefault();const raw=$('amount').value,repeat=$('repeat-monthly').checked&&!editingId;
@@ -535,9 +615,9 @@ $('repeat-monthly').addEventListener('change',()=>{$('form-feedback').hidden=tru
 $('expense-form').addEventListener('click',event=>{
  const key=event.target.closest('[data-key]');if(key){let value=$('amount').value,k=key.dataset.key;if(k==='backspace')value=value.slice(0,-1);else if(k==='.'&&!value.includes('.'))value=(value||'0')+'.';else if(/^\d$/.test(k)){if(value==='0')value='';if(value.includes('.')&&value.split('.')[1].length>=2)return;if(!value.includes('.')&&value.length>=9)return;value+=k;}$('amount').value=value;$('form-feedback').hidden=true;return;}
  const c=event.target.closest('[data-category]');
- if(c){$('repeat-monthly').checked=false;updateRepeatUI();formSelection={mainCategory:category(c.dataset.category).name,subCategory:null};$('form-feedback').hidden=true;renderCategories();$('categories').querySelector('button')?.focus({preventScroll:true});return;}
+ if(c){const selected=category(c.dataset.category);$('repeat-monthly').checked=false;updateRepeatUI();formSelection={mainCategory:selected.name,subCategory:null};if(directCategory(selected))selectSubcategory(selected,selected.subcategories.find(sub=>!selected.removedSubs.includes(sub)));$('form-feedback').hidden=true;renderCategories();(directCategory(selected)?$('categories').querySelector(`[data-category="${CSS.escape(selected.id)}"]`):$('categories').querySelector('button'))?.focus({preventScroll:true});return;}
  const sub=event.target.closest('[data-subcategory]');
- if(sub){formSelection.subCategory=sub.dataset.subcategory;if(!editingId){const c=category(formSelection.mainCategory);$('repeat-monthly').checked=c.subscriptions.includes(formSelection.subCategory);if($('repeat-monthly').checked){$('entry-details').open=true;$('recurring-name').value=formSelection.subCategory;}updateRepeatUI();}$('form-feedback').hidden=true;renderCategories();[...$('categories').children].find(b=>b.dataset.subcategory===formSelection.subCategory)?.focus({preventScroll:true});}
+ if(sub){selectSubcategory(category(formSelection.mainCategory),sub.dataset.subcategory);$('form-feedback').hidden=true;renderCategories();[...$('categories').children].find(b=>b.dataset.subcategory===formSelection.subCategory)?.focus({preventScroll:true});}
 
 });
 $('categories-back').innerHTML=icon('left')+'Back';
@@ -684,8 +764,9 @@ $('gist-disconnect').addEventListener('click',()=>{
 });
 function financialSnapshot(data){
  // Explicit whitelist: connection details and credentials never enter the remote file.
- const out={schema:data.schema,categorizationVersion:data.categorizationVersion,categorySettingsVersion:data.categorySettingsVersion,categories:clone(data.categories),expenses:clone(data.expenses),recurringRules:clone(data.recurringRules),settings:{startView:data.settings.startView,rememberCategory:data.settings.rememberCategory,reducedMotion:data.settings.reducedMotion,monthlyPosting:data.settings.monthlyPosting,gistId:''}};
+ const out={schema:data.schema,categorizationVersion:data.categorizationVersion,categorySettingsVersion:data.categorySettingsVersion,taxonomyVersion:data.taxonomyVersion,categories:clone(data.categories),expenses:clone(data.expenses),recurringRules:clone(data.recurringRules),settings:{startView:data.settings.startView,rememberCategory:data.settings.rememberCategory,reducedMotion:data.settings.reducedMotion,monthlyPosting:data.settings.monthlyPosting,gistId:''}};
  if(data.previousCategories)out.previousCategories=clone(data.previousCategories);
+ if(data.previousCategoryRegistry)out.previousCategoryRegistry=clone(data.previousCategoryRegistry);
  return out;
 }
 async function gistRequest(id,method='GET',body){

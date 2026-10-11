@@ -1,10 +1,10 @@
 const {launch,fresh,stored,fill,add,text,check,today,assert,acceptConfirmation,KEY,URL}=require('./helpers');
-async function openSettings(page,id='tech',sub='Cloud Storage & Software'){await page.click('#nav-settings');await fill(page,'settings-category',id);await fill(page,'settings-subcategory',sub);}
+async function openSettings(page,id='personal',sub='Software & Cloud Services'){await page.click('#nav-settings');await fill(page,'settings-category',id);await fill(page,'settings-subcategory',sub);}
 async function warning(page,label){assert.equal(await page.$eval('#confirm-dialog',e=>e.open),true);assert.equal(await page.$eval('#confirm-dialog',e=>e.getAttribute('role')),'alertdialog');assert.equal(await page.evaluate(()=>document.activeElement.id),'confirm-cancel');assert.equal(await text(page,'confirm-action'),label);assert.equal(await page.$eval('#confirm-dialog',e=>e.getAttribute('aria-describedby')),'confirm-copy');}
 (async()=>{
  const browser=await launch();try{
  const {page,context,errors}=await fresh(browser);
- await add(page,'25','food');await fill(page,'amount','100');await page.click('[data-category="tech"]');await page.click('[data-subcategory="Cloud Storage & Software"]');await page.$eval('#entry-details',e=>e.open=true);await page.click('#repeat-monthly');await fill(page,'recurring-name','Cloud plan');await page.click('#save-expense');
+ await add(page,'25','food');await fill(page,'amount','100');await page.click('[data-category="personal"]');await page.click('[data-subcategory="Software & Cloud Services"]');await page.$eval('#entry-details',e=>e.open=true);await page.click('#repeat-monthly');await fill(page,'recurring-name','Cloud plan');await page.click('#save-expense');
  await check('Expense deletion waits for a named warning; Cancel, Enter on Cancel, and Escape preserve data and parent focus',async()=>{
   await page.click('#recent-list [data-expense]');const before=await stored(page);await page.click('#delete-expense');await warning(page,'Delete expense');assert.deepEqual(await stored(page),before);assert.match(await text(page,'confirm-copy'),/Only this charge/);
   await page.keyboard.press('Enter');assert.equal(await page.$eval('#confirm-dialog',e=>e.open),false);assert.equal(await page.$eval('#expense-dialog',e=>e.open),true);assert.equal(await page.evaluate(()=>document.activeElement.id),'delete-expense');assert.deepEqual(await stored(page),before);
