@@ -9,7 +9,7 @@ async function at(page,date){
  await page.evaluate(value=>localStorage.setItem('finflow_test_clock',value),date+'T12:00:00+05:30');
  await page.reload({waitUntil:'load'});
 }
-async function setup(page,name,amount,date,sub='Cloud Storage & Software (Google One)'){
+async function setup(page,name,amount,date,sub='Cloud Storage & Software'){
  await fill(page,'amount',amount);if(await page.$eval('#categories-back',e=>!e.hidden))await page.click('#categories-back');
  await page.click('[data-category="tech"]');await page.click(`[data-subcategory="${sub}"]`);
  await page.$eval('#entry-details',e=>e.open=true);await page.click('#repeat-monthly');await fill(page,'recurring-name',name);await fill(page,'date',date);await page.click('#save-expense');
@@ -23,7 +23,7 @@ async function setup(page,name,amount,date,sub='Cloud Storage & Software (Google
    await fill(page,'recurring-name','Google One');await page.click('#save-expense');
    const data=await stored(page);assert.equal(data.recurringRules.length,1);assert.equal(data.expenses.length,1);
    const r=data.recurringRules[0],e=data.expenses[0];assert.equal(r.day,31);assert.equal(r.nextMonth,'2024-02');assert.equal(r.cents,100050);
-   assert.equal(e.recurringId,r.id);assert.equal(e.recurringName,'Google One');assert.equal(e.date,'2024-01-31');assert.equal(e.subCategory,'Cloud Storage & Software (Google One)');
+   assert.equal(e.recurringId,r.id);assert.equal(e.recurringName,'Google One');assert.equal(e.date,'2024-01-31');assert.equal(e.subCategory,'Cloud Storage & Software');
    assert.match(await text(page,'monthly-list'),/29 Feb/);assert.match(await text(page,'recent-list'),/Google One/);assert.match(await text(page,'recent-list'),/Monthly/);
   });
   await check('Reloading does not duplicate charges or alter the monthly cursor',async()=>{

@@ -1,13 +1,13 @@
 const {launch,fresh,stored,fill,add,text,check,today,assert,KEY}=require('./helpers');
 const choices=[
- ['transport','Transport & Vehicles',['Fuel & Scooter Maintenance (RayZR)','Ride-Sharing (PickMe/Uber)','Public Transport & Parking','Other']],
- ['food','Food & Dining',['Food Delivery (Uber Eats)','Cafes & Dining (Cafe 4 U)','Groceries & Supermarket','Other']],
+ ['transport','Transport & Vehicles',['Fuel & Scooter Maintenance','Ride-Sharing','Public Transport & Parking','Other']],
+ ['food','Food & Dining',['Food Delivery','Cafes & Dining','Groceries & Supermarket','Other']],
  ['sports','Fitness & Health',['Gym Memberships','Supplements (Protein/Creatine)','Sports & Gear (Badminton/Swimming)','Other']],
  ['pet','Pets',['Cat Food & Litter','Vet & Healthcare (Flea/Tick)','Toys & Accessories','Other']],
  ['housing','Housing & Living',['Rent & Utilities','Home Furniture & Decor','Household Supplies','Other']],
- ['tech','Tech & Subscriptions',['Cloud Storage & Software (Google One)','Gadgets & Hardware','Digital Tools','Other']],
- ['lifestyle','Lifestyle & Social',['Entertainment & Gaming (Valorant)','Outings & Gifts','Personal Care','Other']],
- ['community','Professional & Community',['Rotaract & Volunteering','Work-Related','Development & Courses','Other']]
+ ['tech','Tech & Subscriptions',['Cloud Storage & Software','Gadgets & Hardware','Digital Tools','Other']],
+ ['lifestyle','Lifestyle & Social',['Entertainment & Gaming','Outings & Gifts','Personal Care','Other']],
+ ['community','Professional & Community',['Community & Volunteering','Work-Related','Development & Courses','Other']]
 ];
 (async()=>{
  const browser=await launch();
@@ -18,7 +18,7 @@ const choices=[
    assert.equal(await page.$eval('#save-expense',e=>e.disabled),true);
   });
   await page.setViewport({width:390,height:844});await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);await page.screenshot({path:'/tmp/finflow-phone-categories.png'});
-  await fill(page,'amount','1250');await page.click('[data-category="transport"]');await page.click('[data-subcategory="Fuel & Scooter Maintenance (RayZR)"]');
+  await fill(page,'amount','1250');await page.click('[data-category="transport"]');await page.click('[data-subcategory="Fuel & Scooter Maintenance"]');
   await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);await page.screenshot({path:'/tmp/finflow-phone-subcategories.png'});
   await page.click('#categories-back');await page.setViewport({width:1440,height:1000});
   await check('All categories expose exactly their four specified subcategories and save both selected labels',async()=>{
@@ -64,11 +64,11 @@ const choices=[
    await page.click('[data-filter="community"]');await page.click('#spending-list [data-expense]');await page.click('#edit-expense');
    assert.equal(await text(page,'category-label'),'Professional & Community');
    assert.deepEqual(await page.$$eval('[data-subcategory][aria-pressed="true"]',es=>es.map(e=>e.textContent)),['Other']);
-   await page.click('#categories-back');await page.click('[data-category="food"]');await page.click('[data-subcategory="Food Delivery (Uber Eats)"]');await page.click('#save-expense');
+   await page.click('#categories-back');await page.click('[data-category="food"]');await page.click('[data-subcategory="Food Delivery"]');await page.click('#save-expense');
    const data=await stored(page);assert.equal(data.expenses.length,32);assert.equal(data.expenses.at(-1).mainCategory,'Food & Dining');
-   assert.equal(data.expenses.at(-1).subCategory,'Food Delivery (Uber Eats)');
+   assert.equal(data.expenses.at(-1).subCategory,'Food Delivery');
    await page.click('#nav-spending');await page.click('[data-filter="food"]');assert.equal(await text(page,'filtered-count'),'5 expenses');
-   assert.ok((await text(page,'subcategory-breakdown')).includes('Food Delivery (Uber Eats)Rs. 20.50'));
+   assert.ok((await text(page,'subcategory-breakdown')).includes('Food DeliveryRs. 20.50'));
   });
   assert.deepEqual(errors,[]);await context.close();
   const old=await fresh(browser),p=old.page;
@@ -86,7 +86,7 @@ const choices=[
    await p.evaluate((key,data)=>localStorage.setItem(key,JSON.stringify(data)),KEY,flat);await p.reload({waitUntil:'load'});
    const data=await stored(p);assert.equal(data.categories.length,8);assert.equal(data.expenses.length,4);assert.deepEqual(data.previousCategories,flat.categories);
    data.expenses.forEach((e,i)=>{for(const field of ['id','item','cents','date','note'])assert.equal(e[field],flat.expenses[i][field]);assert.equal(e.previousClassification.categoryId,flat.expenses[i].category);});
-   assert.equal(data.expenses[0].subCategory,'Fuel & Scooter Maintenance (RayZR)');assert.equal(data.expenses[1].subCategory,'Ride-Sharing (PickMe/Uber)');
+   assert.equal(data.expenses[0].subCategory,'Fuel & Scooter Maintenance');assert.equal(data.expenses[1].subCategory,'Ride-Sharing');
    assert.equal(data.expenses[2].mainCategory,'Tech & Subscriptions');assert.equal(data.expenses[3].mainCategory,'Lifestyle & Social');assert.equal(data.expenses[3].subCategory,'Other');
    assert.equal(await text(p,'track-total'),'4,500.50');assert.ok((await text(p,'recent-list')).includes(flat.expenses[3].item));
    assert.equal(await p.$$eval('img',es=>es.length),0);assert.equal(await p.evaluate(()=>window.__xss),undefined);

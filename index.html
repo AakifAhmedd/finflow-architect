@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f6f0">
 <meta name="description" content="FinFlow — personal expense tracking and a clearer view of your spending.">
-<meta name="application-version" content="0.2.0">
+<meta name="application-version" content="0.3.0">
 <title>FinFlow · Personal expenses</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%232c513e'/%3E%3Cpath d='M18 44V20h28M18 32h20' stroke='%23dcecbd' stroke-width='7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
@@ -45,15 +45,23 @@ main{max-width:1350px;margin:auto;padding:38px 40px 24px}.page-heading{display:f
 .monthly-row strong{font-size:13px;font-weight:600;overflow-wrap:anywhere}.monthly-row p{font-size:11px;color:var(--muted);line-height:1.7;margin-top:5px;overflow-wrap:anywhere}
 .recurring-badge{display:inline-block;font-size:9px;line-height:1.4;padding:3px 5px;background:var(--green-light);color:var(--green);border-radius:5px;margin-left:7px;vertical-align:middle;font-weight:500}
 .monthly-dialog{max-height:calc(100dvh - 32px);overflow:auto}
+
+/* Compact default entry keeps both category steps and Save above phone navigation. */
+@media(max-width:760px){.header-inner{min-height:48px}.brand-mark{width:29px;height:29px}.brand-name{font-size:20px}main{padding-top:8px}.entry-card{padding:14px}.card-heading h2{font-size:17px}.entry-hint{font-size:10px}.amount-area{padding:5px 0 7px}#amount{height:44px;font-size:38px}.keypad{gap:5px;margin-bottom:8px}.keypad button{min-height:clamp(44px,5.6svh,48px)}.category-heading{margin-bottom:5px;min-height:36px}.category-heading h3{font-size:14px}.category-back{min-height:36px}.categories{gap:5px}.categories.main-categories .category-button{min-height:44px;padding:6px 7px;gap:6px;font-size:10px}.categories.main-categories .icon{width:18px;height:18px}.categories.subcategories .category-button{min-height:52px;padding:7px;font-size:11px}.entry-details{margin-top:6px}.entry-details summary{min-height:36px;font-size:11px;display:list-item;align-content:center}.save-button{min-height:46px;margin-top:7px}.nav{gap:3px;padding-left:10px;padding-right:10px}.nav button{gap:6px;font-size:12px;padding:11px 6px;min-height:44px}.settings-actions .primary{flex:1}.settings-grid{grid-template-columns:1fr!important}.settings-card{padding:20px!important}}
+@media(max-width:760px) and (max-height:780px){.header-inner{min-height:42px}.entry-card{padding:12px}.amount-area{padding:3px 0 5px}#amount{height:36px;font-size:34px}.keypad{margin-bottom:4px}.category-heading{min-height:32px;margin-bottom:3px}.entry-details{margin-top:4px}.entry-details summary{min-height:32px}}
+@media(max-width:360px){.entry-card{padding:13px}.card-heading .step-label{font-size:10px}}
+.settings-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}.settings-stack{display:grid;gap:24px}.settings-card{padding:26px;min-width:0}.settings-intro{margin:12px 0 18px;overflow-wrap:anywhere}.settings-card .field{margin:14px 0}.settings-card input,.settings-card select{max-width:100%;min-width:0}.settings-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}.settings-actions .delete-button{padding:10px 14px;min-height:44px}.icon-preview{height:28px;margin-bottom:8px;color:var(--green)}.categories.subcategories .category-button small{font-size:9px;color:var(--muted)}
+body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+@media(prefers-reduced-motion:no-preference){#settings-view{animation:appear .2s ease-out}}
 </style>
 </head>
 <body>
 <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg"><defs>
 <symbol id="i-track" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10m8 10V4m8 16v-7"/></symbol><symbol id="i-left" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></symbol><symbol id="i-right" viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol><symbol id="i-backspace" viewBox="0 0 24 24"><path d="M9 5h11v14H9l-7-7Z"/><path d="m12 9 5 6m0-6-5 6"/></symbol><symbol id="i-car" viewBox="0 0 24 24"><path d="m5 9 2-5h10l2 5M3 10h18v9H3Zm3 4h2m8 0h2M6 19v2m12-2v2"/></symbol><symbol id="i-bike" viewBox="0 0 24 24"><circle cx="5" cy="17" r="4"/><circle cx="19" cy="17" r="4"/><path d="m5 17 6-9 4 9H5m6-9h5l3 9M8 5h4"/></symbol><symbol id="i-sport" viewBox="0 0 24 24"><path d="m3 9 6-6m6 18 6-6M4 4l16 16M2 8l6-6m8 20 6-6"/></symbol><symbol id="i-food" viewBox="0 0 24 24"><path d="M5 3v6m3-6v6M2 3v6a3 3 0 0 0 6 0M5 12v9M18 3c-4 4-4 9 0 9V3Zm0 9v9"/></symbol><symbol id="i-pet" viewBox="0 0 24 24"><path d="M8 13c-1 3-5 4-3 7 2 3 5-1 7-1s5 4 7 1c2-3-2-4-3-7-2-3-6-3-8 0Z"/><ellipse cx="5" cy="8" rx="2" ry="3"/><ellipse cx="10" cy="5" rx="2" ry="3"/><ellipse cx="15" cy="5" rx="2" ry="3"/><ellipse cx="20" cy="8" rx="2" ry="3"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-8h6v8"/></symbol><symbol id="i-edit" viewBox="0 0 24 24"><path d="m4 16 12-12 4 4L8 20H4Zm10-10 4 4"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4m-4 5v2"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 11h18"/></symbol><symbol id="i-other" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 12h8m-4-4v8"/></symbol>
-<symbol id="i-tech" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol><symbol id="i-social" viewBox="0 0 24 24"><path d="M3 10h18v11H3Zm9 0v11M2 6h20v4H2Z"/><path d="M12 6C8-2 2 2 6 5l6 1c4-8 10-4 6-1Z"/></symbol><symbol id="i-work" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V3h8v4M3 12l9 4 9-4m-9 0v4"/></symbol></defs></svg>
+<symbol id="i-tech" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol><symbol id="i-social" viewBox="0 0 24 24"><path d="M3 10h18v11H3Zm9 0v11M2 6h20v4H2Z"/><path d="M12 6C8-2 2 2 6 5l6 1c4-8 10-4 6-1Z"/></symbol><symbol id="i-work" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V3h8v4M3 12l9 4 9-4m-9 0v4"/></symbol><symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--bg)"/><circle cx="15" cy="17" r="3" fill="var(--bg)"/></symbol></defs></svg>
 <header class="header"><div class="header-inner">
 <div class="brand"><div class="brand-mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 20V4h14M6 12h10"/></svg></div><span class="brand-name">finflow<span class="brand-dot">.</span></span></div>
-<nav class="nav" aria-label="Main navigation"><button id="nav-track" aria-current="page" type="button"><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-track"/></svg>Track</button><button id="nav-spending" type="button"><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-chart"/></svg>Spending</button></nav>
+<nav class="nav" aria-label="Main navigation"><button id="nav-track" aria-current="page" type="button"><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-track"/></svg>Tracks</button><button id="nav-spending" type="button"><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-chart"/></svg>Spending</button><button id="nav-settings" type="button"><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-settings"/></svg>Settings</button></nav>
 <div class="local-label"><span class="local-dot"></span><span class="local-copy">PERSONAL & LOCAL</span><span>· LKR</span></div>
 </div></header>
 <main>
@@ -87,7 +95,20 @@ main{max-width:1350px;margin:auto;padding:38px 40px 24px}.page-heading{display:f
 </div>
 <section class="card expenses-card spending-expenses"><div class="expense-heading"><div class="filter-title"><h2 id="spending-list-title">All expenses</h2><button id="clear-filter" class="clear-filter" type="button" hidden>Clear filter ×</button></div><span class="muted" id="filtered-count"></span></div><div class="expense-list" id="spending-list"></div><button id="load-more" class="text-button more-button" type="button" hidden>Show more expenses</button></section>
 </section>
-<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.2.0</span></span></footer>
+<section id="settings-view" aria-labelledby="settings-title" hidden>
+<div class="page-heading"><div><p class="eyebrow">Make it yours</p><h1 id="settings-title">Settings</h1><p class="muted">Your categories, your routine, your data.</p></div></div>
+<div class="settings-grid">
+<section class="card settings-card" aria-labelledby="settings-categories-title"><h2 id="settings-categories-title">Categories &amp; subscriptions</h2><p class="muted settings-intro">Remove choices from the picker without losing past spending. Removing a choice stops its monthly schedules.</p>
+<div class="field"><label for="settings-category">Main category</label><select id="settings-category"></select></div>
+<form id="category-settings-form"><div class="field"><label for="category-name">Category name</label><input id="category-name" maxlength="80" required></div><div class="field"><label for="category-icon">Category icon</label><select id="category-icon"></select></div><div id="category-icon-preview" class="icon-preview" aria-hidden="true"></div><div class="settings-actions"><button class="primary" type="submit">Save category</button><button id="new-category" class="text-button" type="button">Add category</button><button id="remove-category" class="delete-button" type="button">Remove category</button><button id="restore-category" class="text-button" type="button" hidden>Restore category</button></div></form>
+<div class="divider" style="margin:22px 0"></div>
+<div class="field"><label for="settings-subcategory">Subcategory</label><select id="settings-subcategory"></select></div>
+<form id="subcategory-settings-form"><div class="field"><label for="subcategory-name">Subcategory name</label><input id="subcategory-name" maxlength="80" required></div><div class="field"><label for="subcategory-icon">Subcategory icon</label><select id="subcategory-icon"></select></div><div id="subcategory-icon-preview" class="icon-preview" aria-hidden="true"></div><label class="monthly-toggle" for="subcategory-subscription"><input id="subcategory-subscription" type="checkbox">Recurring subscription</label><p class="muted monthly-hint">This choice starts with Repeat monthly enabled. Set the amount and first date once. Existing expenses and schedules stay as they are.</p><div class="settings-actions"><button class="primary" type="submit">Save subcategory</button><button id="new-subcategory" class="text-button" type="button">Add subcategory</button><button id="remove-subcategory" class="delete-button" type="button">Remove subcategory</button><button id="restore-subcategory" class="text-button" type="button" hidden>Restore subcategory</button></div></form><p id="category-settings-feedback" class="form-feedback" role="alert" hidden></p>
+</section>
+<div class="settings-stack"><section class="card settings-card" aria-labelledby="behavior-title"><h2 id="behavior-title">App behavior</h2><form id="behavior-form"><div class="field"><label for="start-view">Open FinFlow on</label><select id="start-view"><option value="track">Tracks</option><option value="spending">Spending</option><option value="settings">Settings</option></select></div><label class="monthly-toggle" for="remember-category"><input id="remember-category" type="checkbox">Remember the last main category after saving</label><label class="monthly-toggle" for="reduce-motion"><input id="reduce-motion" type="checkbox">Reduce motion</label><label class="monthly-toggle" for="monthly-posting"><input id="monthly-posting" type="checkbox">Log due monthly expenses automatically</label><p class="muted monthly-hint">When paused, schedules are kept. Turning this on catches up missed months.</p><button class="primary" type="submit">Save behavior</button></form></section>
+<section class="card settings-card" aria-labelledby="gist-title"><h2 id="gist-title">GitHub Gist</h2><p class="muted settings-intro">Optional manual sync through an existing secret Gist. A Gist is stored on GitHub and is not encrypted; anyone with its link can read it. Only connect if you want to upload your spending there.</p><form id="gist-config-form"><div class="field"><label for="gist-id">Gist ID or link</label><input id="gist-id" autocomplete="off" spellcheck="false" placeholder="A secret Gist’s ID or URL"></div><div class="field"><label for="gist-token">GitHub token — this tab only</label><input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="Token with Gists read/write permission"></div><p class="muted monthly-hint">Your token is never saved or included in backups. Reloading clears it. Sync uses finflow.json and replaces a whole snapshot; it does not merge devices.</p><div class="settings-actions"><button class="primary" type="submit">Save connection</button><button id="gist-disconnect" class="text-button" type="button">Disconnect</button></div></form><button id="gist-preview-button" class="text-button" type="button">Preview Gist</button><p id="gist-status" class="muted settings-intro" role="status" aria-live="polite">No Gist preview loaded.</p><div id="gist-actions" class="settings-actions" hidden><button id="gist-pull" class="text-button" type="button">Replace browser data from Gist</button><button id="gist-push" class="text-button" type="button">Replace Gist from this browser</button></div></section></div>
+</div></section>
+<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.3.0</span></span></footer>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toast-message"></span><button id="undo" type="button" hidden>Undo</button></div>
 <dialog id="expense-dialog" class="edit-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><div><p class="eyebrow" style="margin-bottom:10px">Expense details</p><h2 id="dialog-title"></h2></div><button id="close-dialog" class="icon-button" type="button" aria-label="Close expense details"></button></div><p id="dialog-amount" class="dialog-amount num"></p><p id="dialog-note" class="dialog-note"></p><p class="muted monthly-hint" id="charge-hint" hidden>Editing or deleting this charge changes only this expense.</p><div class="dialog-actions"><button id="manage-monthly-charge" class="text-button" type="button" hidden>Manage monthly expense</button><button id="edit-expense" class="primary" type="button">Edit expense</button><button id="delete-expense" class="delete-button" type="button">Delete expense</button></div></dialog>
@@ -97,10 +118,11 @@ main{max-width:1350px;margin:auto;padding:38px 40px 24px}.page-heading{display:f
 <div class="details-fields"><div class="field"><label for="monthly-name">Expense name</label><input id="monthly-name" type="text" maxlength="80" required></div><div class="field"><label for="monthly-amount">Amount in LKR</label><input id="monthly-amount" type="text" inputmode="decimal" maxlength="12" required></div><div class="field"><label for="monthly-day">Day of the month</label><input id="monthly-day" type="number" min="1" max="31" step="1" required></div><div class="field"><label for="monthly-category">Main category</label><select id="monthly-category"></select></div><div class="field"><label for="monthly-subcategory">Subcategory</label><select id="monthly-subcategory"></select></div><div class="field"><label for="monthly-note">Note (optional)</label><input id="monthly-note" type="text" maxlength="240"></div></div>
 <p id="monthly-feedback" class="form-feedback" role="alert" hidden></p><div class="dialog-actions" style="margin-top:20px"><button class="primary" type="submit">Save monthly changes</button><button id="stop-monthly" class="delete-button" type="button">Stop monthly expense</button></div>
 </form></dialog>
+<dialog id="gist-confirm-dialog" class="edit-dialog" aria-labelledby="gist-confirm-title"><h2 id="gist-confirm-title"></h2><p id="gist-confirm-copy" class="muted settings-intro"></p><div class="dialog-actions"><button id="gist-confirm" class="primary" type="button">Confirm replacement</button><button id="gist-cancel" class="text-button" type="button">Cancel</button></div></dialog>
 <script>
 'use strict';
 // App release version is independent of the additive local data schema.
-const APP_VERSION = '0.2.0';
+const APP_VERSION = '0.3.0';
 const STORAGE_KEY = 'finflow_tracker_v1';
 const LEGACY_KEY = 'finflow_architect_model_v2';
 const LEGACY_CATEGORIES = [
@@ -111,7 +133,7 @@ const LEGACY_CATEGORIES = [
  {id:'pet',name:'Pet Care',short:'Pet Care',icon:'pet',color:'#899dad',items:['Cat Food','Spot-on Treatments','Tracker Subscriptions']},
  {id:'living',name:'Living & Tech',short:'Living & Tech',icon:'home',color:'#aca5ba',items:['DIY Materials','Google One','Gadgets']}
 ];
-const DEFAULT_CATEGORIES = [
+const PRIOR_CATEGORIES = [
  {id:'transport',name:'Transport & Vehicles',icon:'bike',color:'#42634d',subcategories:['Fuel & Scooter Maintenance (RayZR)','Ride-Sharing (PickMe/Uber)','Public Transport & Parking','Other']},
  {id:'food',name:'Food & Dining',icon:'food',color:'#d38d72',subcategories:['Food Delivery (Uber Eats)','Cafes & Dining (Cafe 4 U)','Groceries & Supermarket','Other']},
  {id:'sports',name:'Fitness & Health',icon:'sport',color:'#d2ab68',subcategories:['Gym Memberships','Supplements (Protein/Creatine)','Sports & Gear (Badminton/Swimming)','Other']},
@@ -121,6 +143,19 @@ const DEFAULT_CATEGORIES = [
  {id:'lifestyle',name:'Lifestyle & Social',icon:'social',color:'#ae8162',subcategories:['Entertainment & Gaming (Valorant)','Outings & Gifts','Personal Care','Other']},
  {id:'community',name:'Professional & Community',icon:'work',color:'#648f8a',subcategories:['Rotaract & Volunteering','Work-Related','Development & Courses','Other']}
 ].map(c=>({...c,short:c.name,items:[...c.subcategories]}));
+const GENERIC_LABELS = {
+ 'Fuel & Scooter Maintenance (RayZR)':'Fuel & Scooter Maintenance',
+ 'Ride-Sharing (PickMe/Uber)':'Ride-Sharing',
+ 'Food Delivery (Uber Eats)':'Food Delivery',
+ 'Cafes & Dining (Cafe 4 U)':'Cafes & Dining',
+ 'Cloud Storage & Software (Google One)':'Cloud Storage & Software',
+ 'Entertainment & Gaming (Valorant)':'Entertainment & Gaming',
+ 'Rotaract & Volunteering':'Community & Volunteering'
+};
+const genericLabel = label => Object.hasOwn(GENERIC_LABELS,label)?GENERIC_LABELS[label]:label;
+const ICONS = ['bike','car','sport','food','pet','home','other','tech','social','work'];
+const DEFAULT_SETTINGS = {startView:'track',rememberCategory:false,reducedMotion:false,monthlyPosting:true,gistId:''};
+const DEFAULT_CATEGORIES = PRIOR_CATEGORIES.map(c=>({...c,subcategories:c.subcategories.map(genericLabel),items:c.subcategories.map(genericLabel),removed:false,removedSubs:[],subscriptions:[],subIcons:{}}));
 const $ = id => document.getElementById(id);
 const clone = data => JSON.parse(JSON.stringify(data));
 const icon = name => `<svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-${name}"/></svg>`;
@@ -132,7 +167,7 @@ function dateLabel(key){return new Date(`${key}T12:00:00`).toLocaleDateString('e
 function shiftMonth(key,delta){const [y,m]=key.split('-').map(Number);return localDate(new Date(y,m-1+delta,1)).slice(0,7);}
 function money(cents){return `Rs. ${number(cents)}`;}
 function number(cents){return (cents/100).toLocaleString('en-GB',{minimumFractionDigits:cents%100?2:0,maximumFractionDigits:2});}
-function freshState(){return {schema:1,categorizationVersion:1,categories:clone(DEFAULT_CATEGORIES),expenses:[],recurringRules:[]};}
+function freshState(){return {schema:1,categorizationVersion:1,categorySettingsVersion:1,categories:clone(DEFAULT_CATEGORIES),expenses:[],recurringRules:[],settings:clone(DEFAULT_SETTINGS)};}
 let state=freshState(),formSelection={mainCategory:null,subCategory:null},editingId=null,dialogId=null;
 let month=localDate().slice(0,7),view='track',filter=null,listLimit=30,undoState=null,toastTimer;
 let storageBlocked=false,storageSnapshot=null,monthlyDialogId=null;
@@ -140,29 +175,45 @@ function warning(message){$('storage-warning-text').textContent=message;$('stora
 function validateState(data, hierarchical=false){
  if(!data||data.schema!==1||!Array.isArray(data.categories)||!Array.isArray(data.expenses)||!data.categories.length)throw Error('Unsupported saved data');
  const ids=new Set();
- data.categories.forEach(c=>{if(!c||typeof c.id!=='string'||ids.has(c.id)||typeof c.name!=='string'||!c.name||typeof c.short!=='string'||!Array.isArray(c.items)||!c.items.every(i=>typeof i==='string')||!['bike','car','sport','food','pet','home','other','tech','social','work'].includes(c.icon)||!/^#[0-9a-f]{6}$/i.test(c.color))throw Error('Invalid category');ids.add(c.id);});
+ data.categories.forEach(c=>{if(!c||typeof c.id!=='string'||ids.has(c.id)||typeof c.name!=='string'||!c.name.trim()||typeof c.short!=='string'||!Array.isArray(c.items)||!c.items.every(i=>typeof i==='string')||!['bike','car','sport','food','pet','home','other','tech','social','work'].includes(c.icon)||!/^#[0-9a-f]{6}$/i.test(c.color))throw Error('Invalid category');ids.add(c.id);});
  const txIds=new Set();
  data.expenses.forEach(e=>{if(!e||typeof e.id!=='string'||txIds.has(e.id)||!ids.has(e.category)||!Number.isSafeInteger(e.cents)||e.cents<=0||!validDate(e.date)||typeof e.item!=='string'||typeof e.note!=='string')throw Error('Invalid expense');txIds.add(e.id);});
  if(data.recurringRules!==undefined){
   if(!Array.isArray(data.recurringRules))throw Error('Invalid monthly expenses');
   const ruleIds=new Set();
   data.recurringRules.forEach(r=>{
-   const c=data.categories.find(c=>c.id===r.category);
+   const c=r&&data.categories.find(c=>c.id===r.category);
    if(!r||typeof r.id!=='string'||ruleIds.has(r.id)||typeof r.name!=='string'||!r.name.trim()||!Number.isSafeInteger(r.cents)||r.cents<=0||!c||r.mainCategory!==c.name||!c.subcategories?.includes(r.subCategory)||typeof r.note!=='string'||!Number.isInteger(r.day)||r.day<1||r.day>31||!validDate(r.startDate)||!validDate(r.nextMonth+'-01')||r.nextMonth<r.startDate.slice(0,7)||typeof r.active!=='boolean')throw Error('Invalid monthly expense');
    ruleIds.add(r.id);
   });
   data.expenses.forEach(e=>{if(e.recurringId!==undefined&&(!ruleIds.has(e.recurringId)||typeof e.recurringName!=='string'))throw Error('Invalid monthly charge');});
  }
  if(hierarchical){
-  if(data.categorizationVersion!==1||data.categories.length!==8)throw Error('Invalid category registry');
-  DEFAULT_CATEGORIES.forEach(expected=>{
+  if(data.categorizationVersion!==1||(!data.categorySettingsVersion&&data.categories.length!==8))throw Error('Invalid category registry');
+  if(!data.categorySettingsVersion)PRIOR_CATEGORIES.forEach(expected=>{
    const c=data.categories.find(c=>c.id===expected.id);
    if(!c||c.name!==expected.name||JSON.stringify(c.subcategories)!==JSON.stringify(expected.subcategories))throw Error('Invalid main category');
+  });
+  data.categories.forEach(c=>{
+   if(!Array.isArray(c.subcategories)||!c.subcategories.length||!c.subcategories.every(sub=>typeof sub==='string'&&sub.trim()&&sub.length<=80)||new Set(c.subcategories).size!==c.subcategories.length)throw Error('Invalid subcategories');
   });
   data.expenses.forEach(e=>{
    const c=data.categories.find(c=>c.id===e.category);
    if(e.mainCategory!==c.name||!c.subcategories.includes(e.subCategory))throw Error('Invalid expense classification');
   });
+ }
+ if(data.categorySettingsVersion!==undefined){
+  if(data.categorySettingsVersion!==1)throw Error('Unsupported category settings');
+  const names=new Set();
+  data.categories.forEach(c=>{
+   if(c.name.length>80||names.has(c.name)||typeof c.removed!=='boolean'||!Array.isArray(c.removedSubs)||!Array.isArray(c.subscriptions)||!c.removedSubs.every(sub=>c.subcategories.includes(sub))||!c.subscriptions.every(sub=>c.subcategories.includes(sub))||!c.subIcons||typeof c.subIcons!=='object'||Array.isArray(c.subIcons)||!Object.entries(c.subIcons).every(([sub,i])=>c.subcategories.includes(sub)&&ICONS.includes(i)))throw Error('Invalid category settings');
+   if(!c.removed&&!c.subcategories.some(sub=>!c.removedSubs.includes(sub)))throw Error('Category has no available subcategories');
+   names.add(c.name);
+  });
+  if(!data.categories.some(c=>!c.removed))throw Error('No available categories');
+  const p=data.settings;
+  if(!p||Object.keys(p).some(k=>!Object.hasOwn(DEFAULT_SETTINGS,k))||!['track','spending','settings'].includes(p.startView)||!['rememberCategory','reducedMotion','monthlyPosting'].every(k=>typeof p[k]==='boolean')||typeof p.gistId!=='string'||(p.gistId&&!/^[a-f0-9]{5,64}$/i.test(p.gistId)))throw Error('Invalid preferences');
+  if(data.recurringRules?.some(r=>r.active&&data.categories.some(c=>c.id===r.category&&(c.removed||c.removedSubs.includes(r.subCategory)))))throw Error('Removed category has active schedule');
  }
  return data;
 }
@@ -196,7 +247,7 @@ function normalizeCategorization(data){
   return {...e,category:c.id,mainCategory:c.name,subCategory:sub,
    previousClassification:e.previousClassification||{categoryId:e.category,mainCategory:original.name,subCategory:e.item}};
  });
- return validateState({...data,categorizationVersion:1,previousCategories:data.previousCategories||clone(categories),categories:clone(DEFAULT_CATEGORIES),expenses},true);
+ return validateState({...data,categorizationVersion:1,categorySettingsVersion:1,settings:clone(DEFAULT_SETTINGS),previousCategories:data.previousCategories||clone(categories),categories:clone(DEFAULT_CATEGORIES),expenses},true);
 }
 function migrateLegacy(old){
  if(!old||!Array.isArray(old.transactions))throw Error('Invalid legacy data');
@@ -225,8 +276,21 @@ function migrateLegacy(old){
  return validateState(migrated);
 }
 function normalizeState(data){
- const normalized=normalizeCategorization(data);
- return normalized.recurringRules===undefined?{...normalized,recurringRules:[]}:normalized;
+ const next=normalizeCategorization(data);
+ if(next.recurringRules===undefined)next.recurringRules=[];
+ if(!next.categorySettingsVersion){
+  next.categories.forEach(c=>{
+   c.subcategories=c.subcategories.map(genericLabel);c.items=[...c.subcategories];
+   Object.assign(c,{removed:false,removedSubs:[],subscriptions:[],subIcons:{}});
+  });
+  next.expenses.forEach(e=>{
+   const sub=genericLabel(e.subCategory);
+   if(sub!==e.subCategory){e.previousClassification ||= {categoryId:e.category,mainCategory:e.mainCategory,subCategory:e.subCategory};e.subCategory=sub;}
+  });
+  next.recurringRules.forEach(r=>r.subCategory=genericLabel(r.subCategory));
+  next.categorySettingsVersion=1;next.settings=clone(DEFAULT_SETTINGS);
+ }
+ return validateState(next,true);
 }
 function monthlyDate(key,day){
  const [year,month]=key.split('-').map(Number);
@@ -236,6 +300,7 @@ function monthlyDate(key,day){
 // One deterministic charge per schedule/month; a persisted cursor also honors deletions.
 function addDueMonthly(next,today=localDate()){
  let count=0,changed=false;
+ if(!next.settings.monthlyPosting)return {count,changed};
  const ids=new Set(next.expenses.map(e=>e.id));
  next.recurringRules.filter(r=>r.active).forEach(r=>{
   while(monthlyDate(r.nextMonth,r.day)<=today){
@@ -250,13 +315,13 @@ function addDueMonthly(next,today=localDate()){
  return {count,changed};
 }
 function processMonthly(){
- if(storageBlocked)return;
+ if(storageBlocked||!state.settings.monthlyPosting)return;
  const next=clone(state),due=addDueMonthly(next);
  if(due.changed)commit(next,`${due.count} monthly expense${due.count===1?'':'s'} added`,false,due.count===0);
 }
 function renderMonthly(){
  const active=state.recurringRules.filter(r=>r.active);
- $('monthly-count').textContent=`${active.length} active`;
+ $('monthly-count').textContent=`${active.length} active${state.settings.monthlyPosting?'':' · logging paused'}`;
  $('monthly-list').innerHTML=active.length?active.map(r=>`<div class="monthly-row"><div><strong>${escapeHtml(r.name)}</strong><p>${money(r.cents)} · Next: ${dateLabel(monthlyDate(r.nextMonth,r.day))} ${r.nextMonth.slice(0,4)}<br>${escapeHtml(r.mainCategory)} · ${escapeHtml(r.subCategory)}</p></div><button class="icon-button" type="button" data-monthly="${escapeHtml(r.id)}" aria-label="${escapeHtml('Manage '+r.name+' monthly expense')}">${icon('edit')}</button></div>`).join(''):'<p class="muted">No monthly expenses set up yet.</p>';
 }
 function updateRepeatUI(){
@@ -269,13 +334,13 @@ function updateRepeatUI(){
 }
 function updateMonthlySubcategories(value){
  const c=category($('monthly-category').value);
- $('monthly-subcategory').innerHTML=c.subcategories.map(sub=>`<option value="${escapeHtml(sub)}">${escapeHtml(sub)}</option>`).join('');
+ $('monthly-subcategory').innerHTML=c.subcategories.filter(sub=>!c.removedSubs.includes(sub)).map(sub=>`<option value="${escapeHtml(sub)}">${escapeHtml(sub)}</option>`).join('');
  if(c.subcategories.includes(value))$('monthly-subcategory').value=value;
 }
 function showMonthly(id){
  const r=state.recurringRules.find(r=>r.id===id&&r.active);if(!r)return;monthlyDialogId=id;
  $('monthly-name').value=r.name;$('monthly-amount').value=String(r.cents/100);$('monthly-day').value=r.day;$('monthly-note').value=r.note;
- $('monthly-category').innerHTML=state.categories.map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join('');
+ $('monthly-category').innerHTML=state.categories.filter(c=>!c.removed).map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join('');
  $('monthly-category').value=r.category;updateMonthlySubcategories(r.subCategory);$('monthly-feedback').hidden=true;$('monthly-dialog').showModal();
 }
 function saveMonthlyChanges(event){
@@ -320,13 +385,14 @@ function sorted(expenses){return expenses.slice().reverse().sort((a,b)=>b.date.l
 function total(expenses){return expenses.reduce((s,e)=>s+e.cents,0);}
 function categoryTotals(expenses){return state.categories.map(c=>({c,cents:total(expenses.filter(e=>e.category===c.id))})).filter(x=>x.cents>0).sort((a,b)=>b.cents-a.cents);}
 function renderCategories(){
- const c=category(formSelection.mainCategory);
+ let c=category(formSelection.mainCategory);
+ if(c&&(c.removed&&!editingId||!c.subcategories.includes(formSelection.subCategory)&&formSelection.subCategory!==null)){formSelection={mainCategory:null,subCategory:null};c=null;}
  $('categories-back').hidden=!c;$('category-label').textContent=c?c.name:'What was it for?';
  $('category-step-label').textContent=c?'Step 2 of 2':'Step 1 of 2';$('category-step-label').classList.toggle('sr-only',!!c);
  $('categories').className=c?'categories subcategories':'categories main-categories';
- $('categories').innerHTML=c?c.subcategories.map(sub=>`<button type="button" class="category-button" data-subcategory="${escapeHtml(sub)}" aria-pressed="${formSelection.subCategory===sub}">${escapeHtml(sub)}</button>`).join(''):
- state.categories.map(c=>`<button type="button" class="category-button" data-category="${escapeHtml(c.id)}">${icon(c.icon)}<span>${escapeHtml(c.name)}</span></button>`).join('');
- $('save-expense').disabled=!c||!c.subcategories.includes(formSelection.subCategory);
+ $('categories').innerHTML=c?c.subcategories.filter(sub=>!c.removedSubs.includes(sub)||editingId&&formSelection.subCategory===sub).map(sub=>`<button type="button" class="category-button" data-subcategory="${escapeHtml(sub)}" aria-pressed="${formSelection.subCategory===sub}">${icon(Object.hasOwn(c.subIcons,sub)?c.subIcons[sub]:c.icon)}<span>${escapeHtml(sub)}</span>${c.subscriptions.includes(sub)?'<small>Subscription</small>':''}</button>`).join(''):
+ state.categories.filter(c=>!c.removed).map(c=>`<button type="button" class="category-button" data-category="${escapeHtml(c.id)}">${icon(c.icon)}<span>${escapeHtml(c.name)}</span></button>`).join('');
+ $('save-expense').disabled=!c||!c.subcategories.includes(formSelection.subCategory)||!editingId&&(c.removed||c.removedSubs.includes(formSelection.subCategory));
 }
 function previousLabel(e){
  const old=e.previousClassification;
@@ -335,7 +401,7 @@ function previousLabel(e){
 function renderExpenses(id,expenses,limit){
  const list=$(id);
  if(!expenses.length){list.innerHTML=`<div class="empty"><div class="empty-icon">${icon('track')}</div><h3>${filter&&id==='spending-list'?'No expenses in this category':'A fresh page for your expenses'}</h3><p>${id==='recent-list'?'Use the keypad to add your first expense. It will appear here.':'There are no logged expenses for this month yet.'}</p></div>`;return;}
- list.innerHTML=sorted(expenses).slice(0,limit).map(e=>{const c=category(e.category);return `<div class="expense-row"><div class="expense-icon">${icon(c.icon)}</div><div><p class="expense-name">${escapeHtml(e.recurringName||e.subCategory)}${e.recurringId?'<span class="recurring-badge">Monthly</span>':''}</p><p class="expense-meta">${dateLabel(e.date)} · ${e.recurringName?escapeHtml(e.subCategory)+' · ':''}${escapeHtml(e.mainCategory)}${previousLabel(e)?' · '+escapeHtml(previousLabel(e)):''}${e.note?' · '+escapeHtml(e.note):''}</p></div><span class="expense-amount num">${money(e.cents)}</span><button class="icon-button" data-expense="${escapeHtml(e.id)}" type="button" aria-label="${escapeHtml('View '+(e.recurringName||e.mainCategory)+', '+e.subCategory+' expense, '+money(e.cents))}">${icon('edit')}</button></div>`;}).join('');
+ list.innerHTML=sorted(expenses).slice(0,limit).map(e=>{const c=category(e.category);return `<div class="expense-row"><div class="expense-icon">${icon(Object.hasOwn(c.subIcons,e.subCategory)?c.subIcons[e.subCategory]:c.icon)}</div><div><p class="expense-name">${escapeHtml(e.recurringName||e.subCategory)}${e.recurringId?'<span class="recurring-badge">Monthly</span>':''}</p><p class="expense-meta">${dateLabel(e.date)} · ${e.recurringName?escapeHtml(e.subCategory)+' · ':''}${escapeHtml(e.mainCategory)}${previousLabel(e)?' · '+escapeHtml(previousLabel(e)):''}${e.note?' · '+escapeHtml(e.note):''}</p></div><span class="expense-amount num">${money(e.cents)}</span><button class="icon-button" data-expense="${escapeHtml(e.id)}" type="button" aria-label="${escapeHtml('View '+(e.recurringName||e.mainCategory)+', '+e.subCategory+' expense, '+money(e.cents))}">${icon('edit')}</button></div>`;}).join('');
 }
 function renderTracker(){
  const expenses=monthExpenses(),sum=total(expenses),top=categoryTotals(expenses)[0],todayExpenses=state.expenses.filter(e=>e.date===localDate());
@@ -377,19 +443,23 @@ function renderSpending(){
  renderExpenses('spending-list',filtered,listLimit);$('load-more').hidden=filtered.length<=listLimit;
 }
 function render(){
- renderCategories();renderTracker();renderSpending();renderMonthly();
+ renderCategories();renderTracker();renderSpending();renderMonthly();renderSettings();applyBehavior();
  ['track','spending'].forEach(prefix=>{$(`${prefix}-next`).disabled=month>=localDate().slice(0,7);$(`${prefix}-prev`).disabled=month<='1900-01';});
 }
-function switchView(next,focus=true){view=next;$('track-view').hidden=next!=='track';$('spending-view').hidden=next!=='spending';$('nav-track').setAttribute('aria-current',next==='track'?'page':'false');$('nav-spending').setAttribute('aria-current',next==='spending'?'page':'false');render();window.scrollTo({top:0,behavior:'instant'});if(focus){const heading=$(next==='track'?'track-title':'spending-title');heading.tabIndex=-1;heading.focus({preventScroll:true});}}
+function switchView(next,focus=true){
+ view=next;['track','spending','settings'].forEach(v=>{$(v+'-view').hidden=v!==next;$('nav-'+v).setAttribute('aria-current',v===next?'page':'false');});
+ render();window.scrollTo({top:0,behavior:'instant'});
+ if(focus){const heading=$(next==='track'?'track-title':next==='spending'?'spending-title':'settings-title');heading.tabIndex=-1;heading.focus({preventScroll:true});}
+}
 function changeMonth(delta){const next=shiftMonth(month,delta);if(next<'1900-01'||next>localDate().slice(0,7))return;month=next;filter=null;listLimit=30;render();}
 function feedback(message,focus){$('form-feedback').textContent=message;$('form-feedback').hidden=false;if(focus)$(focus).focus();}
-function resetForm(){editingId=null;$('amount').value='';$('note').value='';$('date').value=localDate();formSelection={mainCategory:null,subCategory:null};$('entry-title').textContent='Add an expense';$('save-label').textContent='Save expense';$('entry-hint').textContent='Amount → category → detail';$('cancel-edit').hidden=true;$('form-feedback').hidden=true;$('entry-details').open=false;$('repeat-monthly').checked=false;$('recurring-name').value='';updateRepeatUI();renderCategories();}
+function resetForm(){const remembered=state.settings.rememberCategory?category(formSelection.mainCategory):null;editingId=null;$('amount').value='';$('note').value='';$('date').value=localDate();formSelection={mainCategory:remembered&&!remembered.removed?remembered.name:null,subCategory:null};$('entry-title').textContent='Add an expense';$('save-label').textContent='Save expense';$('entry-hint').textContent='Amount → category → detail';$('cancel-edit').hidden=true;$('form-feedback').hidden=true;$('entry-details').open=false;$('repeat-monthly').checked=false;$('recurring-name').value='';updateRepeatUI();renderCategories();}
 function updateDateSummary(){const date=$('date').value;$('details-summary').textContent=`${date===localDate()?'Today':validDate(date)?dateLabel(date):'Choose date'} · ${$('repeat-monthly').checked&&!editingId?'Repeats monthly':'Add details or repeat monthly'}`;}
 function saveExpense(event){
  event.preventDefault();const raw=$('amount').value,repeat=$('repeat-monthly').checked&&!editingId;
  if(!/^\d{1,9}(\.\d{1,2})?$/.test(raw)||Number(raw)<=0){feedback('Enter an amount greater than zero, with up to two decimal places.','amount');return;}
  const c=category(formSelection.mainCategory);
- if(!c||!c.subcategories.includes(formSelection.subCategory)){feedback('Choose a main category and a subcategory first.');$('categories').querySelector('button')?.focus();return;}
+ if(!c||!c.subcategories.includes(formSelection.subCategory)||!editingId&&(c.removed||c.removedSubs.includes(formSelection.subCategory))){feedback('Choose a main category and a subcategory first.');$('categories').querySelector('button')?.focus();return;}
  const date=$('date').value;
  if(!validDate(date)||(!repeat&&date>localDate())){$('entry-details').open=true;feedback(repeat?'Choose a valid first charge date.':'Choose a valid date, today or earlier.','date');return;}
  const name=$('recurring-name').value.trim();
@@ -414,13 +484,14 @@ $('repeat-monthly').addEventListener('change',()=>{$('form-feedback').hidden=tru
 $('expense-form').addEventListener('click',event=>{
  const key=event.target.closest('[data-key]');if(key){let value=$('amount').value,k=key.dataset.key;if(k==='backspace')value=value.slice(0,-1);else if(k==='.'&&!value.includes('.'))value=(value||'0')+'.';else if(/^\d$/.test(k)){if(value==='0')value='';if(value.includes('.')&&value.split('.')[1].length>=2)return;if(!value.includes('.')&&value.length>=9)return;value+=k;}$('amount').value=value;$('form-feedback').hidden=true;return;}
  const c=event.target.closest('[data-category]');
- if(c){formSelection={mainCategory:category(c.dataset.category).name,subCategory:null};$('form-feedback').hidden=true;renderCategories();$('categories').querySelector('button')?.focus({preventScroll:true});return;}
+ if(c){$('repeat-monthly').checked=false;updateRepeatUI();formSelection={mainCategory:category(c.dataset.category).name,subCategory:null};$('form-feedback').hidden=true;renderCategories();$('categories').querySelector('button')?.focus({preventScroll:true});return;}
  const sub=event.target.closest('[data-subcategory]');
- if(sub){formSelection.subCategory=sub.dataset.subcategory;$('form-feedback').hidden=true;renderCategories();[...$('categories').children].find(b=>b.dataset.subcategory===formSelection.subCategory)?.focus({preventScroll:true});}
+ if(sub){formSelection.subCategory=sub.dataset.subcategory;if(!editingId){const c=category(formSelection.mainCategory);$('repeat-monthly').checked=c.subscriptions.includes(formSelection.subCategory);if($('repeat-monthly').checked){$('entry-details').open=true;$('recurring-name').value=formSelection.subCategory;}updateRepeatUI();}$('form-feedback').hidden=true;renderCategories();[...$('categories').children].find(b=>b.dataset.subcategory===formSelection.subCategory)?.focus({preventScroll:true});}
 
 });
 $('categories-back').innerHTML=icon('left')+'Back';
 $('categories-back').addEventListener('click',()=>{const previous=category(formSelection.mainCategory);formSelection={mainCategory:null,subCategory:null};$('form-feedback').hidden=true;renderCategories();$('categories').querySelector(`[data-category="${CSS.escape(previous.id)}"]`)?.focus({preventScroll:true});});
+$('nav-settings').addEventListener('click',()=>switchView('settings'));
 $('nav-track').addEventListener('click',()=>switchView('track'));
 ['nav-spending','see-spending','all-expenses'].forEach(id=>$(id).addEventListener('click',()=>{filter=null;listLimit=30;switchView('spending');}));
 ['track','spending'].forEach(prefix=>{['prev','next'].forEach(direction=>{const b=$(`${prefix}-${direction}`);b.innerHTML=icon(direction==='prev'?'left':'right');b.addEventListener('click',()=>changeMonth(direction==='prev'?-1:1));});});
@@ -451,8 +522,171 @@ $('close-monthly').innerHTML=icon('close');$('close-monthly').addEventListener('
 $('monthly-category').addEventListener('change',()=>updateMonthlySubcategories());
 $('monthly-form').addEventListener('submit',saveMonthlyChanges);
 $('stop-monthly').addEventListener('click',()=>{const next=clone(state),r=next.recurringRules.find(r=>r.id===monthlyDialogId);if(!r)return;r.active=false;if(commit(next,'Monthly expense stopped; past charges kept'))$('monthly-dialog').close();});
+// Settings are part of the validated financial snapshot. Credentials are tab-only.
+let settingsCategoryId=null,settingsSubName=null,gistToken='',gistPreview=null,gistBusy=false,gistAction=null;
+function applyBehavior(){document.body.classList.toggle('reduce-motion',state.settings.reducedMotion);}
+function settingsCategory(){return state.categories.find(c=>c.id===settingsCategoryId);}
+function settingsError(message){$('category-settings-feedback').textContent=message;$('category-settings-feedback').hidden=false;}
+function iconOptions(inherit=false){return (inherit?'<option value="">Use main category icon</option>':'')+ICONS.map(i=>`<option value="${i}">${i==='other'?'General':i[0].toUpperCase()+i.slice(1)}</option>`).join('');}
+function renderSettings(){
+ if(!state.categories.some(c=>c.id===settingsCategoryId))settingsCategoryId=state.categories.find(c=>!c.removed).id;
+ const c=settingsCategory();
+ $('settings-category').innerHTML=state.categories.map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}${c.removed?' (removed)':''}</option>`).join('');
+ $('settings-category').value=c.id;$('category-name').value=c.name;
+ $('category-icon').innerHTML=iconOptions();$('category-icon').value=c.icon;$('category-icon-preview').innerHTML=icon(c.icon);
+ $('remove-category').hidden=c.removed;$('restore-category').hidden=!c.removed;
+ renderSubSettings();
+ $('start-view').value=state.settings.startView;$('remember-category').checked=state.settings.rememberCategory;$('reduce-motion').checked=state.settings.reducedMotion;$('monthly-posting').checked=state.settings.monthlyPosting;
+ $('gist-id').value=state.settings.gistId;
+}
+function renderSubSettings(){
+ const c=settingsCategory();if(!c)return;
+ if(!c.subcategories.includes(settingsSubName))settingsSubName=c.subcategories.find(sub=>!c.removedSubs.includes(sub))||c.subcategories[0];
+ $('settings-subcategory').innerHTML=c.subcategories.map(sub=>`<option value="${escapeHtml(sub)}">${escapeHtml(sub)}${c.removedSubs.includes(sub)?' (removed)':''}</option>`).join('');
+ $('settings-subcategory').value=settingsSubName;$('subcategory-name').value=settingsSubName;
+ $('subcategory-icon').innerHTML=iconOptions(true);$('subcategory-icon').value=Object.hasOwn(c.subIcons,settingsSubName)?c.subIcons[settingsSubName]:'';
+ $('subcategory-icon-preview').innerHTML=icon($('subcategory-icon').value||c.icon);
+ $('subcategory-subscription').checked=c.subscriptions.includes(settingsSubName);
+ $('remove-subcategory').hidden=c.removedSubs.includes(settingsSubName);$('restore-subcategory').hidden=!c.removedSubs.includes(settingsSubName);
+}
+function finishCategoryChange(next,message){
+ if(commit(next,message)){
+  $('category-settings-feedback').hidden=true;
+  if(editingId&&!state.expenses.some(e=>e.id===editingId))resetForm();
+ }
+}
+$('settings-category').addEventListener('change',()=>{settingsCategoryId=$('settings-category').value;settingsSubName=null;renderSettings();$('category-settings-feedback').hidden=true;});
+$('settings-subcategory').addEventListener('change',()=>{settingsSubName=$('settings-subcategory').value;renderSubSettings();$('category-settings-feedback').hidden=true;});
+$('category-icon').addEventListener('change',()=>$('category-icon-preview').innerHTML=icon($('category-icon').value));
+$('subcategory-icon').addEventListener('change',()=>$('subcategory-icon-preview').innerHTML=icon($('subcategory-icon').value||settingsCategory()?.icon||'other'));
+$('new-category').addEventListener('click',()=>{settingsCategoryId=null;$('category-name').value='';$('category-icon').value='other';$('category-name').focus();$('remove-category').hidden=true;$('restore-category').hidden=true;$('category-settings-feedback').hidden=true;});
+$('category-settings-form').addEventListener('submit',event=>{
+ event.preventDefault();const name=$('category-name').value.trim(),i=$('category-icon').value;
+ if(!name||name.length>80||state.categories.some(c=>c.name===name&&c.id!==settingsCategoryId)||!ICONS.includes(i)){settingsError('Use a unique category name of up to 80 characters and an icon.');return;}
+ const next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);
+ if(c){const old=c.name;c.name=name;c.short=name;c.icon=i;next.expenses.filter(e=>e.category===c.id).forEach(e=>e.mainCategory=name);next.recurringRules.filter(r=>r.category===c.id).forEach(r=>r.mainCategory=name);if(formSelection.mainCategory===old)formSelection.mainCategory=name;}
+ else{const id=crypto.randomUUID();next.categories.push({id,name,short:name,icon:i,color:'#648f8a',items:['Other'],subcategories:['Other'],removed:false,removedSubs:[],subscriptions:[],subIcons:{}});settingsCategoryId=id;settingsSubName='Other';}
+ finishCategoryChange(next,'Category saved');
+});
+$('new-subcategory').addEventListener('click',()=>{if(!settingsCategory()){settingsError('Save the main category first.');return;}settingsSubName=null;$('subcategory-name').value='';$('subcategory-icon').value='';$('subcategory-subscription').checked=false;$('remove-subcategory').hidden=true;$('restore-subcategory').hidden=true;$('subcategory-name').focus();});
+$('subcategory-settings-form').addEventListener('submit',event=>{
+ event.preventDefault();const name=$('subcategory-name').value.trim(),i=$('subcategory-icon').value,next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);
+ if(!c){settingsError('Save the main category first.');return;}
+ if(!name||name.length>80||c.subcategories.some(sub=>sub===name&&sub!==settingsSubName)||i&&!ICONS.includes(i)){settingsError('Use a unique subcategory name of up to 80 characters and an available icon.');return;}
+ const old=settingsSubName,index=c.subcategories.indexOf(old);
+ if(index<0)c.subcategories.push(name);
+ else{
+  c.subcategories[index]=name;c.removedSubs=c.removedSubs.map(sub=>sub===old?name:sub);c.subscriptions=c.subscriptions.filter(sub=>sub!==old);delete c.subIcons[old];
+  next.expenses.filter(e=>e.category===c.id&&e.subCategory===old).forEach(e=>{e.subCategory=name;if(e.item===old)e.item=name;});
+  next.recurringRules.filter(r=>r.category===c.id&&r.subCategory===old).forEach(r=>r.subCategory=name);
+  if(formSelection.mainCategory===c.name&&formSelection.subCategory===old)formSelection.subCategory=name;
+ }
+ c.items=[...c.subcategories];if($('subcategory-subscription').checked&&!c.subscriptions.includes(name))c.subscriptions.push(name);
+ if(i)Object.defineProperty(c.subIcons,name,{value:i,writable:true,enumerable:true,configurable:true});
+ settingsSubName=name;finishCategoryChange(next,'Subcategory saved');
+});
+$('remove-category').addEventListener('click',()=>{
+ const next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);if(!c)return;
+ if(next.categories.filter(c=>!c.removed).length<=1){settingsError('Keep at least one available category.');return;}
+ c.removed=true;next.recurringRules.filter(r=>r.category===c.id).forEach(r=>r.active=false);
+ finishCategoryChange(next,'Category removed from picker; its monthly schedules stopped');
+});
+$('restore-category').addEventListener('click',()=>{const next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);if(!c)return;c.removed=false;if(c.removedSubs.length===c.subcategories.length)c.removedSubs.pop();finishCategoryChange(next,'Category restored; stopped schedules remain stopped');});
+$('remove-subcategory').addEventListener('click',()=>{
+ const next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);if(!c||!c.subcategories.includes(settingsSubName))return;
+ if(c.subcategories.filter(sub=>!c.removedSubs.includes(sub)).length<=1){settingsError('Keep at least one available subcategory.');return;}
+ if(!c.removedSubs.includes(settingsSubName))c.removedSubs.push(settingsSubName);
+ next.recurringRules.filter(r=>r.category===c.id&&r.subCategory===settingsSubName).forEach(r=>r.active=false);
+ finishCategoryChange(next,'Subcategory removed from picker; its monthly schedules stopped');
+});
+$('restore-subcategory').addEventListener('click',()=>{const next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);if(!c)return;c.removedSubs=c.removedSubs.filter(sub=>sub!==settingsSubName);finishCategoryChange(next,'Subcategory restored; stopped schedules remain stopped');});
+$('behavior-form').addEventListener('submit',event=>{
+ event.preventDefault();const next=clone(state);Object.assign(next.settings,{startView:$('start-view').value,rememberCategory:$('remember-category').checked,reducedMotion:$('reduce-motion').checked,monthlyPosting:$('monthly-posting').checked});
+ addDueMonthly(next);commit(next,'App behavior saved');
+});
+function parseGistId(raw){
+ const value=raw.trim();if(/^[a-f0-9]{5,64}$/i.test(value))return value;
+ try{const url=new URL(value);if(url.protocol==='https:'&&url.hostname==='gist.github.com'&&!url.username&&!url.password){const parts=url.pathname.split('/').filter(Boolean),id=parts.at(-1);if(parts.length<=2&&/^[a-f0-9]{5,64}$/i.test(id))return id;}}catch{}
+ return null;
+}
+function clearGistPreview(){gistPreview=null;$('gist-actions').hidden=true;$('gist-status').textContent='No Gist preview loaded.';}
+$('gist-config-form').addEventListener('submit',event=>{
+ event.preventDefault();if(gistBusy)return;const id=parseGistId($('gist-id').value);
+ if(!id){$('gist-status').textContent='Enter an existing Gist ID or a gist.github.com link.';return;}
+ const next=clone(state);next.settings.gistId=id;
+ const token=$('gist-token').value.trim();if(commit(next,'Gist connection saved')){if(token)gistToken=token;$('gist-token').value='';clearGistPreview();$('gist-status').textContent=gistToken?'Connection saved. Preview before choosing a sync direction.':'Connection saved. Enter a token to preview this secret Gist.';}
+});
+$('gist-disconnect').addEventListener('click',()=>{if(gistBusy)return;const next=clone(state);next.settings.gistId='';if(commit(next,'Gist disconnected')){gistToken='';$('gist-token').value='';clearGistPreview();}});
+function financialSnapshot(data){
+ // Explicit whitelist: connection details and credentials never enter the remote file.
+ const out={schema:data.schema,categorizationVersion:data.categorizationVersion,categorySettingsVersion:data.categorySettingsVersion,categories:clone(data.categories),expenses:clone(data.expenses),recurringRules:clone(data.recurringRules),settings:{startView:data.settings.startView,rememberCategory:data.settings.rememberCategory,reducedMotion:data.settings.reducedMotion,monthlyPosting:data.settings.monthlyPosting,gistId:''}};
+ if(data.previousCategories)out.previousCategories=clone(data.previousCategories);
+ return out;
+}
+async function gistRequest(id,method='GET',body){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+ try{
+  const response=await fetch('https://api.github.com/gists/'+id,{method,headers:{Accept:'application/vnd.github+json',Authorization:'Bearer '+gistToken,'X-GitHub-Api-Version':'2022-11-28',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,signal:controller.signal,credentials:'omit',redirect:'error',cache:'no-store'});
+  if(!response.ok)throw Error(`GitHub returned ${response.status}. Check the connection, token permissions, and rate limit.`);
+  const data=await response.json();if(data.id!==id||data.public!==false||data.truncated)throw Error('Use an untruncated secret Gist. Public Gists are not accepted.');
+  return data;
+ }catch(error){if(error.name==='AbortError')throw Error('GitHub timed out. No replacement was confirmed; preview again.');if(error.message.startsWith('GitHub returned')||error.message.startsWith('Use an untruncated'))throw error;throw Error('Could not reach GitHub. Check your connection and preview again.');}
+ finally{clearTimeout(timer);}
+}
+function gistContent(data){
+ const file=data.files?.['finflow.json'];if(!file)return null;
+ if(file.truncated||typeof file.content!=='string'||file.content.length>1000000)throw Error('finflow.json is too large or incomplete. No data was replaced.');
+ return file.content;
+}
+function parseRemote(raw){
+ if(raw===null)return null;
+ try{
+  const backup=JSON.parse(raw);if(backup.format!=='finflow-backup'||!backup.data)throw Error();
+  // Normalize and validate without writes or posting monthly charges.
+  return financialSnapshot(normalizeState(backup.data));
+ }catch{throw Error('finflow.json is not a valid FinFlow backup. No data was replaced.');}
+}
+function setGistBusy(busy){gistBusy=busy;['gist-preview-button','gist-push','gist-pull','gist-confirm','gist-disconnect'].forEach(id=>$(id).disabled=busy);$('gist-config-form').querySelector('button[type="submit"]').disabled=busy;}
+$('gist-preview-button').addEventListener('click',async()=>{
+ if(gistBusy)return;
+ if(!state.settings.gistId||!gistToken){$('gist-status').textContent='Save a Gist ID and a token for this tab first.';return;}
+ setGistBusy(true);clearGistPreview();$('gist-status').textContent='Reading Gist…';
+ const id=state.settings.gistId;
+ try{const response=await gistRequest(id),raw=gistContent(response),remote=parseRemote(raw);gistPreview={id,raw,remote,localSnapshot:storageSnapshot};$('gist-status').textContent=remote?`Gist: ${remote.expenses.length} expenses, ${remote.recurringRules.filter(r=>r.active).length} active monthly schedules. This browser: ${state.expenses.length} expenses. Choose which snapshot to keep.`:'This Gist has no finflow.json yet. You can upload this browser’s snapshot; other files are kept.';$('gist-pull').hidden=!remote;$('gist-actions').hidden=false;}
+ catch(error){$('gist-status').textContent=error.message;}
+ finally{setGistBusy(false);}
+});
+function confirmGist(action){
+ if(gistBusy||!gistPreview)return;gistAction=action;
+ $('gist-confirm-title').textContent=action==='pull'?'Replace this browser’s data?':'Upload spending to GitHub?';
+ $('gist-confirm-copy').textContent=action==='pull'?`Keep the Gist’s ${gistPreview.remote.expenses.length} expenses instead of this browser’s ${state.expenses.length}. Categories, monthly schedules, and general preferences will also be replaced. Undo can restore this browser’s snapshot in this session.`:`Upload this browser’s ${state.expenses.length} expenses, categories, monthly schedules, and general preferences to finflow.json. This replaces that file on GitHub. The Gist is not encrypted and GitHub keeps its history.`;
+ $('gist-confirm-dialog').showModal();
+}
+$('gist-pull').addEventListener('click',()=>confirmGist('pull'));$('gist-push').addEventListener('click',()=>confirmGist('push'));
+$('gist-cancel').addEventListener('click',()=>$('gist-confirm-dialog').close());
+$('gist-confirm').addEventListener('click',async()=>{
+ if(gistBusy||!gistPreview||storageBlocked)return;
+ const preview=gistPreview,action=gistAction,id=state.settings.gistId;
+ $('gist-confirm-dialog').close();setGistBusy(true);
+ try{
+  if(id!==preview.id||storageSnapshot!==preview.localSnapshot||localStorage.getItem(STORAGE_KEY)!==storageSnapshot)throw Error('This browser changed after preview. Preview again before replacing data.');
+  const current=await gistRequest(id);if(storageSnapshot!==preview.localSnapshot||localStorage.getItem(STORAGE_KEY)!==storageSnapshot)throw Error('This browser changed during sync. Preview again before replacing data.');if(gistContent(current)!==preview.raw)throw Error('The Gist changed after preview. Preview again before replacing data.');
+  if(action==='pull'){
+   const next=clone(preview.remote);next.settings.gistId=id;addDueMonthly(next);
+   if(!commit(next,'Gist data restored'))throw Error('Browser data was not replaced. Resolve the storage warning and preview again.');
+   formSelection={mainCategory:null,subCategory:null};resetForm();filter=null;settingsCategoryId=null;settingsSubName=null;render();
+  }else{
+   const content=JSON.stringify({format:'finflow-backup',version:APP_VERSION,data:financialSnapshot(state)});
+   if(content.length>1000000)throw Error('This snapshot is too large for Gist sync. No remote data was replaced.');
+   await gistRequest(id,'PATCH',{files:{'finflow.json':{content}}});
+  }
+  clearGistPreview();$('gist-status').textContent=action==='pull'?'Gist restored. Other browser tabs must reload.':'Snapshot uploaded to the secret Gist. Preview again before another sync.';
+ }catch(error){clearGistPreview();$('gist-status').textContent=error.message;}
+ finally{setGistBusy(false);}
+});
+
 $('app-version').textContent=APP_VERSION;
-loadState();processMonthly();resetForm();render();
+loadState();processMonthly();resetForm();switchView(state.settings.startView,false);
 </script>
 </body>
 </html>

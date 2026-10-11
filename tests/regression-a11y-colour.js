@@ -6,10 +6,10 @@ const {launch,fresh,stored,add,text,check,today,assert,ROOT,fs}=require('./helpe
   const external=[];page.on('request',r=>{if(/^https?:/.test(r.url()))external.push(r.url());});
   await page.setOfflineMode(true);await page.reload({waitUntil:'load'});
   await check('The app works offline and requests no CDN scripts, images, fonts, or other external resources',async()=>{
-   await add(page,'1800','food',{subCategory:'Cafes & Dining (Cafe 4 U)'});assert.equal((await stored(page)).expenses.length,1);assert.deepEqual(external,[]);
+   await add(page,'1800','food',{subCategory:'Cafes & Dining'});assert.equal((await stored(page)).expenses.length,1);assert.deepEqual(external,[]);
   });
-  await add(page,'2500','transport',{subCategory:'Fuel & Scooter Maintenance (RayZR)'});await add(page,'1200','pet',{subCategory:'Cat Food & Litter'});await add(page,'10000','sports',{subCategory:'Gym Memberships'});
-  await add(page,'2800','tech',{subCategory:'Cloud Storage & Software (Google One)'});await add(page,'650','food',{subCategory:'Other'});await add(page,'6500','housing',{subCategory:'Rent & Utilities'});
+  await add(page,'2500','transport',{subCategory:'Fuel & Scooter Maintenance'});await add(page,'1200','pet',{subCategory:'Cat Food & Litter'});await add(page,'10000','sports',{subCategory:'Gym Memberships'});
+  await add(page,'2800','tech',{subCategory:'Cloud Storage & Software'});await add(page,'650','food',{subCategory:'Other'});await add(page,'6500','housing',{subCategory:'Rent & Utilities'});
   const seeded=await page.evaluate(()=>{
    const key='finflow_tracker_v1',data=JSON.parse(localStorage.getItem(key)),base=data.expenses[0].date.slice(0,7);
    // Exercise daily plots with multiple dates without shipping demonstration data.

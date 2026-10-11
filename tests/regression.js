@@ -36,8 +36,8 @@ const {launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,KEY,LEGACY}=
   });
   await check('Notes and dates are optional, local dates default correctly',async()=>{
    assert.equal((await stored(page)).expenses[0].date,today());
-   await add(page,'200','transport',{subCategory:'Fuel & Scooter Maintenance (RayZR)',note:'Fuel stop'});
-   const e=(await stored(page)).expenses[1];assert.equal(e.note,'Fuel stop');assert.equal(e.subCategory,'Fuel & Scooter Maintenance (RayZR)');
+   await add(page,'200','transport',{subCategory:'Fuel & Scooter Maintenance',note:'Fuel stop'});
+   const e=(await stored(page)).expenses[1];assert.equal(e.note,'Fuel stop');assert.equal(e.subCategory,'Fuel & Scooter Maintenance');
   });
   await check('Integer cents keep totals exact and graphs agree with tracker',async()=>{
    await add(page,'0.10');await add(page,'0.20');await page.click('#nav-spending');
@@ -104,7 +104,7 @@ const {launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,KEY,LEGACY}=
   await check('Legacy migration preserves real expenses and custom categories, honors deletions, and leaves original data intact',async()=>{
    await p.evaluate((key,value)=>localStorage.setItem(key,value),LEGACY,JSON.stringify(legacy));await p.reload({waitUntil:'load'});
    const data=await stored(p);assert.equal(data.expenses.length,2);assert.equal(data.expenses[0].cents,120050);assert.equal(data.categories.length,8);assert.equal(data.previousCategories.length,7);
-   assert.equal(data.expenses[0].mainCategory,'Transport & Vehicles');assert.equal(data.expenses[0].subCategory,'Fuel & Scooter Maintenance (RayZR)');
+   assert.equal(data.expenses[0].mainCategory,'Transport & Vehicles');assert.equal(data.expenses[0].subCategory,'Fuel & Scooter Maintenance');
    assert.equal(data.expenses[1].mainCategory,'Lifestyle & Social');assert.equal(data.expenses[1].subCategory,'Other');assert.equal(data.expenses[1].previousClassification.subCategory,legacy.transactions[3].node);
    assert.ok((await text(p,'recent-list')).includes(legacy.transactions[3].node));
    assert.equal(await p.evaluate(key=>localStorage.getItem(key),LEGACY),JSON.stringify(legacy));

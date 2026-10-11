@@ -35,3 +35,6 @@ Release versions and storage schemas are independent. The new app uses `finflow_
 The 0.1.0 categorization update is additive within schema 1. Expenses retain `category` and `item` for compatibility and add `mainCategory` and `subCategory`. Prior classification metadata is retained during migration. `categorizationVersion: 1` marks the eight-category registry; repeated loads do not duplicate expenses or erase prior labels.
 
 The 0.2.0 monthly-expense feature adds `recurringRules` within schema 1. Older tracker data gains an empty rule list without creating schedules. Monthly charges carry a schedule ID and name; posting the charge and advancing its monthly cursor happen in the same save. Legacy subscriptions stay inactive until explicitly set up in FinFlow.
+
+
+The 0.3.0 Settings update adds `categorySettingsVersion: 1`, removal flags, subscription markers, built-in icon overrides, and general preferences within schema 1. Older registries are validated before generic-label migration. Category removal is non-destructive: historical references stay valid and affected schedules stop. Tokens are tab-only and never part of storage or the Gist snapshot. Gist restore validates the same schema before a single local save. The future 2.0.0 SMS milestone does not authorize breaking data changes or constitute the present release.
