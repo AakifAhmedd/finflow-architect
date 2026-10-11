@@ -1,4 +1,4 @@
-const {launch,fresh,stored,fill,add,text,check,today,assert,KEY}=require('./helpers');
+const {acceptConfirmation,launch,fresh,stored,fill,add,text,check,today,assert,KEY}=require('./helpers');
 async function settings(page,id='tech',sub){await page.click('#nav-settings');await fill(page,'settings-category',id);if(sub)await fill(page,'settings-subcategory',sub);}
 async function saveSub(page,name,subscription=false,icon=''){await fill(page,'subcategory-name',name);await fill(page,'subcategory-icon',icon);await page.$eval('#subcategory-subscription',(e,v)=>e.checked=v,subscription);await page.click('#subcategory-settings-form button[type="submit"]');}
 async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={data,requests:[],fail:false,beforeRead:null};window.fetch=async(url,options)=>{const m=window.gistMock;m.requests.push({url,method:options.method,body:options.body});if(m.fail)throw Error('network');if(options.method==='PATCH')Object.assign(m.data.files,JSON.parse(options.body).files);return {ok:true,status:200,json:async()=>structuredClone(m.data)};};},data);}
@@ -31,13 +31,13 @@ async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={d
   assert.equal((await stored(page)).categories.find(c=>c.id==='tech').subscriptions[0],'Software subscriptions');
  });
  await check('Removing a subcategory retains history and totals, pauses its schedule, and Undo restores it',async()=>{
-  await settings(page,'tech','Software subscriptions');await page.click('#remove-subcategory');let data=await stored(page);
+  await settings(page,'tech','Software subscriptions');await page.click('#remove-subcategory');await acceptConfirmation(page);let data=await stored(page);
   assert.equal(data.expenses.length,3);assert.equal(data.recurringRules[0].active,false);await page.click('#nav-track');await page.click('[data-category="tech"]');assert.equal(await page.$$eval('[data-subcategory="Software subscriptions"]',es=>es.length),0);await page.click('#categories-back');
   await page.click('#undo');data=await stored(page);assert.equal(data.recurringRules[0].active,true);await page.click('[data-category="tech"]');assert.equal(await page.$$eval('[data-subcategory="Software subscriptions"]',es=>es.length),1);await page.click('#categories-back');
-  await settings(page,'tech','Software subscriptions');await page.click('#remove-subcategory');await page.click('#restore-subcategory');assert.equal((await stored(page)).recurringRules[0].active,false);
+  await settings(page,'tech','Software subscriptions');await page.click('#remove-subcategory');await acceptConfirmation(page);await page.click('#restore-subcategory');assert.equal((await stored(page)).recurringRules[0].active,false);
  });
  await check('Removing and restoring a main category keeps spending accessible and monthly charges stopped',async()=>{
-  await page.click('#remove-category');let data=await stored(page);assert.equal(data.expenses.length,3);await page.click('#nav-track');assert.equal(await page.$$eval('[data-category="tech"]',es=>es.length),0);
+  await page.click('#remove-category');await acceptConfirmation(page);let data=await stored(page);assert.equal(data.expenses.length,3);await page.click('#nav-track');assert.equal(await page.$$eval('[data-category="tech"]',es=>es.length),0);
   await page.click('#nav-spending');assert.equal(await text(page,'spending-total'),'Rs. 139');await page.click('[data-filter="tech"]');assert.equal(await text(page,'filtered-count'),'2 expenses');await page.click('#clear-filter');
   await settings(page);await page.click('#restore-category');data=await stored(page);assert.equal(data.categories.find(c=>c.id==='tech').removed,false);assert.equal(data.recurringRules[0].active,false);
  });
@@ -50,14 +50,14 @@ async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={d
  });
  await check('Duplicate names and removing the final available choice are rejected without corrupting data',async()=>{
   const c=(await stored(page)).categories.at(-1);await settings(page,c.id,'__proto__');await fill(page,'category-name','Food & Dining');await page.click('#category-settings-form button[type="submit"]');assert.match(await text(page,'category-settings-feedback'),/unique/);assert.equal((await stored(page)).categories.at(-1).name,'Personal projects');
-  await page.click('#remove-subcategory');await fill(page,'settings-subcategory',c.subcategories.at(-1));await page.click('#remove-subcategory');assert.match(await text(page,'category-settings-feedback'),/at least one/);
+  await page.click('#remove-subcategory');await acceptConfirmation(page);await fill(page,'settings-subcategory',c.subcategories.at(-1));await page.click('#remove-subcategory');await acceptConfirmation(page);assert.match(await text(page,'category-settings-feedback'),/at least one/);
   await fill(page,'settings-category','food');await page.click('#new-subcategory');await saveSub(page,'constructor',false,'food');assert.ok((await stored(page)).categories.find(c=>c.id==='food').subcategories.includes('constructor'));
  });
  await check('Behavior preferences persist, control startup and reduced motion, and remember only the main category',async()=>{
-  await fill(page,'start-view','spending');await page.$eval('#remember-category',e=>e.checked=true);await page.$eval('#reduce-motion',e=>e.checked=true);await page.$eval('#monthly-posting',e=>e.checked=false);await page.click('#behavior-form button[type="submit"]');await page.reload();
+  await fill(page,'start-view','spending');await page.$eval('#remember-category',e=>e.checked=true);await page.$eval('#reduce-motion',e=>e.checked=true);await page.$eval('#monthly-posting',e=>e.checked=false);await page.click('#behavior-form button[type="submit"]');await acceptConfirmation(page);await page.reload();
   assert.equal(await page.$eval('#spending-view',e=>e.hidden),false);assert.equal(await page.$eval('body',e=>e.classList.contains('reduce-motion')),true);
   await page.click('#nav-track');await add(page,'2','food');assert.equal(await text(page,'category-label'),'Food & Dining');assert.equal(await page.$eval('#save-expense',e=>e.disabled),true);await page.click('#categories-back');
-  await page.click('#nav-settings');await fill(page,'start-view','track');await page.click('#behavior-form button[type="submit"]');
+  await page.click('#nav-settings');await fill(page,'start-view','track');await page.click('#behavior-form button[type="submit"]');await acceptConfirmation(page);
  });
  await check('Settings remains usable and named on phone/desktop with keyboard navigation and no overflow',async()=>{
   for(const width of [320,390,768,1440]){await page.setViewport({width,height:844});await page.click('#nav-settings');assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);const bad=await page.evaluate(()=>[...document.querySelectorAll('#settings-view button,#settings-view input,#settings-view select')].filter(e=>e.getClientRects().length&&!((e.getAttribute('aria-label')||e.textContent||'').trim()||e.labels?.length)).map(e=>e.id));assert.deepEqual(bad,[]);}
@@ -74,23 +74,23 @@ async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={d
  await mockGist(page,gist);
  await check('Gist preview is read-only, replacements require confirmation, and cancellation writes nothing',async()=>{
   const before=await stored(page);await page.click('#gist-preview-button');assert.match(await text(page,'gist-status'),/Gist: 1 expenses/);assert.deepEqual(await stored(page),before);
-  await page.click('#gist-pull');assert.equal(await page.$eval('#gist-confirm-dialog',e=>e.open),true);await page.keyboard.press('Escape');assert.deepEqual(await stored(page),before);
+  await page.click('#gist-pull');assert.equal(await page.$eval('#confirm-dialog',e=>e.open),true);await page.keyboard.press('Escape');assert.deepEqual(await stored(page),before);
  });
  await check('Changed remote and local snapshots block replacement after preview',async()=>{
-  await page.evaluate(()=>window.gistMock.data.files['finflow.json'].content+=' ');await page.click('#gist-pull');await page.click('#gist-confirm');await page.waitForFunction(()=>document.getElementById('gist-status').textContent.includes('changed after preview'));assert.equal((await stored(page)).expenses.length,data.expenses.length);
-  await page.click('#gist-preview-button');await page.waitForFunction(()=>!document.getElementById('gist-actions').hidden);await page.$eval('#remember-category',e=>e.checked=!e.checked);await page.click('#behavior-form button[type="submit"]');await page.click('#gist-pull');await page.click('#gist-confirm');await page.waitForFunction(()=>document.getElementById('gist-status').textContent.includes('browser changed after preview'));
+  await page.evaluate(()=>window.gistMock.data.files['finflow.json'].content+=' ');await page.click('#gist-pull');await page.click('#confirm-action');await page.waitForFunction(()=>document.getElementById('gist-status').textContent.includes('changed after preview'));assert.equal((await stored(page)).expenses.length,data.expenses.length);
+  await page.click('#gist-preview-button');await page.waitForFunction(()=>!document.getElementById('gist-actions').hidden);await page.$eval('#remember-category',e=>e.checked=!e.checked);await page.click('#behavior-form button[type="submit"]');await acceptConfirmation(page);await page.click('#gist-pull');await page.click('#confirm-action');await page.waitForFunction(()=>document.getElementById('gist-status').textContent.includes('browser changed after preview'));
  });
  await check('Validated Gist restore is atomic, retains local connection, and supports Undo',async()=>{
-  await page.click('#gist-preview-button');await page.waitForFunction(()=>!document.getElementById('gist-actions').hidden);await page.click('#gist-pull');await page.click('#gist-confirm');await page.waitForFunction(()=>document.getElementById('gist-status').textContent.includes('Gist restored'));
+  await page.click('#gist-preview-button');await page.waitForFunction(()=>!document.getElementById('gist-actions').hidden);await page.click('#gist-pull');await page.click('#confirm-action');await page.waitForFunction(()=>document.getElementById('gist-status').textContent.includes('Gist restored'));
   assert.equal((await stored(page)).expenses.length,1);assert.equal((await stored(page)).settings.gistId,'abc123');await page.click('#undo');assert.equal((await stored(page)).expenses.length,data.expenses.length);
  });
  await check('Upload uses only finflow.json, omits credentials/connection, preserves unrelated files, and detects malformed/public/truncated Gists',async()=>{
-  await page.click('#gist-preview-button');await page.waitForFunction(()=>!document.getElementById('gist-actions').hidden);await page.click('#gist-push');await page.click('#gist-confirm');await page.waitForFunction(()=>document.getElementById('gist-status').textContent.includes('uploaded'));
+  await page.click('#gist-preview-button');await page.waitForFunction(()=>!document.getElementById('gist-actions').hidden);await page.click('#gist-push');await page.click('#confirm-action');await page.waitForFunction(()=>document.getElementById('gist-status').textContent.includes('uploaded'));
   const result=await page.evaluate(()=>window.gistMock);const uploaded=JSON.parse(result.data.files['finflow.json'].content);assert.equal(uploaded.data.settings.gistId,'');assert.equal(result.data.files['notes.txt'].content,'keep this');assert.ok(!JSON.stringify(result.requests).includes('fixture-token'));assert.ok(result.requests.every(r=>r.url==='https://api.github.com/gists/abc123'));
   for(const change of [{public:true},{public:false,files:{'finflow.json':{content:'bad'}}},{files:{'finflow.json':{content:raw,truncated:true}}}]){await page.evaluate(change=>Object.assign(window.gistMock.data,change),change);const before=await stored(page);await page.click('#gist-preview-button');await page.waitForFunction(()=>document.getElementById('gist-preview-button').disabled===false);assert.equal(await page.$eval('#gist-actions',e=>e.hidden),true);assert.deepEqual(await stored(page),before);}
  });
  await check('Gist network errors preserve local data and disconnect prevents further requests',async()=>{
-  await page.evaluate(()=>window.gistMock.fail=true);const before=await stored(page);await page.click('#gist-preview-button');await page.waitForFunction(()=>document.getElementById('gist-status').textContent.includes('Could not reach'));assert.deepEqual(await stored(page),before);await page.click('#gist-disconnect');assert.equal((await stored(page)).settings.gistId,'');const requests=await page.evaluate(()=>window.gistMock.requests.length);await page.click('#gist-preview-button');assert.equal(await page.evaluate(()=>window.gistMock.requests.length),requests);
+  await page.evaluate(()=>window.gistMock.fail=true);const before=await stored(page);await page.click('#gist-preview-button');await page.waitForFunction(()=>document.getElementById('gist-status').textContent.includes('Could not reach'));assert.deepEqual(await stored(page),before);await page.click('#gist-disconnect');await acceptConfirmation(page);assert.equal((await stored(page)).settings.gistId,'');const requests=await page.evaluate(()=>window.gistMock.requests.length);await page.click('#gist-preview-button');assert.equal(await page.evaluate(()=>window.gistMock.requests.length),requests);
  });
  assert.deepEqual(errors,[]);await context.close();
  const old=await fresh(browser),p=old.page;

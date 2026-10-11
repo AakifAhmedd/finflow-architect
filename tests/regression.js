@@ -1,4 +1,4 @@
-const {launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,KEY,LEGACY}=require('./helpers');
+const {acceptConfirmation,launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,KEY,LEGACY}=require('./helpers');
 (async()=>{
  const browser=await launch();
  try {
@@ -59,7 +59,7 @@ const {launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,KEY,LEGACY}=
    await page.click('#undo');assert.equal(await text(page,'track-total'),'1,450.80');
   });
   await check('Delete and undo restore the expense and corresponding totals',async()=>{
-   await page.click('#recent-list [data-expense]');await page.click('#delete-expense');
+   await page.click('#recent-list [data-expense]');await page.click('#delete-expense');await acceptConfirmation(page);
    assert.equal((await stored(page)).expenses.length,3);await page.click('#undo');
    assert.equal((await stored(page)).expenses.length,4);assert.equal(await text(page,'track-total'),'1,450.80');
   });

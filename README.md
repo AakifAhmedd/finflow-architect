@@ -1,6 +1,6 @@
 # FinFlow
 
-A personal finance app for quickly logging expenses and understanding where money went. **Track first, visualize second.** Current version: **0.3.0**.
+A personal finance app for quickly logging expenses and understanding where money went. **Track first, visualize second.** Current version: **0.3.1**.
 
 [Open FinFlow](https://aakifahmedd.github.io/finflow-architect/)
 
@@ -15,6 +15,7 @@ Open `index.html` directly, or serve it with any static server. The entire app i
 - **Spending:** switch months, compare total spending with the previous full month, view category shares and daily totals, and select a category to filter its expenses. Daily average includes every calendar day in the month, or days elapsed so far for the current month. Selecting a main category also shows its subcategory totals. Each chart has a text alternative; exact expenses remain available below it.
 - **Settings:** add, rename, remove, or restore categories/subcategories; choose built-in icons; mark subscription subcategories; configure manual GitHub Gist sync; choose the startup view, remembered main category, reduced motion, and automatic monthly posting. The eight original main categories and their icons remain the defaults. Subscription choices preselect Repeat monthly on new entry; you can turn it off for an individual purchase. Marking a choice does not create schedules or alter existing expenses.
 - **Compact phone entry:** the default eight-category picker, keypad, collapsed details, and Save fit without scrolling on common large-phone viewports. Expanded optional details, the software keyboard, large text, many custom categories, and very small/short screens can require scrolling. Touch targets remain at least 44 px. Both category steps stay compact.
+- **Action warnings:** expense deletion, category/subcategory removal, stopping monthly schedules, disconnecting/changing a Gist connection, replacing either Gist snapshot, and pausing automatic monthly logging all use the same confirmation dialog. Read the impact, then choose Cancel or the named action. Cancel and Escape leave the action unapplied; Cancel receives initial focus. Data changes while a warning is open block the action until you review again.
 - Open any expense to edit or delete it. Saved additions, edits, and deletions can be undone with the toast's Undo button or Ctrl/Cmd+Z outside text inputs. Undo covers the most recent change in the current session.
 
 This remains a private, single-user tool. Currency is fixed at **LKR**. Its eight personal main categories are Transport & Vehicles, Food & Dining, Fitness & Health, Pets, Housing & Living, Tech & Subscriptions, Lifestyle & Social, and Professional & Community. The defaults retain three specific subcategories and Other, using generic picker labels. Settings can customize these choices. There are no accounts, sharing, onboarding, generic templates, or currency controls.

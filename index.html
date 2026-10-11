@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f6f0">
 <meta name="description" content="FinFlow — personal expense tracking and a clearer view of your spending.">
-<meta name="application-version" content="0.3.0">
+<meta name="application-version" content="0.3.1">
 <title>FinFlow · Personal expenses</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%232c513e'/%3E%3Cpath d='M18 44V20h28M18 32h20' stroke='%23dcecbd' stroke-width='7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
@@ -53,6 +53,7 @@ main{max-width:1350px;margin:auto;padding:38px 40px 24px}.page-heading{display:f
 .settings-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}.settings-stack{display:grid;gap:24px}.settings-card{padding:26px;min-width:0}.settings-intro{margin:12px 0 18px;overflow-wrap:anywhere}.settings-card .field{margin:14px 0}.settings-card input,.settings-card select{max-width:100%;min-width:0}.settings-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}.settings-actions .delete-button{padding:10px 14px;min-height:44px}.icon-preview{height:28px;margin-bottom:8px;color:var(--green)}.categories.subcategories .category-button small{font-size:9px;color:var(--muted)}
 body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 @media(prefers-reduced-motion:no-preference){#settings-view{animation:appear .2s ease-out}}
+.confirm-dialog{max-height:calc(100dvh - 32px);overflow:auto}.confirm-dialog h2,.confirm-dialog p{overflow-wrap:anywhere}.confirm-symbol{width:44px;height:44px;border-radius:13px;background:#fff1ee;color:var(--red);display:grid;place-items:center;margin-bottom:17px}.confirm-dialog .dialog-actions{margin-top:22px;gap:10px}.confirm-cancel{min-height:52px;background:var(--paper);border:1px solid var(--line);border-radius:13px;font-weight:600;padding:12px 20px}.confirm-cancel:hover{background:var(--green-light)}.primary.danger-confirm{background:#a33b34}.primary.danger-confirm:hover{background:#842f29}
 </style>
 </head>
 <body>
@@ -106,9 +107,9 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <form id="subcategory-settings-form"><div class="field"><label for="subcategory-name">Subcategory name</label><input id="subcategory-name" maxlength="80" required></div><div class="field"><label for="subcategory-icon">Subcategory icon</label><select id="subcategory-icon"></select></div><div id="subcategory-icon-preview" class="icon-preview" aria-hidden="true"></div><label class="monthly-toggle" for="subcategory-subscription"><input id="subcategory-subscription" type="checkbox">Recurring subscription</label><p class="muted monthly-hint">This choice starts with Repeat monthly enabled. Set the amount and first date once. Existing expenses and schedules stay as they are.</p><div class="settings-actions"><button class="primary" type="submit">Save subcategory</button><button id="new-subcategory" class="text-button" type="button">Add subcategory</button><button id="remove-subcategory" class="delete-button" type="button">Remove subcategory</button><button id="restore-subcategory" class="text-button" type="button" hidden>Restore subcategory</button></div></form><p id="category-settings-feedback" class="form-feedback" role="alert" hidden></p>
 </section>
 <div class="settings-stack"><section class="card settings-card" aria-labelledby="behavior-title"><h2 id="behavior-title">App behavior</h2><form id="behavior-form"><div class="field"><label for="start-view">Open FinFlow on</label><select id="start-view"><option value="track">Tracks</option><option value="spending">Spending</option><option value="settings">Settings</option></select></div><label class="monthly-toggle" for="remember-category"><input id="remember-category" type="checkbox">Remember the last main category after saving</label><label class="monthly-toggle" for="reduce-motion"><input id="reduce-motion" type="checkbox">Reduce motion</label><label class="monthly-toggle" for="monthly-posting"><input id="monthly-posting" type="checkbox">Log due monthly expenses automatically</label><p class="muted monthly-hint">When paused, schedules are kept. Turning this on catches up missed months.</p><button class="primary" type="submit">Save behavior</button></form></section>
-<section class="card settings-card" aria-labelledby="gist-title"><h2 id="gist-title">GitHub Gist</h2><p class="muted settings-intro">Optional manual sync through an existing secret Gist. A Gist is stored on GitHub and is not encrypted; anyone with its link can read it. Only connect if you want to upload your spending there.</p><form id="gist-config-form"><div class="field"><label for="gist-id">Gist ID or link</label><input id="gist-id" autocomplete="off" spellcheck="false" placeholder="A secret Gist’s ID or URL"></div><div class="field"><label for="gist-token">GitHub token — this tab only</label><input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="Token with Gists read/write permission"></div><p class="muted monthly-hint">Your token is never saved or included in backups. Reloading clears it. Sync uses finflow.json and replaces a whole snapshot; it does not merge devices.</p><div class="settings-actions"><button class="primary" type="submit">Save connection</button><button id="gist-disconnect" class="text-button" type="button">Disconnect</button></div></form><button id="gist-preview-button" class="text-button" type="button">Preview Gist</button><p id="gist-status" class="muted settings-intro" role="status" aria-live="polite">No Gist preview loaded.</p><div id="gist-actions" class="settings-actions" hidden><button id="gist-pull" class="text-button" type="button">Replace browser data from Gist</button><button id="gist-push" class="text-button" type="button">Replace Gist from this browser</button></div></section></div>
+<section class="card settings-card" aria-labelledby="gist-title"><h2 id="gist-title">GitHub Gist</h2><p class="muted settings-intro">Optional manual sync through an existing secret Gist. A Gist is stored on GitHub and is not encrypted; anyone with its link can read it. Only connect if you want to upload your spending there.</p><form id="gist-config-form"><div class="field"><label for="gist-id">Gist ID or link</label><input id="gist-id" autocomplete="off" spellcheck="false" placeholder="A secret Gist’s ID or URL"></div><div class="field"><label for="gist-token">GitHub token — this tab only</label><input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="Token with Gists read/write permission"></div><p class="muted monthly-hint">Your token is never saved or included in backups. Reloading clears it. Sync uses finflow.json and replaces a whole snapshot; it does not merge devices.</p><div class="settings-actions"><button class="primary" type="submit">Save connection</button><button id="gist-disconnect" class="delete-button" type="button">Disconnect</button></div></form><button id="gist-preview-button" class="text-button" type="button">Preview Gist</button><p id="gist-status" class="muted settings-intro" role="status" aria-live="polite">No Gist preview loaded.</p><div id="gist-actions" class="settings-actions" hidden><button id="gist-pull" class="delete-button" type="button">Replace browser data from Gist</button><button id="gist-push" class="delete-button" type="button">Replace Gist from this browser</button></div></section></div>
 </div></section>
-<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.3.0</span></span></footer>
+<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.3.1</span></span></footer>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toast-message"></span><button id="undo" type="button" hidden>Undo</button></div>
 <dialog id="expense-dialog" class="edit-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><div><p class="eyebrow" style="margin-bottom:10px">Expense details</p><h2 id="dialog-title"></h2></div><button id="close-dialog" class="icon-button" type="button" aria-label="Close expense details"></button></div><p id="dialog-amount" class="dialog-amount num"></p><p id="dialog-note" class="dialog-note"></p><p class="muted monthly-hint" id="charge-hint" hidden>Editing or deleting this charge changes only this expense.</p><div class="dialog-actions"><button id="manage-monthly-charge" class="text-button" type="button" hidden>Manage monthly expense</button><button id="edit-expense" class="primary" type="button">Edit expense</button><button id="delete-expense" class="delete-button" type="button">Delete expense</button></div></dialog>
@@ -118,11 +119,11 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <div class="details-fields"><div class="field"><label for="monthly-name">Expense name</label><input id="monthly-name" type="text" maxlength="80" required></div><div class="field"><label for="monthly-amount">Amount in LKR</label><input id="monthly-amount" type="text" inputmode="decimal" maxlength="12" required></div><div class="field"><label for="monthly-day">Day of the month</label><input id="monthly-day" type="number" min="1" max="31" step="1" required></div><div class="field"><label for="monthly-category">Main category</label><select id="monthly-category"></select></div><div class="field"><label for="monthly-subcategory">Subcategory</label><select id="monthly-subcategory"></select></div><div class="field"><label for="monthly-note">Note (optional)</label><input id="monthly-note" type="text" maxlength="240"></div></div>
 <p id="monthly-feedback" class="form-feedback" role="alert" hidden></p><div class="dialog-actions" style="margin-top:20px"><button class="primary" type="submit">Save monthly changes</button><button id="stop-monthly" class="delete-button" type="button">Stop monthly expense</button></div>
 </form></dialog>
-<dialog id="gist-confirm-dialog" class="edit-dialog" aria-labelledby="gist-confirm-title"><h2 id="gist-confirm-title"></h2><p id="gist-confirm-copy" class="muted settings-intro"></p><div class="dialog-actions"><button id="gist-confirm" class="primary" type="button">Confirm replacement</button><button id="gist-cancel" class="text-button" type="button">Cancel</button></div></dialog>
+<dialog id="confirm-dialog" class="edit-dialog confirm-dialog" role="alertdialog" aria-labelledby="confirm-title" aria-describedby="confirm-copy"><div class="confirm-symbol" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg></div><h2 id="confirm-title"></h2><p id="confirm-copy" class="muted settings-intro"></p><p id="confirm-feedback" class="form-feedback" role="alert" hidden></p><div class="dialog-actions"><button id="confirm-cancel" class="confirm-cancel" type="button" autofocus>Cancel</button><button id="confirm-action" class="primary danger-confirm" type="button"></button></div></dialog>
 <script>
 'use strict';
 // App release version is independent of the additive local data schema.
-const APP_VERSION = '0.3.0';
+const APP_VERSION = '0.3.1';
 const STORAGE_KEY = 'finflow_tracker_v1';
 const LEGACY_KEY = 'finflow_architect_model_v2';
 const LEGACY_CATEGORIES = [
@@ -378,6 +379,32 @@ function commit(next,message,allowUndo=true,silent=false){
  }catch(error){warning('This change was not saved. Browser storage may be full or unavailable. Your expense is still here; free some space or restore storage access and try again.');return false;}
  undoState=allowUndo?clone(state):null;state=next;storageSnapshot=serialized;$('storage-warning').hidden=true;render();if(!silent)toast(message,allowUndo);return true;
 }
+// Every destructive action uses one dialog. Capture intent, then validate freshness before applying it.
+let pendingConfirmation=null,confirmationBusy=false;
+function requestConfirmation(title,copy,label,run){
+ if(confirmationBusy||$('confirm-dialog').open)return;
+ pendingConfirmation={run,snapshot:storageSnapshot,origin:document.activeElement,label};
+ $('confirm-title').textContent=title;$('confirm-copy').textContent=copy;$('confirm-action').textContent=label;
+ $('confirm-feedback').hidden=true;$('confirm-action').disabled=false;$('confirm-cancel').disabled=false;
+ $('confirm-dialog').showModal();$('confirm-cancel').focus({preventScroll:true});
+}
+$('confirm-cancel').addEventListener('click',()=>{if(!confirmationBusy)$('confirm-dialog').close();});
+$('confirm-dialog').addEventListener('cancel',event=>{if(confirmationBusy)event.preventDefault();});
+$('confirm-dialog').addEventListener('close',()=>{if(!$('confirm-dialog').open)pendingConfirmation=null;});
+$('confirm-action').addEventListener('click',async()=>{
+ const request=pendingConfirmation;if(!request||confirmationBusy)return;
+ try{
+  if(storageBlocked||storageSnapshot!==request.snapshot||localStorage.getItem(STORAGE_KEY)!==storageSnapshot){
+   $('confirm-feedback').textContent='Saved data changed or saving is paused. Cancel, review the latest data, and try again.';$('confirm-feedback').hidden=false;$('confirm-action').disabled=true;return;
+  }
+ }catch{$('confirm-feedback').textContent='Browser storage is unavailable. Cancel and restore storage access before trying again.';$('confirm-feedback').hidden=false;return;}
+ confirmationBusy=true;$('confirm-action').disabled=true;$('confirm-cancel').disabled=true;$('confirm-action').textContent='Working…';$('confirm-dialog').setAttribute('aria-busy','true');
+ try{
+  const done=await request.run();
+  if(done===false){$('confirm-feedback').textContent=$('storage-warning-text').textContent||'This change was not saved. Cancel and try again.';$('confirm-feedback').hidden=false;}
+  else{$('confirm-dialog').close();if(request.origin?.isConnected&&request.origin.getClientRects().length)request.origin.focus({preventScroll:true});else $('nav-'+view).focus({preventScroll:true});}
+ }finally{confirmationBusy=false;$('confirm-dialog').removeAttribute('aria-busy');$('confirm-action').disabled=false;$('confirm-cancel').disabled=false;$('confirm-action').textContent=request.label;}
+});
 function toast(message,canUndo=false){clearTimeout(toastTimer);$('toast-message').textContent=message;$('undo').hidden=!canUndo;$('toast').hidden=false;toastTimer=setTimeout(()=>{$('toast').hidden=true;},8000);}
 function category(id){return state.categories.find(c=>c.id===id||c.name===id);}
 function monthExpenses(){return state.expenses.filter(e=>e.date.startsWith(month));}
@@ -503,11 +530,16 @@ $('load-more').addEventListener('click',()=>{listLimit+=30;renderSpending();});
 $('close-dialog').innerHTML=icon('close');$('close-dialog').addEventListener('click',()=>$('expense-dialog').close());
 $('expense-dialog').addEventListener('click',event=>{if(event.target===$('expense-dialog')){const r=event.target.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)event.target.close();}});
 $('edit-expense').addEventListener('click',editExpense);
-$('delete-expense').addEventListener('click',()=>{const next=clone(state);next.expenses=next.expenses.filter(e=>e.id!==dialogId);if(commit(next,'Expense deleted')){$('expense-dialog').close();if(editingId===dialogId)resetForm();}});
+$('delete-expense').addEventListener('click',()=>{
+ const e=state.expenses.find(e=>e.id===dialogId);if(!e)return;const id=e.id;
+ requestConfirmation('Delete this expense?',`Delete ${money(e.cents)} for ${e.recurringName||e.subCategory} on ${dateLabel(e.date)} ${e.date.slice(0,4)}? It will be removed from spending totals.${e.recurringId?' Only this charge is deleted; its monthly schedule will continue.':''} You can undo this change in this session.`,'Delete expense',()=>{
+  const next=clone(state);next.expenses=next.expenses.filter(e=>e.id!==id);if(!commit(next,'Expense deleted'))return false;$('expense-dialog').close();if(editingId===id)resetForm();return true;
+ });
+});
 $('cancel-edit').addEventListener('click',resetForm);
 function undo(){if(!undoState)return;const previous=undoState;if(commit(previous,'Change undone',false)){if(editingId&&!state.expenses.some(e=>e.id===editingId))resetForm();}}
 $('undo').addEventListener('click',undo);
-document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName)){event.preventDefault();undo();}});
+document.addEventListener('keydown',event=>{if($('confirm-dialog').open)return;if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName)){event.preventDefault();undo();}});
 $('retry-storage').addEventListener('click',()=>{loadState();if(!storageBlocked){$('storage-warning').hidden=true;if(editingId&&!state.expenses.some(e=>e.id===editingId))resetForm();undoState=null;processMonthly();render();toast('Saved data reloaded');}});
 window.addEventListener('storage',event=>{if(event.key!==STORAGE_KEY&&event.key!==null)return;storageBlocked=true;warning('Your data changed in another tab. Choose Retry to load it before saving this expense.');});
 window.addEventListener('pageshow',()=>{const today=localDate();updateRepeatUI();$('month-picker').max=today.slice(0,7);processMonthly();render();});
@@ -521,9 +553,12 @@ $('manage-monthly-charge').addEventListener('click',()=>{const e=state.expenses.
 $('close-monthly').innerHTML=icon('close');$('close-monthly').addEventListener('click',()=>$('monthly-dialog').close());
 $('monthly-category').addEventListener('change',()=>updateMonthlySubcategories());
 $('monthly-form').addEventListener('submit',saveMonthlyChanges);
-$('stop-monthly').addEventListener('click',()=>{const next=clone(state),r=next.recurringRules.find(r=>r.id===monthlyDialogId);if(!r)return;r.active=false;if(commit(next,'Monthly expense stopped; past charges kept'))$('monthly-dialog').close();});
+$('stop-monthly').addEventListener('click',()=>{
+ const r=state.recurringRules.find(r=>r.id===monthlyDialogId&&r.active);if(!r)return;const id=r.id;
+ requestConfirmation('Stop this monthly expense?',`Stop future automatic charges for ${r.name} (${money(r.cents)} per month)? Previously logged charges stay in your spending. You can undo this change in this session.`,'Stop monthly expense',()=>{const next=clone(state),rule=next.recurringRules.find(r=>r.id===id);if(!rule)return false;rule.active=false;if(!commit(next,'Monthly expense stopped; past charges kept'))return false;$('monthly-dialog').close();return true;});
+});
 // Settings are part of the validated financial snapshot. Credentials are tab-only.
-let settingsCategoryId=null,settingsSubName=null,gistToken='',gistPreview=null,gistBusy=false,gistAction=null;
+let settingsCategoryId=null,settingsSubName=null,gistToken='',gistPreview=null,gistBusy=false;
 function applyBehavior(){document.body.classList.toggle('reduce-motion',state.settings.reducedMotion);}
 function settingsCategory(){return state.categories.find(c=>c.id===settingsCategoryId);}
 function settingsError(message){$('category-settings-feedback').textContent=message;$('category-settings-feedback').hidden=false;}
@@ -552,8 +587,8 @@ function renderSubSettings(){
 function finishCategoryChange(next,message){
  if(commit(next,message)){
   $('category-settings-feedback').hidden=true;
-  if(editingId&&!state.expenses.some(e=>e.id===editingId))resetForm();
- }
+  if(editingId&&!state.expenses.some(e=>e.id===editingId))resetForm();return true;
+ }return false;
 }
 $('settings-category').addEventListener('change',()=>{settingsCategoryId=$('settings-category').value;settingsSubName=null;renderSettings();$('category-settings-feedback').hidden=true;});
 $('settings-subcategory').addEventListener('change',()=>{settingsSubName=$('settings-subcategory').value;renderSubSettings();$('category-settings-feedback').hidden=true;});
@@ -586,23 +621,24 @@ $('subcategory-settings-form').addEventListener('submit',event=>{
  settingsSubName=name;finishCategoryChange(next,'Subcategory saved');
 });
 $('remove-category').addEventListener('click',()=>{
- const next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);if(!c)return;
- if(next.categories.filter(c=>!c.removed).length<=1){settingsError('Keep at least one available category.');return;}
- c.removed=true;next.recurringRules.filter(r=>r.category===c.id).forEach(r=>r.active=false);
- finishCategoryChange(next,'Category removed from picker; its monthly schedules stopped');
+ const c=settingsCategory();if(!c||c.removed)return;
+ if(state.categories.filter(c=>!c.removed).length<=1){settingsError('Keep at least one available category.');return;}
+ const id=c.id,count=state.recurringRules.filter(r=>r.category===id&&r.active).length;
+ requestConfirmation('Remove this category?',`Remove ${c.name} and its subcategories from new expense choices? Past expenses and their totals are kept.${count?` This also stops ${count} active monthly schedule${count===1?'':'s'}.`:''} Restoring the category will not restart stopped schedules. You can undo this change in this session.`,'Remove category',()=>{const next=clone(state),c=next.categories.find(c=>c.id===id);if(!c)return false;c.removed=true;next.recurringRules.filter(r=>r.category===id).forEach(r=>r.active=false);return finishCategoryChange(next,'Category removed from picker; its monthly schedules stopped');});
 });
 $('restore-category').addEventListener('click',()=>{const next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);if(!c)return;c.removed=false;if(c.removedSubs.length===c.subcategories.length)c.removedSubs.pop();finishCategoryChange(next,'Category restored; stopped schedules remain stopped');});
 $('remove-subcategory').addEventListener('click',()=>{
- const next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);if(!c||!c.subcategories.includes(settingsSubName))return;
+ const c=settingsCategory(),sub=settingsSubName;if(!c||!c.subcategories.includes(sub)||c.removedSubs.includes(sub))return;
  if(c.subcategories.filter(sub=>!c.removedSubs.includes(sub)).length<=1){settingsError('Keep at least one available subcategory.');return;}
- if(!c.removedSubs.includes(settingsSubName))c.removedSubs.push(settingsSubName);
- next.recurringRules.filter(r=>r.category===c.id&&r.subCategory===settingsSubName).forEach(r=>r.active=false);
- finishCategoryChange(next,'Subcategory removed from picker; its monthly schedules stopped');
+ const id=c.id,count=state.recurringRules.filter(r=>r.category===id&&r.subCategory===sub&&r.active).length;
+ requestConfirmation('Remove this subcategory?',`Remove ${sub} from ${c.name}'s new expense choices? Past expenses and their totals are kept.${count?` This also stops ${count} active monthly schedule${count===1?'':'s'}.`:''} Restoring the subcategory will not restart stopped schedules. You can undo this change in this session.`,'Remove subcategory',()=>{const next=clone(state),c=next.categories.find(c=>c.id===id);if(!c)return false;if(!c.removedSubs.includes(sub))c.removedSubs.push(sub);next.recurringRules.filter(r=>r.category===id&&r.subCategory===sub).forEach(r=>r.active=false);return finishCategoryChange(next,'Subcategory removed from picker; its monthly schedules stopped');});
 });
 $('restore-subcategory').addEventListener('click',()=>{const next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);if(!c)return;c.removedSubs=c.removedSubs.filter(sub=>sub!==settingsSubName);finishCategoryChange(next,'Subcategory restored; stopped schedules remain stopped');});
 $('behavior-form').addEventListener('submit',event=>{
- event.preventDefault();const next=clone(state);Object.assign(next.settings,{startView:$('start-view').value,rememberCategory:$('remember-category').checked,reducedMotion:$('reduce-motion').checked,monthlyPosting:$('monthly-posting').checked});
- addDueMonthly(next);commit(next,'App behavior saved');
+ event.preventDefault();const preferences={startView:$('start-view').value,rememberCategory:$('remember-category').checked,reducedMotion:$('reduce-motion').checked,monthlyPosting:$('monthly-posting').checked};
+ const save=()=>{const next=clone(state);Object.assign(next.settings,preferences);addDueMonthly(next);return commit(next,'App behavior saved');};
+ if(state.settings.monthlyPosting&&!preferences.monthlyPosting)requestConfirmation('Pause automatic monthly logging?','Due monthly expenses will stop being added automatically. Your schedules and past expenses are kept. Turning logging back on will catch up missed charges. Your other behavior changes will be saved with this choice.','Pause monthly logging',save);
+ else save();
 });
 function parseGistId(raw){
  const value=raw.trim();if(/^[a-f0-9]{5,64}$/i.test(value))return value;
@@ -613,10 +649,15 @@ function clearGistPreview(){gistPreview=null;$('gist-actions').hidden=true;$('gi
 $('gist-config-form').addEventListener('submit',event=>{
  event.preventDefault();if(gistBusy)return;const id=parseGistId($('gist-id').value);
  if(!id){$('gist-status').textContent='Enter an existing Gist ID or a gist.github.com link.';return;}
- const next=clone(state);next.settings.gistId=id;
- const token=$('gist-token').value.trim();if(commit(next,'Gist connection saved')){if(token)gistToken=token;$('gist-token').value='';clearGistPreview();$('gist-status').textContent=gistToken?'Connection saved. Preview before choosing a sync direction.':'Connection saved. Enter a token to preview this secret Gist.';}
+ const token=$('gist-token').value.trim(),oldId=state.settings.gistId;
+ const save=()=>{const next=clone(state);next.settings.gistId=id;if(!commit(next,'Gist connection saved'))return false;gistToken=token||(oldId===id?gistToken:'');$('gist-token').value='';clearGistPreview();$('gist-status').textContent=gistToken?'Connection saved. Preview before choosing a sync direction.':'Connection saved. Enter a token to preview this secret Gist.';return true;};
+ if(oldId&&oldId!==id)requestConfirmation('Change Gist connection?','Switch to a different Gist and clear the current preview? Your browser expenses and both Gists are kept. Enter a token for the new connection before syncing.','Change connection',save);
+ else save();
 });
-$('gist-disconnect').addEventListener('click',()=>{if(gistBusy)return;const next=clone(state);next.settings.gistId='';if(commit(next,'Gist disconnected')){gistToken='';$('gist-token').value='';clearGistPreview();}});
+$('gist-disconnect').addEventListener('click',()=>{
+ if(gistBusy||!state.settings.gistId&&!gistToken&&!$('gist-token').value)return;
+ requestConfirmation('Disconnect GitHub Gist?','Remove this browser’s saved Gist connection, clear its preview, and forget the token in this tab? Your local expenses and the Gist on GitHub are kept. You will need to connect again before syncing.','Disconnect Gist',()=>{const next=clone(state);next.settings.gistId='';if(!commit(next,'Gist disconnected'))return false;gistToken='';$('gist-token').value='';clearGistPreview();return true;});
+});
 function financialSnapshot(data){
  // Explicit whitelist: connection details and credentials never enter the remote file.
  const out={schema:data.schema,categorizationVersion:data.categorizationVersion,categorySettingsVersion:data.categorySettingsVersion,categories:clone(data.categories),expenses:clone(data.expenses),recurringRules:clone(data.recurringRules),settings:{startView:data.settings.startView,rememberCategory:data.settings.rememberCategory,reducedMotion:data.settings.reducedMotion,monthlyPosting:data.settings.monthlyPosting,gistId:''}};
@@ -646,7 +687,7 @@ function parseRemote(raw){
   return financialSnapshot(normalizeState(backup.data));
  }catch{throw Error('finflow.json is not a valid FinFlow backup. No data was replaced.');}
 }
-function setGistBusy(busy){gistBusy=busy;['gist-preview-button','gist-push','gist-pull','gist-confirm','gist-disconnect'].forEach(id=>$(id).disabled=busy);$('gist-config-form').querySelector('button[type="submit"]').disabled=busy;}
+function setGistBusy(busy){gistBusy=busy;['gist-preview-button','gist-push','gist-pull','gist-disconnect'].forEach(id=>$(id).disabled=busy);$('gist-config-form').querySelector('button[type="submit"]').disabled=busy;}
 $('gist-preview-button').addEventListener('click',async()=>{
  if(gistBusy)return;
  if(!state.settings.gistId||!gistToken){$('gist-status').textContent='Save a Gist ID and a token for this tab first.';return;}
@@ -657,17 +698,16 @@ $('gist-preview-button').addEventListener('click',async()=>{
  finally{setGistBusy(false);}
 });
 function confirmGist(action){
- if(gistBusy||!gistPreview)return;gistAction=action;
- $('gist-confirm-title').textContent=action==='pull'?'Replace this browser’s data?':'Upload spending to GitHub?';
- $('gist-confirm-copy').textContent=action==='pull'?`Keep the Gist’s ${gistPreview.remote.expenses.length} expenses instead of this browser’s ${state.expenses.length}. Categories, monthly schedules, and general preferences will also be replaced. Undo can restore this browser’s snapshot in this session.`:`Upload this browser’s ${state.expenses.length} expenses, categories, monthly schedules, and general preferences to finflow.json. This replaces that file on GitHub. The Gist is not encrypted and GitHub keeps its history.`;
- $('gist-confirm-dialog').showModal();
+ if(gistBusy||!gistPreview)return;const preview=gistPreview;
+ requestConfirmation(action==='pull'?'Replace this browser’s data?':'Replace the Gist snapshot?',
+ action==='pull'?`Keep the Gist’s ${preview.remote.expenses.length} expenses instead of this browser’s ${state.expenses.length}? Categories, monthly schedules, and general preferences will also be replaced. Undo can restore this browser’s snapshot in this session.`:`Upload this browser’s ${state.expenses.length} expenses, categories, monthly schedules, and general preferences to finflow.json? This replaces that file on GitHub. The Gist is not encrypted and GitHub keeps its history.`,
+ action==='pull'?'Replace browser data':'Replace Gist snapshot',()=>executeGist(action,preview));
 }
 $('gist-pull').addEventListener('click',()=>confirmGist('pull'));$('gist-push').addEventListener('click',()=>confirmGist('push'));
-$('gist-cancel').addEventListener('click',()=>$('gist-confirm-dialog').close());
-$('gist-confirm').addEventListener('click',async()=>{
- if(gistBusy||!gistPreview||storageBlocked)return;
- const preview=gistPreview,action=gistAction,id=state.settings.gistId;
- $('gist-confirm-dialog').close();setGistBusy(true);
+async function executeGist(action,preview){
+ if(gistBusy||!preview||storageBlocked)return false;
+ const id=state.settings.gistId;
+ setGistBusy(true);
  try{
   if(id!==preview.id||storageSnapshot!==preview.localSnapshot||localStorage.getItem(STORAGE_KEY)!==storageSnapshot)throw Error('This browser changed after preview. Preview again before replacing data.');
   const current=await gistRequest(id);if(storageSnapshot!==preview.localSnapshot||localStorage.getItem(STORAGE_KEY)!==storageSnapshot)throw Error('This browser changed during sync. Preview again before replacing data.');if(gistContent(current)!==preview.raw)throw Error('The Gist changed after preview. Preview again before replacing data.');
@@ -683,7 +723,7 @@ $('gist-confirm').addEventListener('click',async()=>{
   clearGistPreview();$('gist-status').textContent=action==='pull'?'Gist restored. Other browser tabs must reload.':'Snapshot uploaded to the secret Gist. Preview again before another sync.';
  }catch(error){clearGistPreview();$('gist-status').textContent=error.message;}
  finally{setGistBusy(false);}
-});
+}
 
 $('app-version').textContent=APP_VERSION;
 loadState();processMonthly();resetForm();switchView(state.settings.startView,false);

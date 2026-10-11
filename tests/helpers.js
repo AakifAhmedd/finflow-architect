@@ -40,4 +40,5 @@ async function add(page, amount, category='food', options={}) {
 async function text(page,id) {return page.$eval('#'+id,el=>el.textContent.trim());}
 function check(name,fn) {return Promise.resolve().then(fn).then(()=>console.log('PASS  '+name));}
 function today() {return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Colombo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
-module.exports={launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,URL,KEY,LEGACY};
+async function acceptConfirmation(page){if(await page.$eval('#confirm-dialog',e=>e.open)){await page.click('#confirm-action');await page.waitForFunction(()=>!document.getElementById('confirm-dialog').open);}}
+module.exports={acceptConfirmation,launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,URL,KEY,LEGACY};

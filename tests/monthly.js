@@ -1,4 +1,4 @@
-const {launch,fresh,stored,fill,add,text,check,assert,KEY,LEGACY,URL}=require('./helpers');
+const {acceptConfirmation,launch,fresh,stored,fill,add,text,check,assert,KEY,LEGACY,URL}=require('./helpers');
 async function installClock(page){
  await page.evaluateOnNewDocument(()=>{
   const OriginalDate=Date,instant=localStorage.getItem('finflow_test_clock');
@@ -37,9 +37,9 @@ async function setup(page,name,amount,date,sub='Cloud Storage & Software'){
    assert.equal(await text(page,'track-total'),'1,000.50');await page.click('#nav-spending');assert.equal(await text(page,'spending-total'),'Rs. 1,000.50');await page.click('#nav-track');
   });
   await check('Deleting a monthly charge honors deletion on reload and still allows future months',async()=>{
-   await page.click('#recent-list [data-expense]');await page.click('#delete-expense');assert.equal((await stored(page)).expenses.length,5);
+   await page.click('#recent-list [data-expense]');await page.click('#delete-expense');await acceptConfirmation(page);assert.equal((await stored(page)).expenses.length,5);
    await page.click('#undo');assert.equal((await stored(page)).expenses.length,6);
-   await page.click('#recent-list [data-expense]');await page.click('#delete-expense');await page.reload({waitUntil:'load'});
+   await page.click('#recent-list [data-expense]');await page.click('#delete-expense');await acceptConfirmation(page);await page.reload({waitUntil:'load'});
    assert.equal((await stored(page)).expenses.length,5);assert.equal((await stored(page)).recurringRules[0].nextMonth,'2024-07');
    await at(page,'2024-07-31');assert.equal((await stored(page)).expenses.length,6);assert.equal((await stored(page)).expenses.at(-1).date,'2024-07-31');
   });
@@ -59,9 +59,9 @@ async function setup(page,name,amount,date,sub='Cloud Storage & Software'){
    await at(page,'2024-09-20');assert.equal((await stored(page)).expenses.length,8);assert.equal((await stored(page)).expenses.at(-1).cents,200000);
   });
   await check('Stopping keeps previous charges, Undo restores the schedule, and stopped expenses do not catch up later',async()=>{
-   await page.click('[data-monthly]');await page.click('#stop-monthly');assert.equal((await stored(page)).recurringRules[0].active,false);assert.equal((await stored(page)).expenses.length,8);
+   await page.click('[data-monthly]');await page.click('#stop-monthly');await acceptConfirmation(page);assert.equal((await stored(page)).recurringRules[0].active,false);assert.equal((await stored(page)).expenses.length,8);
    await page.click('#undo');assert.equal((await stored(page)).recurringRules[0].active,true);
-   await page.click('[data-monthly]');await page.click('#stop-monthly');await at(page,'2024-11-20');assert.equal((await stored(page)).expenses.length,8);assert.match(await text(page,'monthly-list'),/No monthly expenses/);
+   await page.click('[data-monthly]');await page.click('#stop-monthly');await acceptConfirmation(page);await at(page,'2024-11-20');assert.equal((await stored(page)).expenses.length,8);assert.match(await text(page,'monthly-list'),/No monthly expenses/);
   });
   await check('Future monthly setup stays out of actual spending until its first charge date',async()=>{
    await setup(page,'YouTube','1200','2024-12-01','Other');const data=await stored(page);assert.equal(data.recurringRules.length,2);assert.equal(data.expenses.length,8);assert.equal(await text(page,'track-total'),'0');assert.match(await text(page,'monthly-list'),/YouTube/);
