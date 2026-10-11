@@ -31,3 +31,5 @@ The app's CSS, JavaScript, SVG icons, and charts are inline in index.html. There
 ## Storage compatibility
 
 Release versions and storage schemas are independent. The new app uses `finflow_tracker_v1`, with `schema: 1` and integer LKR cents. It imports existing logged expenses from `finflow_architect_model_v2` once, only when the new storage key is absent. The original key is never modified or deleted. Income, plans, subscriptions, and other removed features remain in that original data; they are not active in FinFlow. Do not discard saved financial data or silently overwrite unreadable storage.
+
+The 0.1.0 categorization update is additive within schema 1. Expenses retain `category` and `item` for compatibility and add `mainCategory` and `subCategory`. Prior classification metadata is retained during migration. `categorizationVersion: 1` marks the eight-category registry; repeated loads do not duplicate expenses or erase prior labels.

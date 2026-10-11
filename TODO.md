@@ -7,7 +7,7 @@ Until that milestone is ready, use 0.x.x versions for incremental improvements. 
 ## Completed foundation
 
 - [x] Rebuild FinFlow around Track and Spending.
-- [x] Add a large amount keypad and quick category selection.
+- [x] Add a large amount keypad and an eight-category, two-step selector with specific subcategories and Other.
 - [x] Keep the primary phone expense flow visible on the first screen.
 - [x] Add category breakdowns, daily spending charts, and monthly navigation.
 - [x] Support expense editing, deletion, and undo.

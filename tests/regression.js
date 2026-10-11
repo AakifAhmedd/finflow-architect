@@ -12,30 +12,32 @@ const {launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,KEY,LEGACY}=
   });
   await check('Tracker opens first with the full personal category set and no invented expenses',async()=>{
    assert.equal(await page.$eval('#track-view',e=>e.hidden),false);
-   assert.equal(await page.$$eval('[data-category]',e=>e.length),6);
+   assert.equal(await page.$$eval('[data-category]',e=>e.length),8);
    assert.equal(await stored(page),null);assert.equal(await text(page,'track-total'),'0');
    assert.match(await text(page,'recent-list'),/first expense/i);
   });
   await check('Zero, malformed amounts, and missing category cannot save',async()=>{
+   assert.equal(await page.$eval('#save-expense',e=>e.disabled),true);
+   await page.click('[data-category="food"]');await page.click('[data-subcategory="Other"]');
    for(const value of ['0','-10','1.234','1e4','abc','9999999999']) {
     await fill(page,'amount',value);await page.click('#save-expense');assert.equal(await stored(page),null);
    }
-   await fill(page,'amount','20');await page.click('#save-expense');assert.match(await text(page,'form-feedback'),/Choose what/);
+   await page.click('#categories-back');await fill(page,'amount','20');await page.$eval('#expense-form',e=>e.requestSubmit());assert.match(await text(page,'form-feedback'),/Choose a main category/);
   });
   await check('Keypad supports decimal entry, backspace, and two-digit cents',async()=>{
    await fill(page,'amount','');
    for(const key of ['1','2','5','0','.','5','0','7','backspace','0']) await page.click(`[data-key="${key}"]`);
    assert.equal(await page.$eval('#amount',e=>e.value),'1250.50');
-   await page.click('[data-category="sports"]');await page.$eval('#entry-details',e=>e.open=true);await page.click('[data-item="Badminton Gear"]');await page.click('#save-expense');
-   const data=await stored(page);assert.equal(data.expenses.length,1);assert.equal(data.expenses[0].cents,125050);assert.equal(data.expenses[0].item,'Badminton Gear');
+   await page.click('[data-category="sports"]');await page.click('[data-subcategory="Sports & Gear (Badminton/Swimming)"]');await page.click('#save-expense');
+   const data=await stored(page);assert.equal(data.expenses.length,1);assert.equal(data.expenses[0].cents,125050);assert.equal(data.expenses[0].subCategory,'Sports & Gear (Badminton/Swimming)');
    assert.equal(await text(page,'track-total'),'1,250.50');
    assert.equal(await page.$eval('#amount',e=>e.value),'');
    await page.click('#save-expense');assert.equal((await stored(page)).expenses.length,1);
   });
   await check('Notes and dates are optional, local dates default correctly',async()=>{
    assert.equal((await stored(page)).expenses[0].date,today());
-   await add(page,'200','transport',{item:'RayZR Fuel',note:'Fuel stop'});
-   const e=(await stored(page)).expenses[1];assert.equal(e.note,'Fuel stop');assert.equal(e.item,'RayZR Fuel');
+   await add(page,'200','transport',{subCategory:'Fuel & Scooter Maintenance (RayZR)',note:'Fuel stop'});
+   const e=(await stored(page)).expenses[1];assert.equal(e.note,'Fuel stop');assert.equal(e.subCategory,'Fuel & Scooter Maintenance (RayZR)');
   });
   await check('Integer cents keep totals exact and graphs agree with tracker',async()=>{
    await add(page,'0.10');await add(page,'0.20');await page.click('#nav-spending');
@@ -62,7 +64,7 @@ const {launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,KEY,LEGACY}=
    assert.equal((await stored(page)).expenses.length,4);assert.equal(await text(page,'track-total'),'1,450.80');
   });
   await check('Persisted expense notes remain inert text across cards, dialog, and reload',async()=>{
-   const payload='<img src=x onerror="window.__xss=1">';await add(page,'500','pet',{item:'Cat Food',note:payload});
+   const payload='<img src=x onerror="window.__xss=1">';await add(page,'500','pet',{subCategory:'Cat Food & Litter',note:payload});
    await page.reload({waitUntil:'load'});assert.equal((await stored(page)).expenses.length,5);
    assert.equal(await page.evaluate(()=>window.__xss),undefined);assert.equal(await page.$$eval('img',e=>e.length),0);
    assert.ok((await text(page,'recent-list')).includes(payload));await page.click('#recent-list [data-expense]');
@@ -84,14 +86,14 @@ const {launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,KEY,LEGACY}=
   await check('Failed storage writes retain the form and never show a false save or mutate totals',async()=>{
    await page.reload({waitUntil:'load'});
    await page.evaluate(()=>{window.realSet=Storage.prototype.setItem;Storage.prototype.setItem=function(){throw new DOMException('Full','QuotaExceededError');};});
-   await add(page,'77','living');assert.equal((await stored(page)).expenses.length,6);
+   await add(page,'77','tech');assert.equal((await stored(page)).expenses.length,6);
    assert.equal(await page.$eval('#amount',e=>e.value),'77');assert.match(await text(page,'storage-warning'),/not saved/);
    await page.evaluate(()=>Storage.prototype.setItem=window.realSet);await page.click('#save-expense');
    assert.equal((await stored(page)).expenses.length,7);
   });
   await check('Another tab cannot silently overwrite newly saved expenses',async()=>{
    const other=await context.newPage();await other.bringToFront();await other.goto(page.url(),{waitUntil:'load'});
-   await add(other,'25','auto');await page.bringToFront();await add(page,'10','food');
+   await add(other,'25','transport');await page.bringToFront();await add(page,'10','food');
    assert.match(await text(page,'storage-warning'),/another tab/);assert.equal((await stored(page)).expenses.length,8);
    await page.click('#retry-storage');await page.click('#save-expense');assert.equal((await stored(page)).expenses.length,9);
    await other.close();
@@ -101,7 +103,10 @@ const {launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,KEY,LEGACY}=
   const legacy={transactions:[{id:'one',type:'expense',node:'RayZR Fuel',amount:1200.5,date:today(),note:'Old expense'},{id:'two',type:'income',node:'Income',amount:50000,date:today()},{id:'deleted',type:'expense',node:'Meals',amount:150,date:today()},{id:'custom',type:'expense',node:'<img src=x onerror="window.__xss=1">',amount:400,date:today(),note:'Custom category'}],deletedTransactions:{deleted:1},currentFlows:[{source:'Total Cash Flow',target:'Custom Group',value:0},{source:'Custom Group',target:'<img src=x onerror="window.__xss=1">',value:0}]};
   await check('Legacy migration preserves real expenses and custom categories, honors deletions, and leaves original data intact',async()=>{
    await p.evaluate((key,value)=>localStorage.setItem(key,value),LEGACY,JSON.stringify(legacy));await p.reload({waitUntil:'load'});
-   const data=await stored(p);assert.equal(data.expenses.length,2);assert.equal(data.expenses[0].cents,120050);assert.equal(data.categories.length,7);
+   const data=await stored(p);assert.equal(data.expenses.length,2);assert.equal(data.expenses[0].cents,120050);assert.equal(data.categories.length,8);assert.equal(data.previousCategories.length,7);
+   assert.equal(data.expenses[0].mainCategory,'Transport & Vehicles');assert.equal(data.expenses[0].subCategory,'Fuel & Scooter Maintenance (RayZR)');
+   assert.equal(data.expenses[1].mainCategory,'Lifestyle & Social');assert.equal(data.expenses[1].subCategory,'Other');assert.equal(data.expenses[1].previousClassification.subCategory,legacy.transactions[3].node);
+   assert.ok((await text(p,'recent-list')).includes(legacy.transactions[3].node));
    assert.equal(await p.evaluate(key=>localStorage.getItem(key),LEGACY),JSON.stringify(legacy));
    assert.equal(await p.$$eval('img',e=>e.length),0);assert.equal(await p.evaluate(()=>window.__xss),undefined);
    await p.reload({waitUntil:'load'});assert.equal((await stored(p)).expenses.length,2);

@@ -6,10 +6,10 @@ const {launch,fresh,stored,add,text,check,today,assert,ROOT,fs}=require('./helpe
   const external=[];page.on('request',r=>{if(/^https?:/.test(r.url()))external.push(r.url());});
   await page.setOfflineMode(true);await page.reload({waitUntil:'load'});
   await check('The app works offline and requests no CDN scripts, images, fonts, or other external resources',async()=>{
-   await add(page,'1800','food',{item:'Meals'});assert.equal((await stored(page)).expenses.length,1);assert.deepEqual(external,[]);
+   await add(page,'1800','food',{subCategory:'Cafes & Dining (Cafe 4 U)'});assert.equal((await stored(page)).expenses.length,1);assert.deepEqual(external,[]);
   });
-  await add(page,'2500','transport',{item:'RayZR Fuel'});await add(page,'1200','pet',{item:'Cat Food'});await add(page,'10000','sports',{item:'Gym'});
-  await add(page,'2800','living',{item:'Google One'});await add(page,'650','food',{item:'Snacks'});await add(page,'6500','auto',{item:'Vitz Shared Costs'});
+  await add(page,'2500','transport',{subCategory:'Fuel & Scooter Maintenance (RayZR)'});await add(page,'1200','pet',{subCategory:'Cat Food & Litter'});await add(page,'10000','sports',{subCategory:'Gym Memberships'});
+  await add(page,'2800','tech',{subCategory:'Cloud Storage & Software (Google One)'});await add(page,'650','food',{subCategory:'Other'});await add(page,'6500','housing',{subCategory:'Rent & Utilities'});
   const seeded=await page.evaluate(()=>{
    const key='finflow_tracker_v1',data=JSON.parse(localStorage.getItem(key)),base=data.expenses[0].date.slice(0,7);
    // Exercise daily plots with multiple dates without shipping demonstration data.
@@ -24,13 +24,16 @@ const {launch,fresh,stored,add,text,check,today,assert,ROOT,fs}=require('./helpe
     await page.click('#nav-spending');assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`Spending overflow at ${width}`);
    }
   });
-  await check('Phone entry keeps Save visible before and after a quick category selection',async()=>{
+  await check('Phone subcategory selection keeps Save visible and enables it only after selection',async()=>{
    await page.setViewport({width:390,height:844});await page.click('#nav-track');
-   for(const selected of [false,true]){
-    if(selected)await page.click('[data-category="food"]');
-    const position=await page.evaluate(()=>({save:document.getElementById('save-expense').getBoundingClientRect().bottom,nav:document.querySelector('.nav').getBoundingClientRect().top}));
-    assert.ok(position.save<=position.nav,`Save covered by navigation: ${JSON.stringify(position)}`);
-   }
+   assert.equal(await page.$eval('#save-expense',e=>e.disabled),true);
+   await page.click('[data-category="food"]');
+   assert.equal(await page.$eval('#save-expense',e=>e.disabled),true);
+   await page.click('[data-subcategory="Other"]');
+   assert.equal(await page.$eval('#save-expense',e=>e.disabled),false);
+   const position=await page.evaluate(()=>({save:document.getElementById('save-expense').getBoundingClientRect().bottom,nav:document.querySelector('.nav').getBoundingClientRect().top}));
+   assert.ok(position.save<=position.nav,`Save covered by navigation: ${JSON.stringify(position)}`);
+   await page.click('#categories-back');
   });
   await check('Every visible control has an accessible name and all form fields have labels',async()=>{
    for(const view of ['track','spending']){
@@ -55,9 +58,10 @@ const {launch,fresh,stored,add,text,check,today,assert,ROOT,fs}=require('./helpe
    await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
    assert.equal(await page.$eval('#track-view',e=>getComputedStyle(e).animationName),'none');
    assert.equal(await page.$eval('#save-expense',e=>getComputedStyle(e).transitionDuration),'0s');
+   await page.click('[data-category="food"]');assert.equal(await page.$eval('#categories',e=>getComputedStyle(e).animationName),'none');await page.click('#categories-back');
   });
   await check('Adding by keyboard and undoing outside inputs is supported',async()=>{
-   await page.focus('#amount');await page.keyboard.type('123.45');await page.click('[data-category="food"]');await page.click('#save-expense');
+   await page.focus('#amount');await page.keyboard.type('123.45');await page.click('[data-category="food"]');await page.click('[data-subcategory="Other"]');await page.click('#save-expense');
    assert.equal((await stored(page)).expenses.length,seeded.expenses.length+1);
    await page.focus('#nav-track');await page.keyboard.down('Control');await page.keyboard.press('z');await page.keyboard.up('Control');
    assert.equal((await stored(page)).expenses.length,seeded.expenses.length);

@@ -26,8 +26,9 @@ async function fill(page, id, value) {
 }
 async function add(page, amount, category='food', options={}) {
   await fill(page,'amount',amount);
+  if(await page.$eval('#categories-back',el=>!el.hidden)) await page.click('#categories-back');
   await page.click(`[data-category="${category}"]`);
-  if(options.item) { await page.$eval('#entry-details',el=>el.open=true); await page.click(`[data-item="${options.item}"]`); }
+  await page.click(`[data-subcategory="${options.subCategory||'Other'}"]`);
   if(options.note || options.date) {
     await page.$eval('#entry-details',el=>el.open=true);
     if(options.note) await fill(page,'note',options.note);

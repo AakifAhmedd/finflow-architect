@@ -9,26 +9,27 @@ npm install
 npm test
 ```
 
-This runs `node tests/regression.js` and `node tests/regression-a11y-colour.js`. Both resolve `index.html` relative to the repository, open it using `file://`, and use isolated Chrome browser contexts. No server, network access, backend, build, or real financial data is needed.
+This runs `node tests/regression.js`, `node tests/regression-a11y-colour.js`, and `node tests/categories.js`. All three resolve `index.html` relative to the repository, open it using `file://`, and use isolated Chrome browser contexts. No server, network access, backend, build, or real financial data is needed.
 
 The default Chrome path is `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. Set the `CHROME` environment variable for a different executable. Browser dates use Asia/Colombo.
 
 ## Coverage
 
 - Baseline version consistency; default categories and honest empty states.
+- Exactly eight main categories and all 32 specified subcategory choices, Back navigation, selection highlight, Save gating, and both classification fields in storage.
 - Large keypad, keyboard entry, decimal precision, input validation, optional notes/date, and historical expenses.
 - Save/reload persistence, integer-cent totals, category filtering, monthly navigation, editing, deletion, and undo.
-- Legacy migration, retained custom categories, deletion tombstones, idempotence, original-data preservation, and unreadable data.
+- Legacy migration, migration from the flat tracker registry, retained prior classifications, deletion tombstones, idempotence, original-data preservation, and unreadable data.
 - Stored XSS protection in notes/categories; browser storage failures and conflicting writes in another tab.
 - Offline operation, named controls, chart text alternatives, dialog keyboard behavior, reduced motion, and touch targets.
-- Tracker and spending layouts at 320, 360, 390, 760, 768, 1024, and 1440 px, including overflow checks and first-screen Save visibility on a 390 × 844 phone.
+- Tracker and spending layouts at 320, 360, 390, 760, 768, 1024, and 1440 px, including overflow checks and Save visibility after subcategory selection on a 390 × 844 phone.
 
-Tests also write populated desktop and phone review screenshots to `/tmp/finflow-{desktop,phone}-{track,spending}.png`. Fixtures are isolated from your actual browser profile and are never shipped in the app.
+Tests also write populated desktop and phone review screenshots to `/tmp/finflow-{desktop,phone}-{track,spending}.png`. Category checks also capture both selection steps in `/tmp/finflow-phone-{categories,subcategories}.png`. Fixtures are isolated from your actual browser profile and are never shipped in the app.
 
 ## Manual release checks
 
-1. On a phone-sized screen, add an expense with the keypad and one category tap. Add a decimal amount with an optional item/note. Confirm the saved total and cleared form. Scroll to recent expenses and switch views using the bottom navigation.
-2. On desktop, open Spending. Compare category amounts and daily bar totals with the expense list. Select and clear a category. Switch to an empty month and back.
+1. On a phone-sized screen, add an expense with the keypad, a main category, and a subcategory. Try Back and change the category; Save should stay disabled until a subcategory is chosen. Add a decimal amount with an optional note. Confirm the saved total and cleared form. Scroll to recent expenses and switch views using the bottom navigation.
+2. On desktop, open Spending. Compare category amounts and daily bar totals with the expense list. Select a main category, verify its subcategory totals, and clear the filter. Switch to an empty month and back.
 3. Open an expense, edit it, delete it, and undo. Close the dialog with Escape. Check keyboard focus and narrow-screen wrapping.
 4. Reload and verify persistence. Disconnect the network; all features should still work. Inspect rendered desktop and phone screenshots for clipped text, awkward spacing, or controls covered by navigation.
 5. Run `git diff --check` and confirm all release version references agree before committing/pushing.

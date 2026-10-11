@@ -1,10 +1,10 @@
 {
   "name": "finflow-tests",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "description": "Dev-only browser regression tests for the self-contained FinFlow app.",
   "scripts": {
-    "test": "node tests/regression.js && node tests/regression-a11y-colour.js"
+    "test": "node tests/regression.js && node tests/regression-a11y-colour.js && node tests/categories.js"
   },
   "devDependencies": {
     "puppeteer-core": "^23.0.0"
