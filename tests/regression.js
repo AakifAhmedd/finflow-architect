@@ -3,9 +3,9 @@ const {launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,KEY,LEGACY}=
  const browser=await launch();
  try {
   const {page,context,errors}=await fresh(browser);
-  await check('Version baseline is consistent across all release references',async()=>{
+  await check('Current version is consistent across all release references',async()=>{
    const version=fs.readFileSync(ROOT+'/VERSION','utf8').trim(),html=fs.readFileSync(ROOT+'/index.html','utf8');
-   assert.equal(version,'0.0.0');assert.ok(html.includes(`const APP_VERSION = '${version}'`));
+   assert.match(version,/^\d+\.\d+\.\d+$/);assert.ok(html.includes(`const APP_VERSION = '${version}'`));
    assert.equal(await text(page,'app-version'),version);
    assert.equal(await page.$eval('meta[name="application-version"]',e=>e.content),version);
    assert.equal(JSON.parse(fs.readFileSync(ROOT+'/package.json')).version,version);

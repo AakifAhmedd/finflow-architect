@@ -2,6 +2,10 @@
 
 The tracker-first FinFlow rebuild starts a new release line at **0.0.0**. This reset is explicitly authorized by the repository owner. Earlier FinFlow Architect commits remain in Git history; they had no committed VERSION or VERSIONING.md.
 
+## Full release milestone
+
+**1.0.0** is reserved for the full FinFlow PWA release. Track its implementation and release criteria in [TODO.md](TODO.md). Continue using 0.x.x for work leading up to that milestone; documenting the target does not make the current app a PWA.
+
 ## Required for every change
 
 Every user-visible, behavioral, styling, documentation, refactoring, or bug-fix change must update the version. Commit the version update together with its implementation. Never push a change without its corresponding version update.
