@@ -1,39 +1,34 @@
-# Regression tests
+# FinFlow regression checks
 
-Headless checks for the bugs found in QA (`../dogfood-output/report.md`) and for the
-behaviour that QA got *wrong* about, so those are not re-reported as bugs.
+The ground-up 0.0.0 rebuild replaces the previous flow-builder and subscription checks with tests of the active expense tracker and spending views. The existing dev-only dependency, `puppeteer-core`, is unchanged.
 
 ## Running
 
-```bash
-npm install puppeteer-core@23
-node tests/regression.js
-node tests/regression-a11y-colour.js
+```sh
+npm install
+npm test
 ```
 
-Both load `file://../index.html` in headless Chrome, so there is no server to start and
-nothing to deploy. Each exits non-zero on failure.
+This runs `node tests/regression.js` and `node tests/regression-a11y-colour.js`. Both resolve `index.html` relative to the repository, open it using `file://`, and use isolated Chrome browser contexts. No server, network access, backend, build, or real financial data is needed.
 
-Requires a local Chrome at `/Applications/Google Chrome.app` — adjust `CHROME` at the
-top of each file for other platforms.
+The default Chrome path is `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. Set the `CHROME` environment variable for a different executable. Browser dates use Asia/Colombo.
 
-## What is covered
+## Coverage
 
-**`regression.js`** (25 checks)
-- `formatCurrency` rounding is symmetric and never prints `Rs. -0`
-- stored XSS: a node named `<img src=x onerror=…>` persists to localStorage but does not
-  execute in Analysis, Flow Builder, or the connections matrix, and survives a reload
-- Plan and Actual charts each show an empty-state message
-- header badges, Tracker totals and Analysis figures agree with logged transactions
-- Analysis shows a deficit message, correct `1 Stream` grammar, and an explicit
-  empty-month message
+- Baseline version consistency; default categories and honest empty states.
+- Large keypad, keyboard entry, decimal precision, input validation, optional notes/date, and historical expenses.
+- Save/reload persistence, integer-cent totals, category filtering, monthly navigation, editing, deletion, and undo.
+- Legacy migration, retained custom categories, deletion tombstones, idempotence, original-data preservation, and unreadable data.
+- Stored XSS protection in notes/categories; browser storage failures and conflicting writes in another tab.
+- Offline operation, named controls, chart text alternatives, dialog keyboard behavior, reduced motion, and touch targets.
+- Tracker and spending layouts at 320, 360, 390, 760, 768, 1024, and 1440 px, including overflow checks and first-screen Save visibility on a 390 × 844 phone.
 
-**`regression-a11y-colour.js`** (15 checks)
-- net/surplus figures switch rose/teal by sign on all three surfaces
-- chart month-nav buttons carry `aria-label`; no visible button is unnamed
-- Sankey has `role="img"` and a mode-aware `aria-label`
-- subscriptions, delete + undo, and duplicate-node rejection still behave correctly
+Tests also write populated desktop and phone review screenshots to `/tmp/finflow-{desktop,phone}-{track,spending}.png`. Fixtures are isolated from your actual browser profile and are never shipped in the app.
 
-The last group exists because QA wrongly reported duplicate node creation and note
-auto-categorisation as broken. Both work. These assertions pin the correct behaviour so
-a future change that breaks them is caught rather than misdiagnosed.
+## Manual release checks
+
+1. On a phone-sized screen, add an expense with the keypad and one category tap. Add a decimal amount with an optional item/note. Confirm the saved total and cleared form. Scroll to recent expenses and switch views using the bottom navigation.
+2. On desktop, open Spending. Compare category amounts and daily bar totals with the expense list. Select and clear a category. Switch to an empty month and back.
+3. Open an expense, edit it, delete it, and undo. Close the dialog with Escape. Check keyboard focus and narrow-screen wrapping.
+4. Reload and verify persistence. Disconnect the network; all features should still work. Inspect rendered desktop and phone screenshots for clipped text, awkward spacing, or controls covered by navigation.
+5. Run `git diff --check` and confirm all release version references agree before committing/pushing.

@@ -1,7 +1,8 @@
 {
-  "name": "finflow-architect-tests",
+  "name": "finflow-tests",
+  "version": "0.0.0",
   "private": true,
-  "description": "Headless regression tests for index.html. The app itself has no build step and no dependencies; these are dev-only.",
+  "description": "Dev-only browser regression tests for the self-contained FinFlow app.",
   "scripts": {
     "test": "node tests/regression.js && node tests/regression-a11y-colour.js"
   },
