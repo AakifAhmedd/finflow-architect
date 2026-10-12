@@ -64,10 +64,10 @@ async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={d
   for(const width of [320,390,768,1440]){await page.setViewport({width,height:844});await page.click('#nav-settings');assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);const bad=await page.evaluate(()=>[...document.querySelectorAll('#settings-view button,#settings-view input,#settings-view select')].filter(e=>e.getClientRects().length&&!((e.getAttribute('aria-label')||e.textContent||'').trim()||e.labels?.length)).map(e=>e.id));assert.deepEqual(bad,[]);}
   await page.setViewport({width:390,height:844});await page.click('#nav-settings');await page.screenshot({path:'/tmp/finflow-phone-settings.png',fullPage:true});await page.setViewport({width:1440,height:1100});await page.click('#nav-settings');await page.screenshot({path:'/tmp/finflow-desktop-settings.png',fullPage:true});
  });
- await check('Gist connection validates origin/ID, saves no token, and reload/disconnect clears credentials',async()=>{
+ await check('Gist connection validates origin/ID, remembers its masked token, and keeps credentials outside financial data',async()=>{
   await fill(page,'gist-id','https://example.com/bad');await page.click('#gist-config-form button[type="submit"]');assert.match(await text(page,'gist-status'),/existing Gist/);
-  await fill(page,'gist-id','https://gist.github.com/personal/abc123');await fill(page,'gist-token','fixture-token');await page.click('#gist-config-form button[type="submit"]');assert.equal((await stored(page)).settings.gistId,'abc123');assert.equal(await page.$eval('#gist-token',e=>e.value),'');assert.ok(!JSON.stringify(await stored(page)).includes('fixture-token'));
-  await page.reload();await page.click('#nav-settings');await page.click('#gist-preview-button');assert.match(await text(page,'gist-status'),/token/);
+  await fill(page,'gist-id','https://gist.github.com/personal/abc123');await fill(page,'gist-token','fixture-token');await page.click('#gist-config-form button[type="submit"]');assert.equal((await stored(page)).settings.gistId,'abc123');assert.equal(await page.$eval('#gist-token',e=>e.value),'fixture-token');assert.ok(!JSON.stringify(await stored(page)).includes('fixture-token'));
+  await page.reload();await page.click('#nav-settings');assert.equal(await page.$eval('#gist-token',e=>e.value),'fixture-token');assert.equal(await page.$eval('#gist-id',e=>e.value),'abc123');
   await fill(page,'gist-token','fixture-token');await page.click('#gist-config-form button[type="submit"]');
  });
  const data=await stored(page),remote={format:'finflow-backup',version:'0.3.0',data:structuredClone(data)};remote.data.expenses=remote.data.expenses.slice(0,1);remote.data.recurringRules=[];

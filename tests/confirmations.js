@@ -32,16 +32,16 @@ async function warning(page,label){assert.equal(await page.$eval('#confirm-dialo
   window.gistFixture={id:'abc123',public:false,truncated:false,files:{'finflow.json':{content:JSON.stringify({format:'finflow-backup',version:'0.3.1',data:remote})}}};window.requests=[];window.holdUpload=false;
   window.fetch=async(url,options)=>{window.requests.push(options.method);if(options.method==='PATCH'){Object.assign(window.gistFixture.files,JSON.parse(options.body).files);if(window.holdUpload)await new Promise(resolve=>window.releaseUpload=resolve);}return {ok:true,status:200,json:async()=>structuredClone(window.gistFixture)};};
  },remote);
- await check('Disconnect warns before clearing the connection, preview, or tab-only token; cancellation keeps the connection usable',async()=>{
+ await check('Disconnect warns before clearing the connection, preview, or saved device token; cancellation keeps the connection usable',async()=>{
   await page.click('#gist-preview-button');await page.waitForFunction(()=>!document.getElementById('gist-actions').hidden);const before=await stored(page),requests=await page.evaluate(()=>requests.length),status=await text(page,'gist-status');
   await page.click('#gist-disconnect');await warning(page,'Disconnect Gist');assert.match(await text(page,'confirm-copy'),/local expenses and the Gist on GitHub are kept/);await page.click('#confirm-cancel');assert.deepEqual(await stored(page),before);assert.equal(await text(page,'gist-status'),status);assert.equal(await page.evaluate(()=>requests.length),requests);
   await page.click('#gist-preview-button');await page.waitForFunction(()=>!document.getElementById('gist-actions').hidden);assert.equal(await page.evaluate(()=>requests.length),requests+1);
-  await page.click('#gist-disconnect');await acceptConfirmation(page);assert.equal((await stored(page)).settings.gistId,'');assert.deepEqual((await stored(page)).expenses,before.expenses);await page.click('#gist-preview-button');assert.match(await text(page,'gist-status'),/token for this tab/);
+  await page.click('#gist-disconnect');await acceptConfirmation(page);assert.equal((await stored(page)).settings.gistId,'');assert.deepEqual((await stored(page)).expenses,before.expenses);await page.click('#gist-preview-button');assert.match(await text(page,'gist-status'),/token first/);
   await fill(page,'gist-id','abc123');await fill(page,'gist-token','synthetic-test-token');await page.click('#gist-config-form button[type="submit"]');
  });
  await check('Changing an existing Gist uses the same confirmation and never reuses the old token for a different connection',async()=>{
   const before=await stored(page);await fill(page,'gist-id','def456');await page.click('#gist-config-form button[type="submit"]');await warning(page,'Change connection');await page.keyboard.press('Escape');assert.deepEqual(await stored(page),before);
-  await page.click('#gist-config-form button[type="submit"]');await acceptConfirmation(page);assert.equal((await stored(page)).settings.gistId,'def456');await page.click('#gist-preview-button');assert.match(await text(page,'gist-status'),/token for this tab/);
+  await page.click('#gist-config-form button[type="submit"]');await acceptConfirmation(page);assert.equal((await stored(page)).settings.gistId,'def456');await page.click('#gist-preview-button');assert.match(await text(page,'gist-status'),/token first/);
   await fill(page,'gist-id','abc123');await fill(page,'gist-token','synthetic-test-token');await page.click('#gist-config-form button[type="submit"]');await acceptConfirmation(page);
  });
  await check('Both Gist replacements use the shared warning and cancellation performs no replacement requests',async()=>{

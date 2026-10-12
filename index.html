@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f6f0">
 <meta name="description" content="FinFlow — personal expense tracking and a clearer view of your spending.">
-<meta name="application-version" content="0.5.0">
+<meta name="application-version" content="0.6.0">
 <title>FinFlow · Personal expenses</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%232c513e'/%3E%3Cpath d='M18 44V20h28M18 32h20' stroke='%23dcecbd' stroke-width='7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
@@ -137,9 +137,9 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <form id="subcategory-settings-form"><div class="field"><label for="subcategory-name">Subcategory name</label><input id="subcategory-name" maxlength="80" required></div><div class="field"><label for="subcategory-icon">Subcategory icon</label><select id="subcategory-icon"></select></div><div id="subcategory-icon-preview" class="icon-preview" aria-hidden="true"></div><label class="monthly-toggle" for="subcategory-subscription"><input id="subcategory-subscription" type="checkbox">Recurring subscription</label><p class="muted monthly-hint">This choice starts with Repeat monthly enabled. Set the amount and first date once. Existing expenses and schedules stay as they are.</p><div class="settings-actions"><button class="primary" type="submit">Save subcategory</button><button id="new-subcategory" class="text-button" type="button">Add subcategory</button><button id="remove-subcategory" class="delete-button" type="button">Remove subcategory</button><button id="restore-subcategory" class="text-button" type="button" hidden>Restore subcategory</button></div></form><p id="category-settings-feedback" class="form-feedback" role="alert" hidden></p>
 </section>
 <div class="settings-stack"><section class="card settings-card" aria-labelledby="behavior-title"><h2 id="behavior-title">App behavior</h2><form id="behavior-form"><div class="field"><label for="start-view">Open FinFlow on</label><select id="start-view"><option value="track">Tracks</option><option value="spending">Spending</option><option value="settings">Settings</option></select></div><label class="monthly-toggle" for="remember-category"><input id="remember-category" type="checkbox">Remember the last main category after saving</label><label class="monthly-toggle" for="reduce-motion"><input id="reduce-motion" type="checkbox">Reduce motion</label><label class="monthly-toggle" for="monthly-posting"><input id="monthly-posting" type="checkbox">Log due monthly expenses automatically</label><p class="muted monthly-hint">When paused, schedules are kept. Turning this on catches up missed months.</p><button class="primary" type="submit">Save behavior</button></form></section>
-<section class="card settings-card" aria-labelledby="gist-title"><h2 id="gist-title">Cloud sync (optional)</h2><p class="muted settings-intro">Leave Gist ID blank to find or create a separate secret Gist named finflow-data. Creating it uploads your current FinFlow backup. A Gist is stored on GitHub and is not encrypted; anyone with its link can read it.</p><form id="gist-config-form"><div class="field"><label for="gist-token">GitHub personal access token (needs &quot;gist&quot; scope)</label><input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="GitHub personal access token"></div><div class="field"><label for="gist-id">Gist ID <span class="muted">(leave blank to create one)</span></label><input id="gist-id" autocomplete="off" spellcheck="false" placeholder="Leave blank to create finflow-data" aria-describedby="gist-id-help"><p id="gist-id-help" class="muted monthly-hint">Enter an existing FinFlow Gist ID or link, or leave blank for automatic setup. RACK’s data stays separate.</p></div><p class="muted monthly-hint">Fine-grained tokens can use Gists read/write permission. Your token is never saved or included in backups; re-enter it after reloading. Save connection, then Preview cloud before choosing Push to cloud or Pull from cloud. Sync replaces a whole snapshot; it does not merge devices.</p><div class="settings-actions"><button class="primary" type="submit">Save connection</button><button id="gist-disconnect" class="delete-button" type="button">Disconnect</button></div></form><button id="gist-preview-button" class="text-button" type="button">Preview cloud</button><p id="gist-status" class="muted settings-intro" role="status" aria-live="polite">No cloud preview loaded.</p><div id="gist-actions" class="settings-actions" hidden><button id="gist-push" class="delete-button" type="button">Push to cloud</button><button id="gist-pull" class="delete-button" type="button">Pull from cloud</button></div></section></div>
+<section class="card settings-card" aria-labelledby="gist-title"><h2 id="gist-title">Cloud sync (optional)</h2><p class="muted settings-intro">Leave Gist ID blank to find or create a separate secret Gist named finflow-data. Creating it uploads your current FinFlow backup. A Gist is stored on GitHub and is not encrypted; anyone with its link can read it.</p><form id="gist-config-form"><div class="field"><label for="gist-token">GitHub personal access token (needs &quot;gist&quot; scope)</label><input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="GitHub personal access token"></div><div class="field"><label for="gist-id">Gist ID <span class="muted">(leave blank to create one)</span></label><input id="gist-id" autocomplete="off" spellcheck="false" placeholder="Leave blank to create finflow-data" aria-describedby="gist-id-help"><p id="gist-id-help" class="muted monthly-hint">Enter an existing FinFlow Gist ID or link, or leave blank for automatic setup. RACK’s data stays separate.</p></div><p class="muted monthly-hint">Fine-grained tokens can use Gists read/write permission. Your token and Gist ID are saved in this browser. Disconnect removes them. Your token is excluded from backups. Save connection, then Preview cloud before choosing Push to cloud or Pull from cloud. Sync replaces a whole snapshot; it does not merge devices.</p><div class="settings-actions"><button class="primary" type="submit">Save connection</button><button id="gist-disconnect" class="delete-button" type="button">Disconnect</button></div></form><button id="gist-preview-button" class="text-button" type="button">Preview cloud</button><p id="gist-status" class="muted settings-intro" role="status" aria-live="polite">No cloud preview loaded.</p><div id="gist-actions" class="settings-actions" hidden><button id="gist-push" class="delete-button" type="button">Push to cloud</button><button id="gist-pull" class="delete-button" type="button">Pull from cloud</button></div></section></div>
 </div></section>
-<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.5.0</span></span></footer>
+<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.6.0</span></span></footer>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toast-message"></span><button id="undo" type="button" hidden>Undo</button></div>
 <dialog id="expense-dialog" class="edit-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><div><p class="eyebrow" style="margin-bottom:10px">Expense details</p><h2 id="dialog-title"></h2></div><button id="close-dialog" class="icon-button" type="button" aria-label="Close expense details"></button></div><p id="dialog-amount" class="dialog-amount num"></p><p id="dialog-note" class="dialog-note"></p><p class="muted monthly-hint" id="charge-hint" hidden>Editing or deleting this charge changes only this expense.</p><div class="dialog-actions"><button id="manage-monthly-charge" class="text-button" type="button" hidden>Manage monthly expense</button><button id="edit-expense" class="primary" type="button">Edit expense</button><button id="delete-expense" class="delete-button" type="button">Delete expense</button></div></dialog>
@@ -153,7 +153,7 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <script>
 'use strict';
 // App release version is independent of the additive local data schema.
-const APP_VERSION = '0.5.0';
+const APP_VERSION = '0.6.0';
 const STORAGE_KEY = 'finflow_tracker_v1';
 const LEGACY_KEY = 'finflow_architect_model_v2';
 const LEGACY_CATEGORIES = [
@@ -644,7 +644,7 @@ $('cancel-edit').addEventListener('click',resetForm);
 function undo(){if(!undoState)return;const previous=undoState;if(commit(previous,'Change undone',false)){if(editingId&&!state.expenses.some(e=>e.id===editingId))resetForm();}}
 $('undo').addEventListener('click',undo);
 document.addEventListener('keydown',event=>{if($('confirm-dialog').open)return;if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName)){event.preventDefault();undo();}});
-$('retry-storage').addEventListener('click',()=>{loadState();if(!storageBlocked){$('storage-warning').hidden=true;if(editingId&&!state.expenses.some(e=>e.id===editingId))resetForm();undoState=null;processMonthly();render();toast('Saved data reloaded');}});
+$('retry-storage').addEventListener('click',()=>{loadState();loadGistConnection();if(!storageBlocked){$('storage-warning').hidden=true;if(editingId&&!state.expenses.some(e=>e.id===editingId))resetForm();undoState=null;processMonthly();render();toast('Saved data reloaded');}});
 window.addEventListener('storage',event=>{if(event.key!==STORAGE_KEY&&event.key!==null)return;storageBlocked=true;warning('Your data changed in another tab. Choose Retry to load it before saving this expense.');});
 window.addEventListener('pageshow',()=>{const today=localDate();updateRepeatUI();$('month-picker').max=today.slice(0,7);processMonthly();render();});
 window.addEventListener('focus',processMonthly);
@@ -661,8 +661,9 @@ $('stop-monthly').addEventListener('click',()=>{
  const r=state.recurringRules.find(r=>r.id===monthlyDialogId&&r.active);if(!r)return;const id=r.id;
  requestConfirmation('Stop this monthly expense?',`Stop future automatic charges for ${r.name} (${money(r.cents)} per month)? Previously logged charges stay in your spending. You can undo this change in this session.`,'Stop monthly expense',()=>{const next=clone(state),rule=next.recurringRules.find(r=>r.id===id);if(!rule)return false;rule.active=false;if(!commit(next,'Monthly expense stopped; past charges kept'))return false;$('monthly-dialog').close();return true;});
 });
-// Settings are part of the validated financial snapshot. Credentials are tab-only.
-let settingsCategoryId=null,settingsSubName=null,gistToken='',gistPreview=null,gistBusy=false,pendingGistSetup=null,gistCreationUncertain=false;
+// Financial settings sync; remembered credentials are a separate device-only record.
+let settingsCategoryId=null,settingsSubName=null,gistToken='',gistPreview=null,gistBusy=false,pendingGistSetup=null,gistCreationUncertain=false,gistCredentialSnapshot=null,gistTokenEdited=false;
+const GIST_CONNECTION_KEY='finflow_gist_connection_v1';
 const FINFLOW_GIST_NAME='finflow-data';
 function applyBehavior(){document.body.classList.toggle('reduce-motion',state.settings.reducedMotion);}
 function settingsCategory(){return state.categories.find(c=>c.id===settingsCategoryId);}
@@ -678,6 +679,7 @@ function renderSettings(){
  renderSubSettings();
  $('start-view').value=state.settings.startView;$('remember-category').checked=state.settings.rememberCategory;$('reduce-motion').checked=state.settings.reducedMotion;$('monthly-posting').checked=state.settings.monthlyPosting;
  $('gist-id').value=pendingGistSetup?.response.id||state.settings.gistId;
+ if(!gistTokenEdited&&!gistBusy)$('gist-token').value=pendingGistSetup?.token||gistToken;
 }
 function renderSubSettings(){
  const c=settingsCategory();if(!c)return;
@@ -751,25 +753,58 @@ function parseGistId(raw){
  return null;
 }
 function clearGistPreview(){gistPreview=null;$('gist-actions').hidden=true;$('gist-status').textContent='No cloud preview loaded.';}
+function loadGistConnection(){
+ gistToken='';
+ try{
+  const raw=localStorage.getItem(GIST_CONNECTION_KEY);gistCredentialSnapshot=raw;if(raw===null)return;
+  const saved=JSON.parse(raw);
+  if(!saved||Object.keys(saved).some(k=>!['gistId','token'].includes(k))||typeof saved.gistId!=='string'||!/^[a-f0-9]{5,64}$/i.test(saved.gistId)||typeof saved.token!=='string'||!saved.token.trim())throw Error();
+  if(saved.gistId===state.settings.gistId)gistToken=saved.token;
+ }catch{$('gist-status').textContent='The saved cloud token could not be loaded. Enter it and Save connection again.';}
+}
+function checkGistCredentials(snapshot=gistCredentialSnapshot){
+ if(localStorage.getItem(GIST_CONNECTION_KEY)!==snapshot)throw Error('The saved cloud connection changed in another tab. Review it and preview again before syncing.');
+}
+function commitGistConnection(id,token,message,expected=gistCredentialSnapshot){
+ const serialized=token?JSON.stringify({gistId:id,token}):null;
+ const write=value=>{if(value===null)localStorage.removeItem(GIST_CONNECTION_KEY);else localStorage.setItem(GIST_CONNECTION_KEY,value);};
+ try{gistStorageReady(expected);write(serialized);}
+ catch{warning('This cloud connection was not saved. Browser storage is unavailable or the connection changed in another tab. Reload the saved data and try again.');return false;}
+ const next=clone(state);next.settings.gistId=id;
+ if(!commit(next,message,false)){
+  try{if(localStorage.getItem(GIST_CONNECTION_KEY)===serialized)write(expected);else throw Error();}
+  catch{gistToken='';gistCredentialSnapshot=undefined;warning('The cloud connection could not be fully saved or restored. Your expenses are kept. Reload the saved data before reconnecting.');}
+  return false;
+ }
+ gistCredentialSnapshot=serialized;gistToken=token;gistTokenEdited=false;$('gist-token').value=token;return true;
+}
+$('gist-token').addEventListener('input',()=>gistTokenEdited=true);
+window.addEventListener('storage',event=>{
+ if(event.key!==GIST_CONNECTION_KEY&&event.key!==null)return;
+ loadGistConnection();clearGistPreview();if(!gistTokenEdited)$('gist-token').value=gistToken;
+ $('gist-status').textContent='The saved cloud connection changed in another tab. Review it and preview again before syncing.';
+});
 $('gist-config-form').addEventListener('submit',async event=>{
  event.preventDefault();if(gistBusy)return;
- const raw=$('gist-id').value.trim(),id=raw?parseGistId(raw):'',token=$('gist-token').value.trim(),oldId=state.settings.gistId;
+ const raw=$('gist-id').value.trim(),id=raw?parseGistId(raw):'',token=$('gist-token').value.trim(),oldId=state.settings.gistId,credentialSnapshot=gistCredentialSnapshot;
  if(raw&&!id){$('gist-status').textContent='Enter an existing Gist ID or a gist.github.com link, or leave blank to create finflow-data.';return;}
- if(pendingGistSetup&&(!raw||id===pendingGistSetup.response.id)){finishGistSetup(pendingGistSetup);return;}
+ if(pendingGistSetup&&(!raw||id===pendingGistSetup.response.id)){pendingGistSetup.credentialSnapshot=gistCredentialSnapshot;finishGistSetup(pendingGistSetup);return;}
  if(!raw){
   const key=token||gistToken;if(!key){$('gist-status').textContent='Enter a GitHub personal access token to find or create finflow-data.';return;}
-  const setup=async()=>{await setupFinFlowGist(key);if(!$('storage-warning').hidden)return false;};
+  const setup=async()=>{await setupFinFlowGist(key,credentialSnapshot);if(!$('storage-warning').hidden)return false;};
   if(oldId)requestConfirmation('Change Gist connection?','Find or create finflow-data and switch this browser’s cloud connection? Your expenses and the previous Gist are kept. Existing cloud data is previewed before any replacement.','Change connection',setup);
   else await setup();
   return;
  }
- const save=()=>{const next=clone(state);next.settings.gistId=id;if(!commit(next,'Gist connection saved'))return false;gistToken=token||(oldId===id?gistToken:'');pendingGistSetup=null;gistCreationUncertain=false;$('gist-token').value='';clearGistPreview();$('gist-status').textContent=gistToken?'Connection saved. Preview before choosing a sync direction.':'Connection saved. Enter a token to preview this secret Gist.';return true;};
+ const savedToken=oldId===id?(token||gistToken):gistTokenEdited?token:'';
+ const save=()=>{if(!commitGistConnection(id,savedToken,'Gist connection saved',credentialSnapshot))return false;pendingGistSetup=null;gistCreationUncertain=false;clearGistPreview();$('gist-status').textContent=gistToken?'Connection saved on this device. Preview before choosing a sync direction.':'Connection saved. Enter a token to preview this secret Gist.';return true;};
  if(oldId&&oldId!==id)requestConfirmation('Change Gist connection?','Switch to a different Gist and clear the current preview? Your browser expenses and both Gists are kept. Enter a token for the new connection before syncing.','Change connection',save);
  else save();
 });
 $('gist-disconnect').addEventListener('click',()=>{
  if(gistBusy||!state.settings.gistId&&!gistToken&&!$('gist-token').value&&!pendingGistSetup&&!gistCreationUncertain)return;
- requestConfirmation('Disconnect GitHub Gist?','Remove this browser’s saved Gist connection, clear its preview, and forget the token in this tab? Your local expenses and the Gist on GitHub are kept. You will need to connect again before syncing.','Disconnect Gist',()=>{const next=clone(state);next.settings.gistId='';if(!commit(next,'Gist disconnected'))return false;gistToken='';pendingGistSetup=null;gistCreationUncertain=false;$('gist-token').value='';clearGistPreview();return true;});
+ const credentialSnapshot=gistCredentialSnapshot;
+ requestConfirmation('Disconnect GitHub Gist?','Remove this browser’s saved Gist connection, clear its preview, and remove its saved token from this device? Your local expenses and the Gist on GitHub are kept. You will need to connect again before syncing.','Disconnect Gist',()=>{if(!commitGistConnection('','','Gist disconnected',credentialSnapshot))return false;pendingGistSetup=null;gistCreationUncertain=false;clearGistPreview();return true;});
 });
 function financialSnapshot(data){
  // Explicit whitelist: connection details and credentials never enter the remote file.
@@ -797,7 +832,8 @@ function gistBackupContent(){
  if(new Blob([content]).size>1000000)throw Error('This snapshot is too large for Gist sync. No remote data was replaced.');
  return content;
 }
-function gistStorageReady(){
+function gistStorageReady(credentialSnapshot=gistCredentialSnapshot){
+ checkGistCredentials(credentialSnapshot);
  if(localStorage.getItem(STORAGE_KEY)!==storageSnapshot){storageBlocked=true;warning('Your data changed in another tab. Choose Retry to load it before connecting cloud sync.');}
  if(storageBlocked)throw Error('Browser data changed or saving is paused. Resolve the storage warning before connecting.');
 }
@@ -814,25 +850,24 @@ async function findFinFlowGist(token){
 }
 function showGistPreview(response,prefix=''){
  const raw=gistContent(response),remote=parseRemote(raw);
- gistPreview={id:response.id,raw,remote,localSnapshot:storageSnapshot};
+ gistPreview={id:response.id,raw,remote,localSnapshot:storageSnapshot,credentialSnapshot:gistCredentialSnapshot};
  $('gist-status').textContent=prefix+`Gist: ${remote.expenses.length} expenses, ${remote.recurringRules.filter(r=>r.active).length} active monthly schedules. This browser: ${state.expenses.length} expenses. Choose which snapshot to keep.`;
  $('gist-pull').hidden=false;$('gist-actions').hidden=false;
 }
 function finishGistSetup(setup){
- // Persist only the ID. A failed local save keeps the returned ID and token in this tab for retry.
- const next=clone(state);next.settings.gistId=setup.response.id;
- if(!commit(next,'Cloud connection saved',false)){
-  $('gist-id').value=setup.response.id;$('gist-token').value='';
+ // The device-only credential record never enters the financial snapshot. Failed saves retain setup for retry.
+ if(!commitGistConnection(setup.response.id,setup.token,'Cloud connection saved',setup.credentialSnapshot)){
+  $('gist-id').value=setup.response.id;$('gist-token').value=setup.token;
   $('gist-status').textContent=`finflow-data ${setup.created?'was created':'was found'}, but this browser could not save its connection. Copy the Gist ID above, resolve the storage warning, then Save connection to retry. No second Gist will be created.`;return false;
  }
- gistToken=setup.token;pendingGistSetup=null;gistCreationUncertain=false;$('gist-token').value='';
+ pendingGistSetup=null;gistCreationUncertain=false;
  showGistPreview(setup.response,setup.created?'Created finflow-data. ':'Connected to existing finflow-data; no cloud data was changed. ');
  return true;
 }
-async function setupFinFlowGist(token){
+async function setupFinFlowGist(token,credentialSnapshot=gistCredentialSnapshot){
  let posted=false;setGistBusy(true);clearGistPreview();$('gist-status').textContent='Looking for finflow-data…';
  try{
-  gistStorageReady();const existing=await findFinFlowGist(token);gistStorageReady();let response;
+  gistStorageReady(credentialSnapshot);const existing=await findFinFlowGist(token);gistStorageReady(credentialSnapshot);let response;
   if(existing){response=await gistRequest(existing,'GET',undefined,token);parseRemote(gistContent(response));}
   else{
    if(gistCreationUncertain)throw Error('A previous creation may have reached GitHub. Check your Gists and enter the finflow-data ID before trying again.');
@@ -843,7 +878,7 @@ async function setupFinFlowGist(token){
    if(gistContent(response).trim()!==content)throw Error('GitHub returned an incomplete new backup. Check finflow-data before trying again.');
    parseRemote(gistContent(response));
   }
-  pendingGistSetup={response,token,created:posted};return finishGistSetup(pendingGistSetup);
+  pendingGistSetup={response,token,created:posted,credentialSnapshot};return finishGistSetup(pendingGistSetup);
  }catch(error){
   if(posted&&(!error.status||error.status>=500))gistCreationUncertain=true;
   $('gist-status').textContent=error.message+(gistCreationUncertain?' Creation may have succeeded. Check for finflow-data on GitHub or Save connection again to look for it; creation will not be retried automatically.':'');return false;
@@ -865,10 +900,10 @@ function parseRemote(raw){
 function setGistBusy(busy){gistBusy=busy;['gist-preview-button','gist-push','gist-pull','gist-disconnect','gist-token','gist-id'].forEach(id=>$(id).disabled=busy);$('gist-config-form').querySelector('button[type="submit"]').disabled=busy;}
 $('gist-preview-button').addEventListener('click',async()=>{
  if(gistBusy)return;
- if(!state.settings.gistId||!gistToken){$('gist-status').textContent='Save a Gist ID and a token for this tab first.';return;}
+ if(!state.settings.gistId||!gistToken){$('gist-status').textContent='Save a Gist ID and token first.';return;}
  setGistBusy(true);clearGistPreview();$('gist-status').textContent='Reading Gist…';
- const id=state.settings.gistId;
- try{showGistPreview(await gistRequest(id));}
+ const id=state.settings.gistId,credentialSnapshot=gistCredentialSnapshot;
+ try{checkGistCredentials(credentialSnapshot);const response=await gistRequest(id);checkGistCredentials(credentialSnapshot);showGistPreview(response);}
  catch(error){$('gist-status').textContent=error.message;}
  finally{setGistBusy(false);}
 });
@@ -884,8 +919,9 @@ async function executeGist(action,preview){
  const id=state.settings.gistId;
  setGistBusy(true);
  try{
+  checkGistCredentials(preview.credentialSnapshot);
   if(id!==preview.id||storageSnapshot!==preview.localSnapshot||localStorage.getItem(STORAGE_KEY)!==storageSnapshot)throw Error('This browser changed after preview. Preview again before replacing data.');
-  const current=await gistRequest(id);if(storageSnapshot!==preview.localSnapshot||localStorage.getItem(STORAGE_KEY)!==storageSnapshot)throw Error('This browser changed during sync. Preview again before replacing data.');if(gistContent(current)!==preview.raw)throw Error('The Gist changed after preview. Preview again before replacing data.');
+  const current=await gistRequest(id);checkGistCredentials(preview.credentialSnapshot);if(storageSnapshot!==preview.localSnapshot||localStorage.getItem(STORAGE_KEY)!==storageSnapshot)throw Error('This browser changed during sync. Preview again before replacing data.');if(gistContent(current)!==preview.raw)throw Error('The Gist changed after preview. Preview again before replacing data.');
   if(action==='pull'){
    const next=clone(preview.remote);next.settings.gistId=id;addDueMonthly(next);
    if(!commit(next,'Gist data restored'))throw Error('Browser data was not replaced. Resolve the storage warning and preview again.');
@@ -913,7 +949,7 @@ mobileEntry.addEventListener('change',syncMobileLayout);
 const entryLayoutObserver=new ResizeObserver(syncMobileLayout);
 entryLayoutObserver.observe(document.querySelector('.nav'),{box:'border-box'});entryLayoutObserver.observe(document.querySelector('.entry-actions'),{box:'border-box'});
 $('app-version').textContent=APP_VERSION;
-loadState();processMonthly();resetForm();switchView(state.settings.startView,false);
+loadState();loadGistConnection();processMonthly();resetForm();switchView(state.settings.startView,false);
 </script>
 </body>
 </html>
