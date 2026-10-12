@@ -1,6 +1,6 @@
 # FinFlow
 
-A personal finance app for quickly logging expenses and understanding where money went. **Track first, visualize second.** Current version: **0.4.0**.
+A personal finance app for quickly logging expenses and understanding where money went. **Track first, visualize second.** Current version: **0.4.1**.
 
 [Open FinFlow](https://aakifahmedd.github.io/finflow-architect/)
 
@@ -46,9 +46,9 @@ On first use at the **same origin** as FinFlow Architect, valid existing logged 
 
 The earlier Flow Builder, plan/actual Sankey, income analysis, and CSV tools remain outside the active app. FinFlow focuses on actual expenses.
 
-## Optional Gist connection
+## Cloud sync (optional)
 
-Under Settings, enter an existing **secret** GitHub Gist ID/link and a token with Gists read/write permission (classic gist scope or fine-grained Gists permission). Save the connection, then Preview Gist. Choose a direction and confirm the whole-snapshot replacement. FinFlow reads/writes only `finflow.json`; other files are left intact. No account, sharing flow, automatic network sync, or Gist creation is added. HTTPS and network access to `api.github.com` are needed for these actions. All other functionality remains local and offline.
+Under Settings → Cloud sync (optional), the fields use RACK’s wording and order: **GitHub personal access token (needs "gist" scope)**, then **Gist ID**. Use a classic token with gist scope or a fine-grained token with Gists read/write permission, and enter an existing **secret** Gist ID/link. Save connection, then Preview cloud. **Push to cloud** uploads this browser’s snapshot; **Pull from cloud** restores the cloud snapshot to this browser. Both require confirmation before replacing data. FinFlow reads/writes only `finflow.json`; other files are left intact. No account, sharing flow, automatic network sync, or Gist creation is added. HTTPS and network access to `api.github.com` are needed for these actions. All other functionality remains local and offline.
 
 The ID is saved locally. The token stays in memory for this tab, is cleared from its input after connection, and disappears on reload/disconnect. It never enters localStorage, backups, or request URLs. Only secret Gists are accepted, but secret Gists are **not encrypted or access-controlled by their link**. GitHub keeps revision history. Uploading sends expenses, classifications, schedules, general preferences, and retained migration metadata to GitHub, without connection details or credentials. Review the replacement confirmation first.
 
