@@ -17,7 +17,7 @@ The default Chrome path is `/Applications/Google Chrome.app/Contents/MacOS/Googl
 
 - Baseline version consistency; default categories and honest empty states.
 - The default six main categories and all 31 stored classification choices, Back navigation, selection highlight, Save gating, and both classification fields in storage.
-- Large keypad, keyboard entry, decimal precision, input validation, optional notes/date, and historical expenses.
+- Large keypad, keyboard entry, live thousands separators, decimal precision, caret/selection edits, deletion across commas, grouped paste validation, input validation, optional notes/date, and historical expenses.
 - Save/reload persistence, integer-cent totals, category filtering, monthly navigation, editing, deletion, and undo.
 - Six-category migration: precise/ambiguous splits, Personal merging, custom registries/collisions, old removals/icons/subscription defaults, active/stopped monthly schedules, full prior metadata, Gist round-trip, idempotence, invalid input, and failed saves. Direct Other supports notes, editing, switching categories, reset, remembered-category behavior, and customized subcategories.
 - Legacy migration, migration from the flat tracker registry, retained prior classifications, deletion tombstones, idempotence, original-data preservation, and unreadable data.
