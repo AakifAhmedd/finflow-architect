@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f6f0">
 <meta name="description" content="FinFlow — personal expense tracking and a clearer view of your spending.">
-<meta name="application-version" content="0.8.0">
+<meta name="application-version" content="0.8.1">
 <title>FinFlow · Personal expenses</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%232c513e'/%3E%3Cpath d='M18 44V20h28M18 32h20' stroke='%23dcecbd' stroke-width='7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
@@ -105,6 +105,25 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
  #track-view .keypad{flex:1;grid-template-rows:repeat(4,minmax(56px,1fr));gap:8px;margin:0;max-height:420px}
  #track-view .keypad button{min-height:56px;font-size:28px;background:var(--paper);border-radius:16px}
  #track-view .keypad button:active{background:var(--lime)}
+ :root.phone-amount,.phone-amount body{background:var(--green)}
+ .phone-amount #track-view .entry-card{background:transparent}
+ .phone-amount #track-view #amount{color:var(--paper);caret-color:var(--lime)}
+ .phone-amount #track-view #amount::placeholder{color:#d7e4d0}
+ .phone-amount #track-view .currency{color:var(--lime)}
+ .phone-amount #track-view .keypad button{background:#3d624e;color:var(--bg)}
+ .phone-amount #track-view .keypad button:hover{background:#476b54}
+ .phone-amount #track-view .keypad button:active{background:#52765e}
+ .phone-amount #track-view button:focus-visible,.phone-amount #track-view input:focus-visible{outline-color:var(--lime)}
+ .phone-amount #track-view .entry-actions{background:var(--green);border-color:#ffffff1f}
+ .phone-amount #continue-amount{background:var(--lime);color:var(--green)}
+ .phone-amount #continue-amount:hover{background:#e9f3d9}
+ .phone-amount #continue-amount:disabled{background:#476b54;color:#d7e4d0;opacity:1}
+ .phone-amount #cancel-edit{color:var(--lime)}
+ .phone-amount #form-feedback{color:#ffd8cf}
+ .phone-amount .nav{--bg:var(--green);background:var(--green);border-color:#ffffff1f}
+ .phone-amount .nav button{color:#d7e4d0}
+ .phone-amount .nav button[aria-current="page"]{background:#3d624e;color:var(--paper)}
+ .phone-amount .nav button:focus-visible{outline-color:var(--lime)}
 }
 </style>
 </head>
@@ -164,7 +183,7 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <section class="card settings-card" aria-labelledby="gist-title"><h2 id="gist-title">Cloud sync (optional)</h2><p class="muted settings-intro">Leave Gist ID blank to find or create a separate secret Gist named finflow-data. Creating it uploads your current FinFlow backup. A Gist is stored on GitHub and is not encrypted; anyone with its link can read it.</p><form id="gist-config-form"><div class="field"><label for="gist-token">GitHub personal access token (needs &quot;gist&quot; scope)</label><input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="GitHub personal access token"></div><div class="field"><label for="gist-id">Gist ID <span class="muted">(leave blank to create one)</span></label><input id="gist-id" autocomplete="off" spellcheck="false" placeholder="Leave blank to create finflow-data" aria-describedby="gist-id-help"><p id="gist-id-help" class="muted monthly-hint">Enter an existing FinFlow Gist ID or link, or leave blank for automatic setup. RACK’s data stays separate.</p></div><p class="muted monthly-hint">Fine-grained tokens can use Gists read/write permission. Your token and Gist ID are saved in this browser. Disconnect removes them. Your token is excluded from backups. Save connection, then Preview cloud before choosing Push to cloud or Pull from cloud. Sync replaces a whole snapshot; it does not merge devices.</p><div class="settings-actions"><button class="primary" type="submit">Save connection</button><button id="gist-disconnect" class="delete-button" type="button">Disconnect</button></div></form><button id="gist-preview-button" class="text-button" type="button">Preview cloud</button><p id="gist-status" class="muted settings-intro" role="status" aria-live="polite">No cloud preview loaded.</p><div id="gist-actions" class="settings-actions" hidden><button id="gist-push" class="delete-button" type="button">Push to cloud</button><button id="gist-pull" class="delete-button" type="button">Pull from cloud</button></div></section>
 <section class="card settings-card" aria-labelledby="reset-title"><h2 id="reset-title">Reset data</h2><p class="muted settings-intro">Clear all expenses, monthly expenses, category changes, and behavior settings stored in this browser. Your Gist connection and the cloud copy are not touched.</p><button id="reset-data" class="delete-button" type="button">Reset local data</button></section></div>
 </div></section>
-<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.8.0</span></span></footer>
+<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.8.1</span></span></footer>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toast-message"></span><button id="undo" type="button" hidden>Undo</button></div>
 <dialog id="expense-dialog" class="edit-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><div><p class="eyebrow" style="margin-bottom:10px">Expense details</p><h2 id="dialog-title"></h2></div><button id="close-dialog" class="icon-button" type="button" aria-label="Close expense details"></button></div><p id="dialog-amount" class="dialog-amount num"></p><p id="dialog-note" class="dialog-note"></p><p class="muted monthly-hint" id="charge-hint" hidden>Editing or deleting this charge changes only this expense.</p><div class="dialog-actions"><button id="manage-monthly-charge" class="text-button" type="button" hidden>Manage monthly expense</button><button id="edit-expense" class="primary" type="button">Edit expense</button><button id="delete-expense" class="delete-button" type="button">Delete expense</button></div></dialog>
@@ -178,7 +197,7 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <script>
 'use strict';
 // App release version is independent of the additive local data schema.
-const APP_VERSION = '0.8.0';
+const APP_VERSION = '0.8.1';
 const STORAGE_KEY = 'finflow_tracker_v1';
 const LEGACY_KEY = 'finflow_architect_model_v2';
 const LEGACY_CATEGORIES = [
@@ -553,6 +572,9 @@ function renderCategories(){
 function validAmount(){return /^\d{1,9}(\.\d{1,2})?$/.test($('amount').value)&&Number($('amount').value)>0;}
 function renderPhoneEntry(){
  const phone=mobileEntry.matches,c=category(formSelection.mainCategory),amountStep=phone&&phoneEntryStage==='amount';
+ const darkAmount=amountStep&&view==='track';
+ document.documentElement.classList.toggle('phone-amount',darkAmount);
+ document.querySelector('meta[name="theme-color"]').content=getComputedStyle(document.documentElement).getPropertyValue(darkAmount?'--green':'--bg').trim();
  $('expense-form').dataset.entryStep=amountStep?'amount':c&&!directCategory(c)?'subcategory':'category';
  $('expense-form').style.setProperty('--amount-characters',$('amount').value.length||1);
  $('category-picker').hidden=amountStep;

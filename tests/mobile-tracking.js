@@ -13,6 +13,20 @@ function assertFits(l,label){
  assert.ok(Math.abs(l.actions.bottom-l.nav.top)<1);assert.ok(l.nav.bottom<=l.height);
 }
 async function amountStage(page){if(await page.$eval('#edit-amount',e=>!e.hidden))await page.click('#edit-amount');}
+function contrast(a,b){
+ const luminance=color=>{const rgb=color.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});return rgb.reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i],0);};
+ const [low,high]=[luminance(a),luminance(b)].sort((a,b)=>a-b);return (high+.05)/(low+.05);
+}
+async function palette(page){
+ await page.waitForFunction(()=>!document.getElementById('continue-amount').getAnimations().some(a=>a.playState==='running'));
+ return page.evaluate(()=>{
+ const style=selector=>getComputedStyle(document.querySelector(selector));
+ const root=style(':root'),key=style('[data-key="1"]'),action=style('#continue-amount');
+ return {dark:document.documentElement.classList.contains('phone-amount'),background:root.backgroundColor,theme:document.querySelector('meta[name="theme-color"]').content,
+  amount:style('#amount').color,placeholder:getComputedStyle(document.getElementById('amount'),'::placeholder').color,currency:style('.currency').color,
+  key:{color:key.color,background:key.backgroundColor},action:{color:action.color,background:action.backgroundColor,opacity:action.opacity},nav:style('.nav').backgroundColor,
+  navText:style('#nav-spending').color,error:style('#form-feedback').color};
+ });}
 (async()=>{const browser=await launch();try{
  const {page,context,errors}=await fresh(browser,390,844);
  await check('Phones open on the amount alone; invalid amounts cannot advance or save and Enter only advances',async()=>{
@@ -23,6 +37,19 @@ async function amountStage(page){if(await page.$eval('#edit-amount',e=>!e.hidden
   await fill(page,'amount','100');await page.focus('#amount');await page.keyboard.press('Enter');assert.equal(await stored(page),null);
   assert.equal(await page.$eval('.keypad',e=>e.hidden),true);assert.equal(await page.$eval('#amount',e=>e.readOnly),true);assert.equal(await page.evaluate(()=>document.activeElement.dataset.category),'transport');
   await page.click('#categories-back');assert.equal(await page.$eval('#amount',e=>e.value),'100');assert.equal(await page.$eval('#amount',e=>e.readOnly),false);
+ });
+ await check('The dark green palette is readable and applies only to the phone amount stage',async()=>{
+  const dark=await palette(page);assert.equal(dark.dark,true);assert.equal(dark.theme,'#2c513e');assert.equal(dark.nav,dark.background);
+  for(const color of [dark.amount,dark.placeholder,dark.currency,dark.navText,dark.error])assert.ok(contrast(color,dark.background)>=4.5,`Low contrast: ${color}`);
+  for(const control of [dark.key,dark.action])assert.ok(contrast(control.color,control.background)>=4.5);
+  await fill(page,'amount','');const disabled=(await palette(page)).action;assert.equal(disabled.opacity,'1');assert.ok(contrast(disabled.color,disabled.background)>=4.5);
+  await fill(page,'amount','100');await continueEntry(page);const categories=await palette(page);assert.equal(categories.dark,false);assert.equal(categories.theme,'#f5f6f0');assert.notEqual(categories.background,dark.background);
+  await page.click('[data-category="food"]');assert.equal((await palette(page)).background,categories.background);await page.click('#edit-amount');assert.equal((await palette(page)).background,dark.background);
+  for(const destination of ['spending','settings']){await page.click('#nav-'+destination);const light=await palette(page);assert.equal(light.dark,false);assert.equal(light.background,categories.background);assert.equal(light.theme,categories.theme);}
+  await page.click('#nav-track');assert.equal((await palette(page)).dark,true);
+  await page.setViewport({width:768,height:844});await page.waitForFunction(()=>!document.documentElement.classList.contains('phone-amount'));assert.equal((await palette(page)).background,categories.background);
+  await page.setViewport({width:390,height:844});await page.waitForFunction(()=>document.documentElement.classList.contains('phone-amount'));assert.equal((await palette(page)).dark,true);
+  await continueEntry(page);await page.click('#categories-back');await page.click('#categories-back');
  });
  await check('Amount, main categories, and every default subcategory grid fit common phones without scrolling',async()=>{
   for(const [width,height] of [[390,740],[390,844],[393,852],[412,823],[414,896],[430,932],[360,800],[767,900]]){
