@@ -24,8 +24,11 @@ async function stored(page) { return page.evaluate(key=>JSON.parse(localStorage.
 async function fill(page, id, value) {
   await page.$eval('#'+id,(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));},value);
 }
+async function continueEntry(page) {
+  if(await page.$eval('#continue-amount',el=>!el.hidden)) await page.click('#continue-amount');
+}
 async function add(page, amount, category='food', options={}) {
-  await fill(page,'amount',amount);
+  await fill(page,'amount',amount);await continueEntry(page);
   if(await page.$eval('#categories-back',el=>!el.hidden)) await page.click('#categories-back');
   await page.click(`[data-category="${category}"]`);
   const selector=await page.evaluate(sub=>`[data-subcategory="${CSS.escape(sub)}"]`,options.subCategory||'Other');
@@ -41,4 +44,4 @@ async function text(page,id) {return page.$eval('#'+id,el=>el.textContent.trim()
 function check(name,fn) {return Promise.resolve().then(fn).then(()=>console.log('PASS  '+name));}
 function today() {return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Colombo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
 async function acceptConfirmation(page){if(await page.$eval('#confirm-dialog',e=>e.open)){await page.click('#confirm-action');await page.waitForFunction(()=>!document.getElementById('confirm-dialog').open);}}
-module.exports={acceptConfirmation,launch,fresh,stored,fill,add,text,check,today,assert,fs,ROOT,URL,KEY,LEGACY};
+module.exports={acceptConfirmation,launch,fresh,stored,fill,continueEntry,add,text,check,today,assert,fs,ROOT,URL,KEY,LEGACY};

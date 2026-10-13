@@ -1,4 +1,4 @@
-const {acceptConfirmation,launch,fresh,stored,fill,add,text,check,today,assert,KEY}=require('./helpers');
+const {acceptConfirmation,launch,fresh,stored,fill,continueEntry,add,text,check,today,assert,KEY}=require('./helpers');
 async function settings(page,id='personal',sub){await page.click('#nav-settings');await fill(page,'settings-category',id);if(sub)await fill(page,'settings-subcategory',sub);}
 async function saveSub(page,name,subscription=false,icon=''){await fill(page,'subcategory-name',name);await fill(page,'subcategory-icon',icon);await page.$eval('#subcategory-subscription',(e,v)=>e.checked=v,subscription);await page.click('#subcategory-settings-form button[type="submit"]');}
 async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={data,requests:[],fail:false,beforeRead:null};window.fetch=async(url,options)=>{const m=window.gistMock;m.requests.push({url,method:options.method,body:options.body});if(m.fail)throw Error('network');if(options.method==='PATCH')Object.assign(m.data.files,JSON.parse(options.body).files);return {ok:true,status:200,json:async()=>structuredClone(m.data)};};},data);}
@@ -8,8 +8,10 @@ async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={d
  await check('Both category steps and all default entry controls fit common large phones without scrolling',async()=>{
   for(const [width,height] of [[390,740],[390,844],[393,852],[412,823],[414,896],[430,932],[360,800]]){
    await page.setViewport({width,height});await page.click('#nav-track');await page.evaluate(()=>window.scrollTo(0,0));
+   if(await page.$eval('#edit-amount',e=>!e.hidden))await page.click('#edit-amount');
    const fit=await page.evaluate(()=>{const rect=id=>document.getElementById(id).getBoundingClientRect();return {save:rect('save-expense').bottom,nav:document.querySelector('.nav').getBoundingClientRect().top,top:rect('amount').top,keys:[...document.querySelectorAll('[data-key]')].map(e=>e.getBoundingClientRect().height),overflow:document.documentElement.scrollWidth>innerWidth};});
    assert.ok(fit.save<=fit.nav,`Main step clipped at ${width}x${height}: ${JSON.stringify(fit)}`);assert.ok(fit.top>=0);assert.ok(fit.keys.every(h=>h>=44));assert.equal(fit.overflow,false);
+   await fill(page,'amount','10');await continueEntry(page);
    for(const id of ['transport','food','sports','personal','community']){await page.click(`[data-category="${id}"]`);await page.click('[data-subcategory="Other"]');const subfit=await page.evaluate(()=>({save:document.getElementById('save-expense').getBoundingClientRect().bottom,nav:document.querySelector('.nav').getBoundingClientRect().top,scroll:scrollY}));assert.ok(subfit.save<=subfit.nav);assert.equal(subfit.scroll,0);await page.click('#categories-back');}
   }
   await page.setViewport({width:390,height:740});await page.click('#nav-track');await page.evaluate(()=>{document.querySelector('.nav').style.paddingBottom='43px';window.scrollTo(0,0);});

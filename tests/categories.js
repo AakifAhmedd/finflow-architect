@@ -1,4 +1,4 @@
-const {launch,fresh,stored,fill,add,text,check,today,assert,KEY}=require('./helpers');
+const {launch,fresh,stored,fill,continueEntry,add,text,check,today,assert,KEY}=require('./helpers');
 const choices=[
  ['transport','Transport',['Fuel','Vehicle Maintenance','Public Transport','Parking','Ride Sharing','Other']],
  ['food','Food & Dining',['Food Delivery','Restaurants','Cafes','Snacks & Drinks','Groceries','Other']],
@@ -16,7 +16,7 @@ const choices=[
    assert.equal(await page.$eval('#save-expense',e=>e.disabled),true);
   });
   await page.setViewport({width:390,height:844});await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);await page.screenshot({path:'/tmp/finflow-phone-categories.png'});
-  await fill(page,'amount','1250');await page.click('[data-category="transport"]');await page.click('[data-subcategory="Fuel"]');
+  await fill(page,'amount','1250');await continueEntry(page);await page.screenshot({path:'/tmp/finflow-phone-categories.png'});await page.click('[data-category="transport"]');await page.click('[data-subcategory="Fuel"]');
   await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);await page.screenshot({path:'/tmp/finflow-phone-subcategories.png'});
   await page.click('#categories-back');await page.setViewport({width:1440,height:1000});
   await check('All categories expose exactly their agreed subcategories and save both selected labels',async()=>{

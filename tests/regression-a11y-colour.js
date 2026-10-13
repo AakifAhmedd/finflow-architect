@@ -1,4 +1,4 @@
-const {launch,fresh,stored,add,text,check,today,assert,ROOT,fs}=require('./helpers');
+const {launch,fresh,stored,fill,continueEntry,add,text,check,today,assert,ROOT,fs}=require('./helpers');
 (async()=>{
  const browser=await launch();
  try{
@@ -27,7 +27,7 @@ const {launch,fresh,stored,add,text,check,today,assert,ROOT,fs}=require('./helpe
   await check('Phone subcategory selection keeps Save visible and enables it only after selection',async()=>{
    await page.setViewport({width:390,height:844});await page.click('#nav-track');
    assert.equal(await page.$eval('#save-expense',e=>e.disabled),true);
-   await page.click('[data-category="food"]');
+   await fill(page,'amount','100');await continueEntry(page);await page.click('[data-category="food"]');
    assert.equal(await page.$eval('#save-expense',e=>e.disabled),true);
    await page.click('[data-subcategory="Other"]');
    assert.equal(await page.$eval('#save-expense',e=>e.disabled),false);
@@ -52,7 +52,7 @@ const {launch,fresh,stored,add,text,check,today,assert,ROOT,fs}=require('./helpe
    await page.click('#spending-list [data-expense]');assert.equal(await page.$eval('#expense-dialog',e=>e.open),true);
    await page.keyboard.press('Escape');assert.equal(await page.$eval('#expense-dialog',e=>e.open),false);
    assert.equal(await page.evaluate(()=>document.activeElement.hasAttribute('data-expense')),true);
-   await page.click('#nav-track');assert.equal(await page.evaluate(()=>document.activeElement.id),'track-title');
+   await page.click('#nav-track');assert.equal(await page.evaluate(()=>document.activeElement.id),'categories-back');
   });
   await check('Reduced-motion mode removes entrance and button animations',async()=>{
    await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
@@ -61,7 +61,7 @@ const {launch,fresh,stored,add,text,check,today,assert,ROOT,fs}=require('./helpe
    await page.click('[data-category="food"]');assert.equal(await page.$eval('#categories',e=>getComputedStyle(e).animationName),'none');await page.click('#categories-back');
   });
   await check('Adding by keyboard and undoing outside inputs is supported',async()=>{
-   await page.focus('#amount');await page.keyboard.type('123.45');await page.click('[data-category="food"]');await page.click('[data-subcategory="Other"]');await page.click('#save-expense');
+   await page.click('#edit-amount');await fill(page,'amount','');await page.focus('#amount');await page.keyboard.type('123.45');await page.keyboard.press('Enter');await page.click('[data-category="food"]');await page.click('[data-subcategory="Other"]');await page.click('#save-expense');
    assert.equal((await stored(page)).expenses.length,seeded.expenses.length+1);
    await page.focus('#nav-track');await page.keyboard.down('Control');await page.keyboard.press('z');await page.keyboard.up('Control');
    assert.equal((await stored(page)).expenses.length,seeded.expenses.length);
