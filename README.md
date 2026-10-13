@@ -1,6 +1,6 @@
 # FinFlow
 
-A personal finance app for quickly logging expenses and understanding where money went. **Track first, visualize second.** Current version: **0.6.0**.
+A personal finance app for quickly logging expenses and understanding where money went. **Track first, visualize second.** Current version: **0.7.0**.
 
 [Open FinFlow](https://aakifahmedd.github.io/finflow-architect/)
 
