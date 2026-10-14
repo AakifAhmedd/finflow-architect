@@ -119,5 +119,35 @@ async function palette(page){
   const date=await page.$eval('#date',e=>({bottom:e.getBoundingClientRect().bottom,top:e.getBoundingClientRect().top}));assert.ok(date.top>=0&&date.bottom<=l.actions.top,JSON.stringify({date,l}));
   await page.click('#nav-settings');assert.equal(await page.$eval('.entry-actions',e=>e.getClientRects().length),0);
  });
- assert.deepEqual(errors,[]);await context.close();console.log('All staged phone tracking checks passed.');
+ assert.deepEqual(errors,[]);await context.close();
+ const touch=await fresh(browser,390,844),t=touch.page;
+ await t.setViewport({width:390,height:844,isMobile:true,hasTouch:true});await t.reload({waitUntil:'load'});
+ async function quietFocus(){
+  const focused=await t.evaluate(()=>({id:document.activeElement.id,outline:getComputedStyle(document.activeElement).outlineStyle,tap:getComputedStyle(document.activeElement).webkitTapHighlightColor}));
+  assert.equal(focused.outline,'none',`Touch focus box on ${focused.id}`);assert.equal(focused.tap,'rgba(0, 0, 0, 0)');
+ }
+ await check('Emulated phone taps remove amount and picker focus boxes while preserving selection and keyboard focus',async()=>{
+  await t.tap('[data-key="1"]');await t.tap('[data-key="2"]');await t.tap('#amount');await quietFocus();assert.equal(await t.$eval('#amount',e=>e.value),'12');
+  await t.screenshot({path:'/tmp/finflow-phone-touch-amount.png'});
+  await t.tap('#continue-amount');await quietFocus();assert.equal(await t.evaluate(()=>document.activeElement.dataset.category),'transport');
+  await t.tap('[data-category="food"]');await quietFocus();await t.tap('[data-subcategory="Cafes"]');await quietFocus();
+  assert.equal(await t.$eval('[data-subcategory="Cafes"]',e=>e.getAttribute('aria-pressed')),'true');assert.equal(await t.$eval('[data-subcategory="Cafes"]',e=>getComputedStyle(e).borderColor),'rgb(104, 133, 80)');
+  await t.screenshot({path:'/tmp/finflow-phone-touch-subcategory.png'});
+  await t.tap('#edit-amount');await quietFocus();await t.keyboard.press('Tab');
+  assert.ok(await t.evaluate(()=>parseFloat(getComputedStyle(document.activeElement).outlineWidth)>=3));
+  await t.click('#amount');await quietFocus();await t.tap('#continue-amount');await quietFocus();
+ });
+ await check('Touch focus stays quiet in details, Settings, navigation, save reset, and dialogs',async()=>{
+  await t.tap('#details-summary');await quietFocus();await t.tap('#note');await quietFocus();await t.keyboard.type('Phone note');await quietFocus();
+  await t.tap('#nav-settings');await quietFocus();await t.tap('#category-name');await quietFocus();
+  await t.tap('#settings-category');await quietFocus();await t.keyboard.press('Escape');await t.tap('#remember-category');await quietFocus();
+  await t.tap('#nav-track');await quietFocus();await t.tap('#save-expense');await quietFocus();assert.equal((await stored(t)).expenses[0].cents,1200);assert.equal((await stored(t)).expenses[0].note,'Phone note');
+  await t.tap('#nav-spending');await quietFocus();await t.tap('#spending-list [data-expense]');await quietFocus();
+  await t.tap('#delete-expense');await quietFocus();assert.equal(await t.$eval('#confirm-dialog',e=>e.open),true);
+  await t.keyboard.press('Tab');assert.ok(await t.evaluate(()=>parseFloat(getComputedStyle(document.activeElement).outlineWidth)>=3));
+  await t.tap('#confirm-cancel');await quietFocus();assert.equal((await stored(t)).expenses.length,1);await t.tap('#close-dialog');
+  await t.setViewport({width:1440,height:1000,isMobile:false,hasTouch:false});await t.click('#nav-track');await t.click('#amount');
+  assert.ok(await t.$eval('#amount',e=>parseFloat(getComputedStyle(e).outlineWidth)>=3));
+ });
+ assert.deepEqual(touch.errors,[]);await touch.context.close();console.log('All staged phone tracking checks passed.');
  }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
