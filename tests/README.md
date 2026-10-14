@@ -9,12 +9,13 @@ npm install
 npm test
 ```
 
-This runs `node tests/regression.js`, `node tests/regression-a11y-colour.js`, `node tests/categories.js`, `node tests/monthly.js`, `node tests/settings.js`, `node tests/confirmations.js`, `node tests/mobile-tracking.js`, `node tests/taxonomy.js`, `node tests/gist-setup.js`, and `node tests/gist-credentials.js`. All ten resolve `index.html` relative to the repository, open it using `file://`, and use isolated Chrome browser contexts. No server, network access, backend, build, or real financial data is needed.
+This runs `node tests/regression.js`, `node tests/regression-a11y-colour.js`, `node tests/categories.js`, `node tests/monthly.js`, `node tests/settings.js`, `node tests/confirmations.js`, `node tests/mobile-tracking.js`, `node tests/taxonomy.js`, `node tests/gist-setup.js`, `node tests/gist-credentials.js`, and `node tests/income-import.js`. All eleven resolve `index.html` relative to the repository, open it using `file://`, and use isolated Chrome browser contexts. No server, network access, backend, build, or real financial data is needed.
 
 The default Chrome path is `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. Set the `CHROME` environment variable for a different executable. Browser dates use Asia/Colombo.
 
 ## Coverage
 
+- Income and file import: exact cents, received dates, source totals, income/spending comparisons, separate movement types, editing/deletion/Undo, preview/cancel/confirmation, repeat IDs, deletion tombstones, changed-source conflicts, invalid files, storage failure/stale preview, backup/Gist inclusion and credential exclusion, old data normalization, stored XSS, and phone/desktop layouts.
 - Baseline version consistency; default categories and honest empty states.
 - The default six main categories and all 31 stored classification choices, Back navigation, selection highlight, Save gating, and both classification fields in storage.
 - Large keypad, keyboard entry, live thousands separators, decimal precision, caret/selection edits, deletion across commas, grouped paste validation, input validation, optional notes/date, and historical expenses.

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f6f0">
 <meta name="description" content="FinFlow — personal expense tracking and a clearer view of your spending.">
-<meta name="application-version" content="0.8.3">
+<meta name="application-version" content="0.9.0">
 <title>FinFlow · Personal expenses</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%232c513e'/%3E%3Cpath d='M18 44V20h28M18 32h20' stroke='%23dcecbd' stroke-width='7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
@@ -128,6 +128,8 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
  *{-webkit-tap-highlight-color:transparent}
  :root:not(.keyboard-navigation) :focus{outline:none}
 }
+.income-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:23px}.income-overview .stat-card{background:var(--paper);color:var(--ink)}.income-overview .stat-card .stat-value{font-size:27px}.income-sources{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.income-sources span{font-size:12px;background:var(--green-light);color:var(--green);border-radius:8px;padding:8px 10px}.cash-section summary{cursor:pointer;min-height:44px;line-height:1.7;font-weight:600}.cash-section summary span{margin-left:8px}#income-dialog .field input{max-width:100%;min-width:0}#income-dialog .dialog-top h2{font-size:19px}#income-provenance{overflow-wrap:anywhere}
+@media(max-width:767.98px){.income-overview{grid-template-columns:1fr;gap:11px;margin-bottom:17px}.income-overview .stat-card{padding:20px}.income-overview .stat-value{margin:8px 0}.income-overview .stat-card .stat-value{font-size:28px}}
 </style>
 </head>
 <body>
@@ -164,12 +166,15 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 </section>
 <section id="spending-view" aria-labelledby="spending-title" hidden>
 <div class="page-heading spending-heading"><div><p class="eyebrow">The bigger picture</p><h1 id="spending-title">Where your money went.</h1><p class="muted">Your actual expenses. A clearer perspective.</p></div><div class="spending-month"><button id="spending-prev" class="icon-button" aria-label="Previous month" type="button"></button><label class="sr-only" for="month-picker">Spending month</label><input id="month-picker" type="month"><button id="spending-next" class="icon-button" aria-label="Next month" type="button"></button></div></div>
+<div class="income-overview"><div class="card stat-card"><div class="card-heading"><p class="eyebrow">Income received</p><button id="add-income-top" class="text-button" type="button">Add income</button></div><p class="stat-value num" id="income-total">Rs. 0</p><p class="muted" id="income-count">0 entries</p></div><div class="card stat-card"><p class="eyebrow">Income minus expenses</p><p class="stat-value num" id="income-difference">Rs. 0</p><p class="muted">Recorded income less purchases, before refunds. This is not an account balance.</p></div><div class="card stat-card"><p class="eyebrow">Income spent</p><p class="stat-value num" id="income-spent-share">—</p><p class="muted" id="income-share-hint">Add income to compare this month.</p></div></div>
 <div class="stats-grid"><div class="card stat-card"><p class="eyebrow">Total spent</p><p class="stat-value num" id="spending-total">Rs. 0</p><p class="muted" id="month-comparison"></p></div><div class="card stat-card"><p class="eyebrow">Daily average</p><p class="stat-value num" id="daily-average">Rs. 0</p><p class="muted" id="average-caption"></p></div><div class="card stat-card"><p class="eyebrow">Expenses logged</p><p class="stat-value num" id="spending-count">0</p><p class="muted" id="count-caption">Every little expense counts</p></div></div>
 <div class="spending-grid">
 <section class="card chart-card"><div class="chart-heading"><div><h2>By category</h2><p class="muted">Select a category to explore its expenses.</p></div><span class="chart-number" id="category-count">0 categories</span></div><div id="category-chart"></div><div class="breakdown-list" id="breakdown-list"></div><div id="subcategory-breakdown" class="subcategory-breakdown" hidden></div></section>
 <section class="card chart-card"><div class="chart-heading"><div><h2>Day by day</h2><p class="muted" id="daily-month"></p></div><span class="chart-number">LKR</span></div><div id="daily-chart"></div><p class="chart-caption">Daily spending totals. Hover over a bar for its amount.</p><div class="daily-footer"><div><p class="eyebrow">Highest spending day</p><strong id="highest-day">—</strong><p class="muted" id="highest-amount">No expenses yet</p></div><div><p class="eyebrow">Days with expenses</p><strong id="active-days">0 days</strong></div></div></section>
 </div>
 <section class="card expenses-card spending-expenses"><div class="expense-heading"><div class="filter-title"><h2 id="spending-list-title">All expenses</h2><button id="clear-filter" class="clear-filter" type="button" hidden>Clear filter ×</button></div><span class="muted" id="filtered-count"></span></div><div class="expense-list" id="spending-list"></div><button id="load-more" class="text-button more-button" type="button" hidden>Show more expenses</button></section>
+<section class="card expenses-card spending-expenses" aria-labelledby="income-title"><div class="expense-heading"><div><h2 id="income-title">Income this month</h2><p class="muted">Salary, allowances, profit, and other income actually received.</p></div><button id="add-income" class="text-button" type="button">Add income</button></div><div id="income-sources" class="income-sources"></div><div id="income-list" class="expense-list"></div></section>
+<details class="card expenses-card spending-expenses cash-section"><summary>Other cash movements <span id="movement-count" class="muted"></span></summary><p class="muted monthly-hint">Refunds, loans, cash withdrawals, transfers, savings, and rollover are kept separately and excluded from income and spending charts. Purchases show spending before refunds.</p><button id="add-movement" class="text-button" type="button">Add cash movement</button><div id="movement-list" class="expense-list"></div></details>
 <div id="mobile-monthly-slot"></div>
 </section>
 <section id="settings-view" aria-labelledby="settings-title" hidden>
@@ -184,12 +189,14 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 </section>
 <div class="settings-stack"><section class="card settings-card" aria-labelledby="behavior-title"><h2 id="behavior-title">App behavior</h2><form id="behavior-form"><div class="field"><label for="start-view">Open FinFlow on</label><select id="start-view"><option value="track">Tracks</option><option value="spending">Spending</option><option value="settings">Settings</option></select></div><label class="monthly-toggle" for="remember-category"><input id="remember-category" type="checkbox">Remember the last main category after saving</label><label class="monthly-toggle" for="reduce-motion"><input id="reduce-motion" type="checkbox">Reduce motion</label><label class="monthly-toggle" for="monthly-posting"><input id="monthly-posting" type="checkbox">Log due monthly expenses automatically</label><p class="muted monthly-hint">When paused, schedules are kept. Turning this on catches up missed months.</p><button class="primary" type="submit">Save behavior</button></form></section>
 <section class="card settings-card" aria-labelledby="gist-title"><h2 id="gist-title">Cloud sync (optional)</h2><p class="muted settings-intro">Leave Gist ID blank to find or create a separate secret Gist named finflow-data. Creating it uploads your current FinFlow backup. A Gist is stored on GitHub and is not encrypted; anyone with its link can read it.</p><form id="gist-config-form"><div class="field"><label for="gist-token">GitHub personal access token (needs &quot;gist&quot; scope)</label><input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="GitHub personal access token"></div><div class="field"><label for="gist-id">Gist ID <span class="muted">(leave blank to create one)</span></label><input id="gist-id" autocomplete="off" spellcheck="false" placeholder="Leave blank to create finflow-data" aria-describedby="gist-id-help"><p id="gist-id-help" class="muted monthly-hint">Enter an existing FinFlow Gist ID or link, or leave blank for automatic setup. RACK’s data stays separate.</p></div><p class="muted monthly-hint">Fine-grained tokens can use Gists read/write permission. Your token and Gist ID are saved in this browser. Disconnect removes them. Your token is excluded from backups. Save connection, then Preview cloud before choosing Push to cloud or Pull from cloud. Sync replaces a whole snapshot; it does not merge devices.</p><div class="settings-actions"><button class="primary" type="submit">Save connection</button><button id="gist-disconnect" class="delete-button" type="button">Disconnect</button></div></form><button id="gist-preview-button" class="text-button" type="button">Preview cloud</button><p id="gist-status" class="muted settings-intro" role="status" aria-live="polite">No cloud preview loaded.</p><div id="gist-actions" class="settings-actions" hidden><button id="gist-push" class="delete-button" type="button">Push to cloud</button><button id="gist-pull" class="delete-button" type="button">Pull from cloud</button></div></section>
-<section class="card settings-card" aria-labelledby="reset-title"><h2 id="reset-title">Reset data</h2><p class="muted settings-intro">Clear all expenses, monthly expenses, category changes, and behavior settings stored in this browser. Your Gist connection and the cloud copy are not touched.</p><button id="reset-data" class="delete-button" type="button">Reset local data</button></section></div>
+<section class="card settings-card" aria-labelledby="files-title"><h2 id="files-title">Import &amp; backup</h2><p class="muted settings-intro">Import a FinFlow transaction file to add records, or restore a complete FinFlow backup. Everything happens in this browser.</p><div class="field"><label for="import-file">FinFlow JSON file</label><input id="import-file" type="file" accept=".json,application/json"></div><p id="import-status" class="muted settings-intro" role="status" aria-live="polite">Choose a file to preview it.</p><button id="apply-import" class="primary" type="button" hidden>Import records</button><button id="download-backup" class="text-button" type="button">Download backup</button><p class="muted monthly-hint">Imports add records and skip previously imported IDs. Existing manual/monthly purchases are not automatically matched; review any overlap. Backups include income, cash movements, and import history, and exclude Gist credentials.</p></section>
+<section class="card settings-card" aria-labelledby="reset-title"><h2 id="reset-title">Reset data</h2><p class="muted settings-intro">Clear all expenses, income, cash movements, import history, monthly expenses, category changes, and behavior settings stored in this browser. Your Gist connection and the cloud copy are not touched.</p><button id="reset-data" class="delete-button" type="button">Reset local data</button></section></div>
 </div></section>
-<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.8.3</span></span></footer>
+<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">0.9.0</span></span></footer>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toast-message"></span><button id="undo" type="button" hidden>Undo</button></div>
 <dialog id="expense-dialog" class="edit-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><div><p class="eyebrow" style="margin-bottom:10px">Expense details</p><h2 id="dialog-title"></h2></div><button id="close-dialog" class="icon-button" type="button" aria-label="Close expense details"></button></div><p id="dialog-amount" class="dialog-amount num"></p><p id="dialog-note" class="dialog-note"></p><p class="muted monthly-hint" id="charge-hint" hidden>Editing or deleting this charge changes only this expense.</p><div class="dialog-actions"><button id="manage-monthly-charge" class="text-button" type="button" hidden>Manage monthly expense</button><button id="edit-expense" class="primary" type="button">Edit expense</button><button id="delete-expense" class="delete-button" type="button">Delete expense</button></div></dialog>
+<dialog id="income-dialog" class="edit-dialog monthly-dialog" aria-labelledby="income-dialog-title"><form id="income-form" novalidate><div class="dialog-top"><h2 id="income-dialog-title">Add income</h2><button id="close-income" class="icon-button" aria-label="Close income editor" type="button">×</button></div><div class="details-fields"><div class="field"><label for="income-source">Source / label</label><input id="income-source" maxlength="80" list="income-source-options" required><datalist id="income-source-options"><option value="Salary"><option value="Allowances"><option value="Profit"><option value="Freelance"><option value="Gifts"><option value="Other"></datalist></div><div id="movement-type-field" class="field" hidden><label for="movement-type">Movement type</label><select id="movement-type"></select></div><div class="field"><label for="income-amount">Amount in LKR</label><input id="income-amount" inputmode="decimal" maxlength="14" required></div><div class="field"><label id="income-date-label" for="income-date">Date received</label><input id="income-date" type="date" required></div><div class="field"><label for="income-note">Note (optional)</label><input id="income-note" maxlength="240"></div><p id="income-provenance" class="muted" hidden></p></div><p id="income-feedback" class="form-feedback" role="alert" hidden></p><div class="dialog-actions" style="margin-top:20px"><button class="primary" type="submit">Save entry</button><button id="delete-income" class="delete-button" type="button" hidden>Delete entry</button></div></form></dialog>
 <dialog id="monthly-dialog" class="edit-dialog monthly-dialog" aria-labelledby="monthly-dialog-title"><form id="monthly-form" novalidate>
 <div class="dialog-top"><div><p class="eyebrow" style="margin-bottom:10px">Repeat monthly</p><h2 id="monthly-dialog-title">Manage monthly expense</h2></div><button id="close-monthly" class="icon-button" type="button" aria-label="Close monthly expense settings"></button></div>
 <p class="muted monthly-hint">Changes apply to future charges. Logged expenses stay as they are.</p>
@@ -200,7 +207,7 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <script>
 'use strict';
 // App release version is independent of the additive local data schema.
-const APP_VERSION = '0.8.3';
+const APP_VERSION = '0.9.0';
 const STORAGE_KEY = 'finflow_tracker_v1';
 const LEGACY_KEY = 'finflow_architect_model_v2';
 const LEGACY_CATEGORIES = [
@@ -253,7 +260,7 @@ function dateLabel(key){return new Date(`${key}T12:00:00`).toLocaleDateString('e
 function shiftMonth(key,delta){const [y,m]=key.split('-').map(Number);return localDate(new Date(y,m-1+delta,1)).slice(0,7);}
 function money(cents){return `Rs. ${number(cents)}`;}
 function number(cents){return (cents/100).toLocaleString('en-GB',{minimumFractionDigits:cents%100?2:0,maximumFractionDigits:2});}
-function freshState(){return {schema:1,categorizationVersion:1,categorySettingsVersion:1,taxonomyVersion:1,categories:clone(DEFAULT_CATEGORIES),expenses:[],recurringRules:[],settings:clone(DEFAULT_SETTINGS)};}
+function freshState(){return {schema:1,categorizationVersion:1,categorySettingsVersion:1,taxonomyVersion:1,categories:clone(DEFAULT_CATEGORIES),expenses:[],incomes:[],movements:[],importLedger:[],recurringRules:[],settings:clone(DEFAULT_SETTINGS)};}
 let state=freshState(),formSelection={mainCategory:null,subCategory:null},editingId=null,dialogId=null,phoneEntryStage='amount';
 let month=localDate().slice(0,7),view='track',filter=null,listLimit=30,undoState=null,toastTimer;
 let storageBlocked=false,storageSnapshot=null,monthlyDialogId=null;
@@ -303,6 +310,7 @@ function validateState(data, hierarchical=false){
   if(!p||Object.keys(p).some(k=>!Object.hasOwn(DEFAULT_SETTINGS,k))||!['track','spending','settings'].includes(p.startView)||!['rememberCategory','reducedMotion','monthlyPosting'].every(k=>typeof p[k]==='boolean')||typeof p.gistId!=='string'||(p.gistId&&!/^[a-f0-9]{5,64}$/i.test(p.gistId)))throw Error('Invalid preferences');
   if(data.recurringRules?.some(r=>r.active&&data.categories.some(c=>c.id===r.category&&(c.removed||c.removedSubs.includes(r.subCategory)))))throw Error('Removed category has active schedule');
  }
+ validateCashState(data);
  for(const record of [...data.expenses,...(data.recurringRules||[])])if(record.classificationHistory!==undefined&&(!Array.isArray(record.classificationHistory)||!record.classificationHistory.every(h=>h&&['categoryId','mainCategory','subCategory'].every(k=>typeof h[k]==='string'))))throw Error('Invalid classification history');
  return data;
 }
@@ -367,6 +375,7 @@ function migrateLegacy(old){
 function normalizeState(data){
  const next=normalizeCategorization(data);
  if(next.recurringRules===undefined)next.recurringRules=[];
+ if(next.incomes===undefined)next.incomes=[];if(next.movements===undefined)next.movements=[];if(next.importLedger===undefined)next.importLedger=[];
  if(!next.categorySettingsVersion){
   next.categories.forEach(c=>{
    c.subcategories=c.subcategories.map(genericLabel);c.items=[...c.subcategories];
@@ -525,7 +534,7 @@ function commit(next,message,allowUndo=true,silent=false){
   validateState(next,true);
   if(localStorage.getItem(STORAGE_KEY)!==storageSnapshot){storageBlocked=true;warning('Your data changed in another tab. Choose Retry to load it before saving this expense.');return false;}
   serialized=JSON.stringify(next);localStorage.setItem(STORAGE_KEY,serialized);
- }catch(error){warning('This change was not saved. Browser storage may be full or unavailable. Your expense is still here; free some space or restore storage access and try again.');return false;}
+ }catch(error){warning('This change was not saved. Browser storage may be full or unavailable. Your entries are still here; free some space or restore storage access and try again.');return false;}
  undoState=allowUndo?clone(state):null;state=next;storageSnapshot=serialized;$('storage-warning').hidden=true;render();if(!silent)toast(message,allowUndo);return true;
 }
 // Every destructive action uses one dialog. Capture intent, then validate freshness before applying it.
@@ -575,14 +584,14 @@ function renderCategories(){
 function rawAmount(value=$('amount').value){return /^(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d*)?$/.test(value)?value.replace(/,/g,''):value;}
 function formatAmount(value){return value.replace(/^(\d+)(\.\d*)?$/,(_,whole,fraction)=>whole.replace(/\B(?=(\d{3})+(?!\d))/g,',')+(fraction||''));}
 function formatAmountInput(event){
- const input=$('amount'),value=input.value,start=input.selectionStart,end=input.selectionEnd;
+ const input=event.target,value=input.value,start=input.selectionStart,end=input.selectionEnd;
  const raw=event.inputType?value.replace(/,/g,''):rawAmount(value),formatted=formatAmount(raw);
  if(formatted===value)return;
  const logicalPosition=position=>value.slice(0,position).replace(/,/g,'').length;
  const displayPosition=position=>{let index=0;while(index<formatted.length&&position>0){if(formatted[index]!==',')position--;index++;}return index;};
  input.value=formatted;input.setSelectionRange(displayPosition(logicalPosition(start)),displayPosition(logicalPosition(end)));
 }
-function validAmount(){const raw=rawAmount();return /^\d{1,9}(\.\d{1,2})?$/.test(raw)&&Number(raw)>0;}
+function validAmount(value=$('amount').value){const raw=rawAmount(value);return /^\d{1,9}(\.\d{1,2})?$/.test(raw)&&Number(raw)>0;}
 function renderPhoneEntry(){
  const phone=mobileEntry.matches,c=category(formSelection.mainCategory),amountStep=phone&&phoneEntryStage==='amount';
  const darkAmount=amountStep&&view==='track';
@@ -657,7 +666,7 @@ function renderSpending(){
  renderExpenses('spending-list',filtered,listLimit);$('load-more').hidden=filtered.length<=listLimit;
 }
 function render(){
- renderCategories();renderTracker();renderSpending();renderMonthly();renderSettings();applyBehavior();
+ renderCategories();renderTracker();renderSpending();renderIncome();renderMonthly();renderSettings();applyBehavior();
  ['track','spending'].forEach(prefix=>{$(`${prefix}-next`).disabled=month>=localDate().slice(0,7);$(`${prefix}-prev`).disabled=month<='1900-01';});
 }
 function switchView(next,focus=true){
@@ -690,7 +699,7 @@ function saveExpense(event){
  const message=repeat?'Monthly expense set up':editingId?'Expense updated':'Expense saved';
  if(commit(next,message)){resetForm();if(mobileEntry.matches){toast(message,true,3000);window.scrollTo({top:0,behavior:'instant'});$('expense-form').querySelector('[data-key]').focus({preventScroll:true});}else $('amount').focus({preventScroll:true});}else month=priorMonth;
 }
-function showExpense(id){const e=state.expenses.find(e=>e.id===id);if(!e)return;dialogId=id;$('dialog-title').textContent=e.recurringName||e.subCategory;$('dialog-amount').textContent=money(e.cents);$('dialog-note').textContent=`${dateLabel(e.date)} ${e.date.slice(0,4)} · ${e.mainCategory}${e.recurringId?' · '+e.subCategory+' · Monthly':''}${previousLabel(e)?' · '+previousLabel(e):''}${e.note?' · '+e.note:''}`;$('charge-hint').hidden=!e.recurringId;$('manage-monthly-charge').hidden=!state.recurringRules.some(r=>r.id===e.recurringId&&r.active);$('expense-dialog').showModal();}
+function showExpense(id){const e=state.expenses.find(e=>e.id===id);if(!e)return;dialogId=id;$('dialog-title').textContent=e.recurringName||e.subCategory;$('dialog-amount').textContent=money(e.cents);$('dialog-note').textContent=`${dateLabel(e.date)} ${e.date.slice(0,4)} · ${e.mainCategory}${e.recurringId?' · '+e.subCategory+' · Monthly':''}${previousLabel(e)?' · '+previousLabel(e):''}${e.note?' · '+e.note:''}${e.source?' · Imported from '+(e.source.sheet||'source')+' '+(e.source.range||'')+' · Original category: '+(e.source.originalLabel||''):''}`;$('charge-hint').hidden=!e.recurringId;$('manage-monthly-charge').hidden=!state.recurringRules.some(r=>r.id===e.recurringId&&r.active);$('expense-dialog').showModal();}
 function editExpense(){const e=state.expenses.find(e=>e.id===dialogId);if(!e)return;$('expense-dialog').close();phoneEntryStage='amount';editingId=e.id;formSelection={mainCategory:e.mainCategory,subCategory:e.subCategory};$('amount').value=formatAmount(String(e.cents/100));$('note').value=e.note;$('date').value=e.date;$('entry-title').textContent='Edit expense';$('save-label').textContent='Save changes';$('entry-hint').textContent='Update the details below';$('cancel-edit').hidden=false;$('form-feedback').hidden=true;$('entry-details').open=true;$('repeat-monthly').checked=false;updateRepeatUI();switchView('track',false);$('amount').focus({preventScroll:true});}
 $('expense-form').addEventListener('submit',saveExpense);
 $('amount').addEventListener('input',event=>{formatAmountInput(event);$('form-feedback').hidden=true;renderPhoneEntry();});
@@ -900,11 +909,11 @@ $('gist-disconnect').addEventListener('click',()=>{
  requestConfirmation('Disconnect GitHub Gist?','Remove this browser’s saved Gist connection, clear its preview, and remove its saved token from this device? Your local expenses and the Gist on GitHub are kept. You will need to connect again before syncing.','Disconnect Gist',()=>{if(!commitGistConnection('','','Gist disconnected',credentialSnapshot))return false;pendingGistSetup=null;gistCreationUncertain=false;clearGistPreview();return true;});
 });
 $('reset-data').addEventListener('click',()=>{
- requestConfirmation('Reset all local data?','Delete every expense, monthly expense, category change, and behavior setting in this browser and restore the defaults? Your Gist connection and the cloud copy are kept. You can undo this in this session.','Reset data',()=>{const next=freshState();next.settings.gistId=state.settings.gistId;return commit(next,'Local data reset');});
+ requestConfirmation('Reset all local data?','Delete every expense, income entry, cash movement, import history, monthly expense, category change, and behavior setting in this browser and restore the defaults? Your Gist connection and the cloud copy are kept. You can undo this in this session.','Reset data',()=>{const next=freshState();next.settings.gistId=state.settings.gistId;return commit(next,'Local data reset');});
 });
 function financialSnapshot(data){
  // Explicit whitelist: connection details and credentials never enter the remote file.
- const out={schema:data.schema,categorizationVersion:data.categorizationVersion,categorySettingsVersion:data.categorySettingsVersion,taxonomyVersion:data.taxonomyVersion,categories:clone(data.categories),expenses:clone(data.expenses),recurringRules:clone(data.recurringRules),settings:{startView:data.settings.startView,rememberCategory:data.settings.rememberCategory,reducedMotion:data.settings.reducedMotion,monthlyPosting:data.settings.monthlyPosting,gistId:''}};
+ const out={schema:data.schema,categorizationVersion:data.categorizationVersion,categorySettingsVersion:data.categorySettingsVersion,taxonomyVersion:data.taxonomyVersion,categories:clone(data.categories),expenses:clone(data.expenses),incomes:clone(data.incomes||[]),movements:clone(data.movements||[]),importLedger:clone(data.importLedger||[]),recurringRules:clone(data.recurringRules),settings:{startView:data.settings.startView,rememberCategory:data.settings.rememberCategory,reducedMotion:data.settings.reducedMotion,monthlyPosting:data.settings.monthlyPosting,gistId:''}};
  if(data.previousCategories)out.previousCategories=clone(data.previousCategories);
  if(data.previousCategoryRegistry)out.previousCategoryRegistry=clone(data.previousCategoryRegistry);
  return out;
@@ -947,7 +956,7 @@ async function findFinFlowGist(token){
 function showGistPreview(response,prefix=''){
  const raw=gistContent(response),remote=parseRemote(raw);
  gistPreview={id:response.id,raw,remote,localSnapshot:storageSnapshot,credentialSnapshot:gistCredentialSnapshot};
- $('gist-status').textContent=prefix+`Gist: ${remote.expenses.length} expenses, ${remote.recurringRules.filter(r=>r.active).length} active monthly schedules. This browser: ${state.expenses.length} expenses. Choose which snapshot to keep.`;
+ $('gist-status').textContent=prefix+`Gist: ${remote.expenses.length} expenses, ${remote.incomes.length} income entries, ${remote.movements.length} other cash movements, ${remote.recurringRules.filter(r=>r.active).length} active monthly schedules. This browser: ${state.expenses.length} expenses, ${state.incomes.length} income entries, ${state.movements.length} other cash movements. Choose which snapshot to keep.`;
  $('gist-pull').hidden=false;$('gist-actions').hidden=false;
 }
 function finishGistSetup(setup){
@@ -1006,7 +1015,7 @@ $('gist-preview-button').addEventListener('click',async()=>{
 function confirmGist(action){
  if(gistBusy||!gistPreview)return;const preview=gistPreview;
  requestConfirmation(action==='pull'?'Replace this browser’s data?':'Replace the Gist snapshot?',
- action==='pull'?`Keep the Gist’s ${preview.remote.expenses.length} expenses instead of this browser’s ${state.expenses.length}? Categories, monthly schedules, and general preferences will also be replaced. Undo can restore this browser’s snapshot in this session.`:`Upload this browser’s ${state.expenses.length} expenses, categories, monthly schedules, and general preferences to finflow.json? This replaces that file on GitHub. The Gist is not encrypted and GitHub keeps its history.`,
+ action==='pull'?`Keep the Gist’s ${preview.remote.expenses.length} expenses, ${preview.remote.incomes.length} income entries, and ${preview.remote.movements.length} cash movements instead of this browser’s ${state.expenses.length} expenses, ${state.incomes.length} income entries, and ${state.movements.length} cash movements? Income, other cash movements, import history, categories, monthly schedules, and general preferences will also be replaced. Undo can restore this browser’s snapshot in this session.`:`Upload this browser’s ${state.expenses.length} expenses, ${state.incomes.length} income entries, ${state.movements.length} other cash movements, import history, categories, monthly schedules, and general preferences to finflow.json? This replaces that file on GitHub. The Gist is not encrypted and GitHub keeps its history.`,
  action==='pull'?'Replace browser data':'Replace Gist snapshot',()=>executeGist(action,preview));
 }
 $('gist-pull').addEventListener('click',()=>confirmGist('pull'));$('gist-push').addEventListener('click',()=>confirmGist('push'));
@@ -1030,6 +1039,114 @@ async function executeGist(action,preview){
  }catch(error){clearGistPreview();$('gist-status').textContent=error.message;}
  finally{setGistBusy(false);}
 }
+
+const CASH_TYPES={refund:['Refund received','in'],loan_received:['Loan received','in'],loan_repaid:['Loan repaid to you','in'],loan_given:['Loan given','out'],loan_repayment:['Loan repayment','out'],withdrawal:['Cash withdrawal','internal'],transfer:['Account transfer','internal'],saving:['Savings allocation','internal'],rollover:['Rollover / opening balance','internal']};
+function validateCashState(data){
+ const ids=new Set(data.expenses.map(e=>e.id));
+ for(const key of ['incomes','movements']){
+  if(data[key]===undefined)continue;if(!Array.isArray(data[key]))throw Error('Invalid '+key);
+  for(const r of data[key]){
+   if(!r||typeof r.id!=='string'||!r.id||r.id.length>160||ids.has(r.id)||!Number.isSafeInteger(r.cents)||r.cents<=0||!validDate(r.date)||typeof r.label!=='string'||!r.label.trim()||r.label.length>80||typeof r.note!=='string'||r.note.length>240)throw Error('Invalid '+key+' record');
+   if(key==='movements'&&(!Object.hasOwn(CASH_TYPES,r.movementType)||r.direction!==CASH_TYPES[r.movementType][1]))throw Error('Invalid cash movement');ids.add(r.id);
+  }
+ }
+ if(data.importLedger!==undefined){
+  if(!Array.isArray(data.importLedger))throw Error('Invalid import history');const imported=new Set();
+  for(const r of data.importLedger){if(!r||typeof r.id!=='string'||!r.id||r.id.length>160||imported.has(r.id)||typeof r.signature!=='string'||r.signature.length>3000)throw Error('Invalid import history');imported.add(r.id);}
+ }
+}
+function cashRecords(kind,data=state){return kind==='income'?data.incomes:data.movements;}
+function renderCashList(id,records,kind){
+ $(id).innerHTML=records.length?sorted(records).map(r=>`<div class="expense-row"><div class="expense-icon">${icon(kind==='income'?'work':'arrow')}</div><div><p class="expense-name">${escapeHtml(r.label)}</p><p class="expense-meta">${dateLabel(r.date)}${kind==='movement'?' · '+escapeHtml(CASH_TYPES[r.movementType][0]):''}${r.source?' · Imported':''}${r.note?' · '+escapeHtml(r.note):''}</p></div><span class="expense-amount num">${kind==='movement'&&r.direction==='out'?'− ':''}${money(r.cents)}</span><button class="icon-button" data-cash-kind="${kind}" data-cash-id="${escapeHtml(r.id)}" type="button" aria-label="${escapeHtml('Edit '+r.label+', '+money(r.cents))}">${icon('edit')}</button></div>`).join(''):`<p class="muted" style="padding:16px 0">${kind==='income'?'No income recorded for this month.':'No other cash movements recorded for this month.'}</p>`;
+}
+function renderIncome(){
+ const entries=state.incomes.filter(r=>r.date.startsWith(month)),income=total(entries),spent=total(monthExpenses()),movements=state.movements.filter(r=>r.date.startsWith(month));
+ $('income-total').textContent=money(income);$('income-count').textContent=entries.length+' income entr'+(entries.length===1?'y':'ies');$('income-difference').textContent=money(income-spent);
+ $('income-spent-share').textContent=income?(spent/income*100).toFixed(1)+'%':'—';$('income-share-hint').textContent=income?'Recorded expenses as a share of this month’s income.':'Add income to compare this month.';
+ const sources=new Map();entries.forEach(r=>sources.set(r.label,(sources.get(r.label)||0)+r.cents));$('income-sources').innerHTML=[...sources].map(([label,cents])=>`<span>${escapeHtml(label)}: ${money(cents)}</span>`).join('');
+ $('movement-count').textContent=movements.length+' records';renderCashList('income-list',entries,'income');renderCashList('movement-list',movements,'movement');
+}
+let cashEditingId=null,cashEditingKind='income';
+function openCashEntry(kind='income',id=null){
+ const r=id?cashRecords(kind).find(r=>r.id===id):null;if(id&&!r)return;cashEditingId=id;cashEditingKind=kind;
+ $('movement-type-field').hidden=kind!=='movement';$('movement-type').innerHTML=Object.entries(CASH_TYPES).map(([id,v])=>`<option value="${id}">${v[0]}</option>`).join('');$('movement-type').value=r?.movementType||'refund';$('income-date-label').textContent=kind==='movement'?'Date':'Date received';
+ $('income-dialog-title').textContent=kind==='movement'?(id?'Edit cash movement':'Add cash movement'):id?'Edit income':'Add income';$('income-source').value=r?.label||'';$('income-amount').value=r?formatAmount(String(r.cents/100)):'';$('income-date').value=r?.date||localDate();$('income-date').max=localDate();$('income-date').min='1900-01-01';$('income-note').value=r?.note||'';
+ $('income-provenance').hidden=!r?.source;$('income-provenance').textContent=r?.source?`Imported from ${r.source.sheet||'source'} ${r.source.range||''}. Original label: ${r.source.originalLabel||r.label}.` : '';
+ $('delete-income').hidden=!id;$('income-feedback').hidden=true;$('income-dialog').showModal();$('income-source').focus({preventScroll:true});
+}
+function incomeError(message){$('income-feedback').textContent=message;$('income-feedback').hidden=false;}
+$('add-income').addEventListener('click',()=>openCashEntry());$('add-income-top').addEventListener('click',()=>openCashEntry());$('add-movement').addEventListener('click',()=>openCashEntry('movement'));$('close-income').addEventListener('click',()=>$('income-dialog').close());
+['income-list','movement-list'].forEach(id=>$(id).addEventListener('click',event=>{const b=event.target.closest('[data-cash-id]');if(b)openCashEntry(b.dataset.cashKind,b.dataset.cashId);}));
+$('income-amount').addEventListener('input',event=>{formatAmountInput(event);$('income-feedback').hidden=true;});
+$('income-form').addEventListener('submit',event=>{
+ event.preventDefault();const label=$('income-source').value.trim(),date=$('income-date').value;
+ if(!label||label.length>80){incomeError('Enter a source or label of up to 80 characters.');return;}
+ if(!validAmount($('income-amount').value)){incomeError('Enter an amount greater than zero with up to two decimal places.');return;}
+ if(!validDate(date)||date>localDate()){incomeError('Choose a date, today or earlier.');return;}
+ const next=clone(state),entries=cashRecords(cashEditingKind,next),r=cashEditingId?entries.find(r=>r.id===cashEditingId):{id:crypto.randomUUID()};
+ if(!r){incomeError('This entry is no longer available. Close the editor and reload.');return;}
+ Object.assign(r,{label,date,cents:Math.round(Number(rawAmount($('income-amount').value))*100),note:$('income-note').value.trim()});if(cashEditingKind==='movement'){const type=$('movement-type').value;if(!Object.hasOwn(CASH_TYPES,type)){incomeError('Choose a cash movement type.');return;}r.movementType=type;r.direction=CASH_TYPES[type][1];}if(!cashEditingId)entries.push(r);
+ const priorMonth=month;month=date.slice(0,7);if(commit(next,cashEditingId?'Entry updated':cashEditingKind==='movement'?'Cash movement saved':'Income saved'))$('income-dialog').close();else{month=priorMonth;incomeError('The entry was not saved. Resolve the storage warning and try again.');}
+});
+$('delete-income').addEventListener('click',()=>{
+ const id=cashEditingId,kind=cashEditingKind,r=cashRecords(kind).find(r=>r.id===id);if(!r)return;
+ requestConfirmation('Delete this entry?',`Delete ${money(r.cents)} for ${r.label} on ${dateLabel(r.date)}? The totals will update. Imported deletion history is retained so re-importing the same file will not recreate it. You can undo this in this session.`,'Delete entry',()=>{const next=clone(state),key=kind==='income'?'incomes':'movements';next[key]=next[key].filter(r=>r.id!==id);if(!commit(next,'Entry deleted'))return false;$('income-dialog').close();return true;});
+});
+function normalizedImportRecord(r){
+ if(!r||!['expense','income','movement'].includes(r.kind)||typeof r.id!=='string'||!r.id||r.id.length>160||!validDate(r.date)||r.date>localDate()||!Number.isSafeInteger(r.cents)||r.cents<=0||r.cents>99999999999||typeof r.label!=='string'||!r.label.trim()||r.label.length>80||typeof r.note!=='string'||r.note.length>240)throw Error('A record has an invalid type, ID, date, amount, label, or note.');
+ const out={id:r.id,kind:r.kind,date:r.date,cents:r.cents,label:r.label,note:r.note};
+ if(r.kind==='expense'){if(!['mainCategory','subCategory'].every(k=>typeof r[k]==='string'&&r[k].trim()&&r[k].length<=80))throw Error('An expense has an invalid category.');out.mainCategory=r.mainCategory;out.subCategory=r.subCategory;}
+ if(r.kind==='movement'){if(!Object.hasOwn(CASH_TYPES,r.movementType)||r.direction!==CASH_TYPES[r.movementType][1])throw Error('A cash movement has an invalid classification.');out.movementType=r.movementType;out.direction=r.direction;}
+ if(r.source!==undefined){if(!r.source||typeof r.source!=='object'||Array.isArray(r.source))throw Error('Invalid source reference.');out.source={};for(const key of ['documentId','sheet','range','row','originalKind','originalLabel','originalDate','originalAmount'])if(Object.hasOwn(r.source,key)){const v=r.source[key];if(!(typeof v==='string'&&v.length<=160||typeof v==='number'&&Number.isFinite(v)))throw Error('Invalid source reference.');out.source[key]=v;}}
+ return out;
+}
+function planFileImport(raw){
+ const file=JSON.parse(raw);
+ if(file?.format==='finflow-backup'){const next=parseRemote(raw);next.settings.gistId=state.settings.gistId;return {mode:'restore',next,counts:{expense:next.expenses.length,income:next.incomes.length,movement:next.movements.length},skipped:0,review:0};}
+ if(!file||file.format!=='finflow-import'||file.version!==1||file.currency!=='LKR'||!Array.isArray(file.records)||file.records.length>10000)throw Error('Choose a FinFlow LKR transaction file or backup.');
+ if(file.review!==undefined&&!Array.isArray(file.review))throw Error('Invalid review rows.');
+ const next=clone(state),history=new Map(next.importLedger.map(r=>[r.id,r.signature])),ids=new Set([...next.expenses,...next.incomes,...next.movements].map(r=>r.id)),fileIds=new Set(),counts={expense:0,income:0,movement:0};let skipped=0;
+ for(const rawRecord of file.records){
+  const r=normalizedImportRecord(rawRecord);if(fileIds.has(r.id))throw Error('The file contains duplicate record IDs.');fileIds.add(r.id);
+  const {source,...business}=r,signature=JSON.stringify(business);
+  if(history.has(r.id)){if(history.get(r.id)!==signature)throw Error('A previously imported source record changed. Review the source change before importing.');skipped++;continue;}
+  if(ids.has(r.id))throw Error('An import ID conflicts with an existing record.');ids.add(r.id);
+  if(r.kind==='expense'){
+   let c=next.categories.find(c=>c.name===r.mainCategory);
+   if(!c){c={id:crypto.randomUUID(),name:r.mainCategory,short:r.mainCategory,icon:'other',color:'#648f8a',items:[],subcategories:[],removed:false,removedSubs:[],subscriptions:[],subIcons:{}};next.categories.push(c);}
+   if(!c.subcategories.includes(r.subCategory)){c.subcategories.push(r.subCategory);c.items=[...c.subcategories];}
+   next.expenses.push({id:r.id,date:r.date,cents:r.cents,category:c.id,item:r.subCategory,mainCategory:c.name,subCategory:r.subCategory,note:r.note,...(source?{source}:{})});
+  }else{
+   const entry={id:r.id,date:r.date,cents:r.cents,label:r.label,note:r.note,...(source?{source}:{})};if(r.kind==='movement'){entry.movementType=r.movementType;entry.direction=r.direction;next.movements.push(entry);}else next.incomes.push(entry);
+  }
+  next.importLedger.push({id:r.id,signature});counts[r.kind]++;
+ }
+ validateState(next,true);return {mode:'merge',next,counts,skipped,review:file.review?.length||0};
+}
+let filePreview=null,fileReadGeneration=0;
+$('import-file').addEventListener('change',async()=>{
+ const generation=++fileReadGeneration,file=$('import-file').files[0],snapshot=storageSnapshot;filePreview=null;$('apply-import').hidden=true;$('import-status').textContent='Choose a file to preview it.';if(!file)return;
+ try{
+  if(file.size>5000000)throw Error('Choose a JSON file smaller than 5 MB.');const raw=await file.text();if(generation!==fileReadGeneration)return;
+  const plan=planFileImport(raw);if(storageSnapshot!==snapshot)throw Error('Browser data changed while reading the file. Choose it again.');filePreview={plan,snapshot};
+  const c=plan.counts;$('import-status').textContent=`${plan.mode==='restore'?'Restore':'Add'} ${c.expense} expenses, ${c.income} income entries, and ${c.movement} other cash movements. ${plan.skipped} already imported IDs will be skipped. ${plan.review} incomplete source rows stay in the file for review.`;
+  $('apply-import').textContent=plan.mode==='restore'?'Restore backup':'Import records';$('apply-import').hidden=plan.mode==='merge'&&!Object.values(c).some(Boolean);
+ }catch(error){if(generation===fileReadGeneration)$('import-status').textContent=error instanceof SyntaxError?'The file is not valid JSON.':error.message;}
+});
+$('apply-import').addEventListener('click',()=>{
+ const preview=filePreview;if(!preview)return;if(preview.snapshot!==storageSnapshot){filePreview=null;$('apply-import').hidden=true;$('import-status').textContent='Browser data changed after preview. Choose the file again.';return;}
+ const p=preview.plan,c=p.counts,restore=p.mode==='restore';
+ requestConfirmation(restore?'Replace local financial data?':'Import these records?',restore?`Replace this browser’s expenses, income, cash movements, categories, schedules, preferences, and import history with the backup? The saved Gist connection and credentials stay on this device. Undo can restore the previous data.`:`Add ${c.expense} expenses, ${c.income} income entries, and ${c.movement} other cash movements? ${p.skipped} previously imported IDs will be skipped. Existing records stay in place. Manual/monthly purchases are not automatically matched; review any overlap first. Undo can remove this import.`,restore?'Restore backup':'Import records',()=>{
+  const next=clone(p.next);if(restore)addDueMonthly(next);if(!commit(next,restore?'Backup restored':'Records imported'))return false;
+  if(restore){resetForm();filter=null;settingsCategoryId=null;settingsSubName=null;render();}
+  filePreview=null;$('apply-import').hidden=true;$('import-file').value='';$('import-status').textContent=restore?'Backup restored. The device’s Gist connection is unchanged.':'Records imported. Re-importing this file will skip the same IDs.';return true;
+ });
+});
+function localBackup(){return {format:'finflow-backup',version:APP_VERSION,data:financialSnapshot(state)};}
+$('download-backup').addEventListener('click',()=>{
+ try{const blob=new Blob([JSON.stringify(localBackup(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='finflow-backup-'+localDate()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+ catch{$('import-status').textContent='The backup could not be downloaded. Try again in this browser.';}
+});
 
 const mobileEntry=window.matchMedia('(max-width:767.98px)');
 document.addEventListener('pointerdown',()=>document.documentElement.classList.remove('keyboard-navigation'),true);

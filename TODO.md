@@ -11,6 +11,8 @@ Until that milestone is ready, use 0.x.x versions for incremental improvements. 
 - [x] Keep the default keypad, category steps, and Save on one screen on common large phones, with generic picker labels.
 - [x] Add Settings for category/subcategory editing, removal/restoration, built-in icons, subscription defaults, general behavior, and explicit manual Gist snapshots.
 - [x] Add category breakdowns, daily spending charts, and monthly navigation.
+- [x] Track received income separately, compare it with monthly expenses, and keep refunds, loans, withdrawals, transfers, savings and rollover in a separate movement ledger.
+- [ ] Explore a future Sankey of income and expenditure after validating the cash-flow classifications; no Sankey is included in 0.9.0.
 - [x] Support expense editing, deletion, and undo.
 - [x] Set up named monthly expenses once, catch up due charges, and manage or stop future recurrence.
 - [x] Preserve personal defaults and migrate existing logged expenses without changing the original saved data.
@@ -23,7 +25,7 @@ Until that milestone is ready, use 0.x.x versions for incremental improvements. 
 - [ ] Refine phone layouts using actual iPhone and Android devices, including small screens, landscape, safe areas, and the on-screen keyboard.
 - [ ] Check desktop spending views with several months of realistic expenses, long notes, and custom categories.
 - [ ] Confirm empty months, decimal amounts, month boundaries, and daily-average explanations remain clear.
-- [ ] Add a simple local expense backup and restore flow, with validation and protection against accidental replacement of saved expenses.
+- [x] Add local JSON backup/restore and additive transaction import with validation, preview, confirmation, deduplication, deletion history, and Undo.
 
 ## PWA — required for 1.0.0
 
