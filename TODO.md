@@ -1,8 +1,8 @@
 # FinFlow to-do list
 
-**Release goal: 1.0.0 — the full FinFlow PWA release.**
+**Current release: 1.0.0 — installable FinFlow with offline reopening and recurring income.**
 
-Until that milestone is ready, use 0.x.x versions for incremental improvements. FinFlow remains a personal, single-user expense and income tracker with spending visualizations, fixed LKR, and the existing personal categories. This is a planning checklist; the unchecked items are not implemented yet.
+FinFlow remains a personal, single-user expense and income tracker with spending visualizations, fixed LKR, and the existing personal categories. This is a planning checklist; unchecked items are future work or acceptance checks.
 
 ## Completed foundation
 
@@ -11,15 +11,16 @@ Until that milestone is ready, use 0.x.x versions for incremental improvements. 
 - [x] Keep the default keypad, category steps, and Save on one screen on common large phones, with generic picker labels.
 - [x] Add Settings for category/subcategory editing, removal/restoration, built-in icons, subscription defaults, general behavior, and explicit manual Gist snapshots.
 - [x] Add category breakdowns, daily spending charts, and monthly navigation.
+- [x] Add recurring monthly income with due dates, month-end handling, catch-up, edit/stop/Undo, and separate schedule management.
 - [x] Track received income separately, compare it with monthly expenses, and keep refunds, loans, withdrawals, transfers, savings and rollover in a separate movement ledger.
-- [ ] Explore a future Sankey of income and expenditure after validating the cash-flow classifications; no Sankey is included in 0.9.0.
+- [ ] Explore a future Sankey of income and expenditure after validating the cash-flow classifications; Sankey remains deferred after 1.0.0.
 - [x] Support expense editing, deletion, and undo.
 - [x] Set up named monthly expenses once, catch up due charges, and manage or stop future recurrence.
 - [x] Preserve personal defaults and migrate existing logged expenses without changing the original saved data.
 - [x] Keep the application self-contained in index.html with no runtime dependencies.
 - [x] Add regression checks for persistence, totals, migration, storage failures, accessibility, and responsive layouts.
 
-## Before the full release
+## Everyday-use acceptance
 
 - [ ] Use the tracker for everyday expenses and record any friction in amount entry, category selection, saving, and editing.
 - [ ] Refine phone layouts using actual iPhone and Android devices, including small screens, landscape, safe areas, and the on-screen keyboard.
@@ -29,25 +30,27 @@ Until that milestone is ready, use 0.x.x versions for incremental improvements. 
 
 ## PWA — required for 1.0.0
 
-- [ ] Add a web app manifest with FinFlow's name, app ID, theme colors, and standalone display mode.
-- [ ] Add app icons, including maskable icons and an Apple touch icon.
-- [ ] Set the manifest start URL and scope correctly for the existing /finflow-architect/ GitHub Pages path.
-- [ ] Add a service worker that caches the application for offline reopening after an initial successful load.
-- [ ] Keep application code in index.html; add only the supporting files needed for installation and offline caching.
-- [ ] Add a clear update flow and versioned caches so an installed app receives new releases without losing saved expenses.
-- [ ] Verify installation and standalone launch on iPhone, Android, and a supported desktop browser.
-- [ ] Verify offline launch after closing and reopening the installed app, plus expense save/edit/delete and persistence while offline.
-- [ ] Verify an upgrade from the existing website to the installed PWA keeps same-origin expense data and legacy migration working.
-- [ ] Verify cache cleanup and updates never delete financial data or show a mixture of old and new application code.
+- [x] Add a web app manifest with FinFlow's name, app ID, theme colors, and standalone display mode.
+- [x] Add app icons, including maskable icons and an Apple touch icon.
+- [x] Set the manifest start URL and scope correctly for the existing /finflow-architect/ GitHub Pages path.
+- [x] Add a service worker that caches the application for offline reopening after an initial successful load.
+- [x] Keep application code in index.html; add only the supporting files needed for installation and offline caching.
+- [x] Add a clear update flow and versioned caches so an installed app receives new releases without losing saved expenses.
+- [x] Validate manifest, scope, icon dimensions, and Chromium installability with the browser protocol.
+- [ ] Complete physical iPhone/Android home-screen installation and desktop OS app-window acceptance; automation does not replace these checks.
+- [x] Verify offline reopening after an isolated Chromium browser restart, including expense save/edit/delete/Undo, income, and persistence; repeat from actual installed phone icons below.
+- [x] Verify a browser upgrade to the PWA shell preserves same-origin financial data and legacy storage; separately verify any OS-specific installation storage behavior below.
+- [x] Verify cache cleanup and updates never delete financial data or show a mixture of old and new application code.
 
-## 1.0.0 release checklist
+## 1.0.0 release verification
 
-- [ ] Complete the tracker polish and PWA requirements above.
-- [ ] Run the documented regression suite and manual desktop/phone checks; resolve release-blocking issues.
-- [ ] Document installation, offline behavior, updates, local backup/restore, and browser storage limitations in README.md.
-- [ ] Update VERSION and all documented release references to 1.0.0, together with any PWA cache version references added during implementation.
-- [ ] Commit the release implementation and version change together, then push after verification.
-- [ ] Confirm the deployed GitHub Pages app installs, launches offline, and preserves expenses through an update.
+- [x] Implement the PWA shell, installation help, explicit update flow, and recurring income.
+- [ ] Complete the everyday-use and physical-device checks above; keep any device-specific issues here.
+- [x] Run all thirteen regression suites and review desktop/phone browser layouts; retain the physical-device checks above.
+- [x] Document installation, offline behavior, updates, local backup/restore, and browser storage limitations in README.md.
+- [x] Update VERSION and matching application/package/service-worker release references to 1.0.0.
+- [x] Commit the release implementation and version change together and push after automated verification.
+- [ ] Complete actual-device acceptance against GitHub Pages: install, reopen offline, and preserve expenses through an update.
 
 
 ## 2.0.0 — device bank SMS → automatic PWA spending

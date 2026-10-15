@@ -4,7 +4,7 @@ The tracker-first FinFlow rebuild starts a new release line at **0.0.0**. This r
 
 ## Full release milestone
 
-**1.0.0** is reserved for the full FinFlow PWA release. Track its implementation and release criteria in [TODO.md](TODO.md). Continue using 0.x.x for work leading up to that milestone; documenting the target does not make the current app a PWA.
+**1.0.0** is reserved for the full FinFlow PWA release. Track its implementation and release criteria in [TODO.md](TODO.md). The owner authorized this release with compatible data additions; release 1.0.0 includes the manifest, app icons, offline shell, explicit updates, and recurring income. Subsequent changes follow the rules below.
 
 ## Required for every change
 
@@ -21,12 +21,12 @@ The initial rebuild is the authorized **0.0.0** baseline; subsequent fixes start
 ## Release checklist
 
 1. Read VERSION, this document, README.md, and the current implementation before editing.
-2. Update VERSION, `APP_VERSION`, the `application-version` meta tag, and the initial footer display in index.html to the same release version.
+2. Update VERSION, `APP_VERSION`, the `application-version` meta tag, the initial footer display in index.html, and `RELEASE` in sw.js to the same release version.
 3. Update README.md's baseline version and package.json's dev-test package version when making a release.
 4. Run `npm test` and the desktop/phone manual checks in tests/README.md.
 5. Check `git diff --check`, then commit the version and implementation together. Push only after checks pass.
 
-The app's CSS, JavaScript, SVG icons, and charts are inline in index.html. There are no external application assets, CDN scripts, service worker, or asset cache-busting tokens to update. GitHub Pages serves index.html using its normal HTTP cache policy.
+Application CSS, JavaScript, SVG UI icons, and charts stay inline in index.html. Supporting PWA files are manifest.webmanifest, sw.js, and icons/. Update sw.js's RELEASE for every release, including documentation/version-only releases, to make the new app available to installed copies. Add any new required shell files to its explicit precache list. Installation must fetch all files successfully and match the HTML application-version before committing a cache. Never cache financial/API requests, clear localStorage/IndexedDB, change the manifest ID/scope/start URL casually, or delete another app's caches. New workers wait for explicit activation or normal activation after old tabs close. Run the HTTP PWA tests for offline restart, failed/mixed deployment, confirmation, multi-tab drafts, credentials, cache isolation, and data preservation before pushing.
 
 ## Storage compatibility
 
@@ -48,3 +48,5 @@ The compatible 0.6.0 release remembers credentials per browser/device as explici
 The compatible 0.8.0 release stages phone entry as amount, category, and subcategory selection. Advancing from the amount never saves; Back and Edit amount preserve draft values. Successful saves reset the flow. Desktop entry, storage schema, and backup formats are unchanged.
 
 The compatible 0.9.0 release adds incomes, movements, and importLedger arrays within schema 1. Older snapshots gain empty arrays through idempotent normalization; malformed new fields are rejected before writing. Snapshot backups and Gist sync include the new arrays while excluding device credentials. Import IDs and original signatures survive deletion to prevent re-import resurrection; source changes are rejected for review. No schedules are created from imported historical transactions.
+
+The additive 1.0.0 release adds recurringIncomeRules within schema 1. Older snapshots gain an empty list without creating salary schedules. Deterministic monthly-income IDs and a persisted nextMonth cursor preserve edited/deleted postings; posting and cursor changes are saved atomically. Existing income and cash movement records, legacy storage, backup format, device credentials, and manual Gist semantics remain compatible. Installation caches application files independently of financial storage. Physical iPhone/Android installation checks remain explicit manual acceptance steps.

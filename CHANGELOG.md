@@ -1,5 +1,14 @@
 # FinFlow change summary
 
+## 1.0.0 — 2026-10-15
+
+- Add an installable manifest, FinFlow app icons, Apple Home Screen metadata, and scoped offline caching.
+- Add Settings installation help, offline readiness, update checks, and explicit update/reload with draft warnings.
+- Keep working downloads on failure, validate matching release files, preserve financial data/credentials, and isolate cache cleanup from other apps.
+- Add recurring income with first dates, month-end handling, catch-up, edit/stop/Undo, and deletion-safe monthly IDs.
+- Preserve backup/Gist compatibility through additive monthly income rules; document installation, storage limitations, and device acceptance checks.
+- Add HTTP PWA and recurring-income regression suites alongside the existing tracker checks.
+
 ## 0.9.1 — 2026-10-15
 
 Removed the obsolete October 2 review report and its five screenshots from the repository; future `dogfood-output/` artifacts are ignored. The application, development dependencies, regression suites, roadmap, and migration code remain needed. Changes since that review of commit `f64e319`:

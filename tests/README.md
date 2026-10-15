@@ -9,11 +9,14 @@ npm install
 npm test
 ```
 
-This runs `node tests/regression.js`, `node tests/regression-a11y-colour.js`, `node tests/categories.js`, `node tests/monthly.js`, `node tests/settings.js`, `node tests/confirmations.js`, `node tests/mobile-tracking.js`, `node tests/taxonomy.js`, `node tests/gist-setup.js`, `node tests/gist-credentials.js`, and `node tests/income-import.js`. All eleven resolve `index.html` relative to the repository, open it using `file://`, and use isolated Chrome browser contexts. No server, network access, backend, build, or real financial data is needed.
+This runs `node tests/regression.js`, `node tests/regression-a11y-colour.js`, `node tests/categories.js`, `node tests/monthly.js`, `node tests/settings.js`, `node tests/confirmations.js`, `node tests/mobile-tracking.js`, `node tests/taxonomy.js`, `node tests/gist-setup.js`, `node tests/gist-credentials.js`, `node tests/income-import.js`, `node tests/recurring-income.js`, and `node tests/pwa.js`. All thirteen resolve files relative to the repository and use isolated synthetic browser profiles. Twelve open `index.html` using `file://`; the PWA suite starts its own temporary loopback HTTP server to exercise real service workers and browser restarts, then removes its temporary profile. No external network, backend, build, or real financial data is used. The loopback port is assigned automatically.
 
 The default Chrome path is `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. Set the `CHROME` environment variable for a different executable. Browser dates use Asia/Colombo.
 
 ## Coverage
+
+- Recurring income: first/future dates, precise cents, leap/non-leap month ends, catch-up, duplicate prevention across reloads/tabs, posted-entry edits/deletion, future schedule changes, stop/cancel/Undo, paused logging, storage failure, backup/Gist compatibility, idempotent older data, malformed schedules, inert labels, and phone/landscape dialogs.
+- PWA: first same-origin upgrade with existing expenses/income/legacy data/credentials, real manifest and Chromium installability checks, offline entry/edit/delete/Undo/income/backups, fresh browser-process reopening, cache isolation, failed assets, mismatched deployment versions, waiting updates, cancellation, confirmed reload, other-tab draft preservation, and narrow layouts. Only explicit bundled shell files enter Cache Storage.
 
 - Income and file import: exact cents, received dates, source totals, income/spending comparisons, separate movement types, editing/deletion/Undo, preview/cancel/confirmation, repeat IDs, deletion tombstones, changed-source conflicts, invalid files, storage failure/stale preview, backup/Gist inclusion and credential exclusion, old data normalization, stored XSS, and phone/desktop layouts.
 - Baseline version consistency; default categories and honest empty states.
@@ -51,3 +54,14 @@ Tests also write populated desktop and phone review screenshots to `/tmp/finflow
 10. Run `git diff --check` and confirm all release version references agree before committing/pushing.
 
 Settings review screenshots are written to `/tmp/finflow-{desktop,phone}-settings.png`; the compact first screen is `/tmp/finflow-phone-entry-0.3.png`. SMS ingestion remains roadmap-only and has no permission or parsing code in this release.
+
+## PWA acceptance and support
+
+Automated Chromium checks validate installability and exercise real service workers over HTTP, including process restart while the server is unavailable. Responsive iPhone/Android viewport checks use Chromium emulation; they do not run iOS Safari or an Android device. Full OS installation/launch and touch/keyboard behavior on actual devices remain manual acceptance items in TODO.md.
+
+1. On iPhone Safari and Android Chrome, download a current JSON backup, install from the hosted GitHub Pages URL using Settings instructions, and open the home-screen icon. Verify app icons, standalone launch, no address bar, startup view, safe areas, landscape, and keyboard scrolling in the income/schedule editors. If an installation uses separate storage, explicitly restore the backup or your FinFlow Gist there.
+2. Wait for Ready to open offline; enable airplane mode, close/reopen the installed app, save/edit/delete/Undo expenses and income, set up a salary, and reload. Switch to an empty month and verify totals. Reconnect and confirm manual Gist actions still require preview/confirmation.
+3. On desktop Chrome/Edge, install with the browser menu and repeat from the standalone app window. Retain an old open tab with an unsaved amount while a new release downloads: check the Settings dot, cancel the update, confirm it, and verify saved data/credentials and the other tab's draft. Reload the other tab explicitly.
+4. Use synthetic data to compare website → installed app → updated app records, categories, import history, recurring expense/income cursors, preferences, and backups. Verify past deleted postings stay deleted, future posts stay excluded, and OS/browser cache eviction/storage clearing is documented rather than treated as a backup guarantee.
+
+The current release does not claim a completed physical-device pilot. No notifications, background salary jobs, telemetry, SMS permissions, or cloud synchronization are added by installation.
