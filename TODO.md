@@ -2,12 +2,12 @@
 
 **Release goal: 1.0.0 — the full FinFlow PWA release.**
 
-Until that milestone is ready, use 0.x.x versions for incremental improvements. FinFlow remains a personal, single-user expense tracker with desktop spending visualizations, fixed LKR, and the existing personal categories. This is a planning checklist; the unchecked items are not implemented yet.
+Until that milestone is ready, use 0.x.x versions for incremental improvements. FinFlow remains a personal, single-user expense and income tracker with spending visualizations, fixed LKR, and the existing personal categories. This is a planning checklist; the unchecked items are not implemented yet.
 
 ## Completed foundation
 
 - [x] Rebuild FinFlow around Track and Spending.
-- [x] Add a large amount keypad and an eight-category, two-step selector with specific subcategories and Other.
+- [x] Add a large amount keypad and a selector with six main categories, specific subcategories, and direct Other entry.
 - [x] Keep the default keypad, category steps, and Save on one screen on common large phones, with generic picker labels.
 - [x] Add Settings for category/subcategory editing, removal/restoration, built-in icons, subscription defaults, general behavior, and explicit manual Gist snapshots.
 - [x] Add category breakdowns, daily spending charts, and monthly navigation.

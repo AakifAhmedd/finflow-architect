@@ -1,10 +1,12 @@
 # FinFlow
 
-A personal finance app for logging expenses and income and understanding where money went. **Track first, visualize second.** Current version: **0.9.0**.
+A personal finance app for logging expenses and income and understanding where money went. **Track first, visualize second.** Current version: **0.9.1**.
 
 [Open FinFlow](https://aakifahmedd.github.io/finflow-architect/)
 
 See [the to-do list](TODO.md) for the roadmap to **1.0.0**, the full PWA release.
+
+See [CHANGELOG.md](CHANGELOG.md) for the short summary of changes since the October 2026 review.
 
 ## Use
 
@@ -66,7 +68,7 @@ Under Settings → Cloud sync (optional), enter your **GitHub personal access to
 Creation runs once per in-progress setup. Discovery scans up to 1,000 Gists and stops without creating if that list is incomplete. After an uncertain network failure, another Save connection may discover a successfully created Gist, but does not blindly repeat creation in the same tab. Check GitHub and enter the returned ID if needed. If creation succeeds but local storage fails, the ID remains visible and the pending connection stays in memory for a safe retry; copy the ID before closing/reloading the tab. Creating a Gist uploads a snapshot at that moment; expenses added while the request is running remain local and can be pushed after reviewing the preview.
 The Gist ID and token are remembered in this browser on this device. The token stays masked in its password field after saving and reloading. It is stored in a separate localStorage record, `finflow_gist_connection_v1`, bound to the Gist ID, outside the financial model and every Gist backup. It is never included in uploads or request URLs. Disconnect removes the saved ID and token after confirmation. Different browsers/devices have their own saved connection. Connection writes roll back the credential record if the financial-settings save fails; changed credentials in another tab invalidate the preview. Only secret Gists are accepted, but secret Gists are **not encrypted or access-controlled by their link**. GitHub keeps revision history. Uploading sends expenses, income, cash movements, import history, classifications, schedules, general preferences, and retained migration metadata to GitHub, without connection details or credentials. Review the replacement confirmation first.
 
-Remote data is validated before restore; public, malformed, and truncated files are rejected. Preview compares expense counts. A second read prevents overwriting a snapshot changed since preview, and local storage conflicts block restoration. Gist sync is manual snapshot replacement, not merging: avoid simultaneous writes from multiple devices, as GitHub's update endpoint does not provide an atomic compare-and-swap guarantee here. A network error after an upload may mean GitHub accepted it; preview again before retrying. Restore can be undone in this session. Due monthly charges are processed after restore only when automatic posting is enabled.
+Remote data is validated before restore; public, malformed, and truncated files are rejected. Preview compares expense, income, and cash-movement counts and shows active monthly schedules. A second read prevents overwriting a snapshot changed since preview, and local storage conflicts block restoration. Gist sync is manual snapshot replacement, not merging: avoid simultaneous writes from multiple devices, as GitHub's update endpoint does not provide an atomic compare-and-swap guarantee here. A network error after an upload may mean GitHub accepted it; preview again before retrying. Restore can be undone in this session. Due monthly charges are processed after restore only when automatic posting is enabled.
 
 ## Roadmap
 
