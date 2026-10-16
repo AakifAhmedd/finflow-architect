@@ -1,5 +1,9 @@
 # FinFlow change summary
 
+## 1.0.1 — 2026-10-16
+
+- Refresh the README: document Reset local data and correct the stale release-line note.
+
 ## 1.0.0 — 2026-10-15
 
 - Add an installable manifest, FinFlow app icons, Apple Home Screen metadata, and scoped offline caching.
