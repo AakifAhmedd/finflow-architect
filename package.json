@@ -1,6 +1,6 @@
 {
   "name": "finflow-tests",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Dev-only browser regression tests for the self-contained FinFlow app.",
   "scripts": {

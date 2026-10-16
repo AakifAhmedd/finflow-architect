@@ -1,5 +1,9 @@
 # FinFlow change summary
 
+## 1.0.2 — 2026-10-16
+
+- Condense the README to a short overview; detailed behavior stays in Git history and VERSIONING.md.
+
 ## 1.0.1 — 2026-10-16
 
 - Refresh the README: document Reset local data and correct the stale release-line note.
