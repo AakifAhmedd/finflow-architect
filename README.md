@@ -1,6 +1,6 @@
 # FinFlow
 
-Personal, single-user expense and income tracker. Fixed LKR, offline-first PWA, no build step or dependencies. Current version: **1.0.3**.
+Personal, single-user expense and income tracker. Fixed LKR, offline-first PWA, no build step or dependencies. Current version: **1.0.4**.
 
 [Open FinFlow](https://aakifahmedd.github.io/finflow-architect/)
 
@@ -12,6 +12,7 @@ Personal, single-user expense and income tracker. Fixed LKR, offline-first PWA, 
 - **Other cash movements:** refunds, loans, withdrawals, transfers, savings, rollover. Kept separate from income and spending.
 - **Monthly schedules:** recurring expenses and income post on their day each month (last day for shorter months) and catch up when the app opens.
 - **Settings:** edit categories and icons, startup view, Gist sync, backup/import, install and updates, Reset local data.
+- Calendars and dropdowns use in-app controls on desktop and phone; income sources support suggestions or custom text.
 - Deletes and replacements ask for confirmation; recent changes can be undone (toast or Ctrl/Cmd+Z).
 
 Default categories: Transport, Food & Dining, Fitness & Health, Personal, Professional & Community, Other.

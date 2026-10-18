@@ -141,7 +141,7 @@ async function palette(page){
  await check('Touch focus stays quiet in details, Settings, navigation, save reset, and dialogs',async()=>{
   await t.tap('#details-summary');await quietFocus();await t.tap('#note');await quietFocus();await t.keyboard.type('Phone note');await quietFocus();
   await t.tap('#nav-settings');await quietFocus();await t.tap('#category-name');await quietFocus();
-  await t.tap('#settings-category');await quietFocus();await t.keyboard.press('Escape');await t.tap('#remember-category');await quietFocus();
+  await t.tap('#settings-category-control');await quietFocus();await t.keyboard.press('Escape');await t.tap('#remember-category');await quietFocus();
   await t.tap('#nav-track');await quietFocus();await t.tap('#save-expense');await quietFocus();assert.equal((await stored(t)).expenses[0].cents,1200);assert.equal((await stored(t)).expenses[0].note,'Phone note');
   await t.tap('#nav-spending');await quietFocus();await t.tap('#spending-list [data-expense]');await quietFocus();
   await t.tap('#delete-expense');await quietFocus();assert.equal(await t.$eval('#confirm-dialog',e=>e.open),true);

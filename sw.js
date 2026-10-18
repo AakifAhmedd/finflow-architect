@@ -1,6 +1,6 @@
 'use strict';
 // Bump with every app release. A new worker waits for explicit user activation.
-const RELEASE = '1.0.3';
+const RELEASE = '1.0.4';
 const BASE = self.registration.scope;
 const PREFIX = 'finflow-shell:' + new URL(BASE).pathname + ':';
 const CACHE = PREFIX + RELEASE;

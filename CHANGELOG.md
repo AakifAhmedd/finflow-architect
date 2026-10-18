@@ -1,5 +1,11 @@
 # FinFlow change summary
 
+## 1.0.4 — 2026-10-18
+
+- Replace native date/month pickers and every select menu with FinFlow-styled controls, including phone panels and keyboard support.
+- Make income-source suggestions searchable while preserving custom labels.
+- Keep category Save, Add, and Remove/Restore actions on one compact row on phones.
+
 ## 1.0.3 — 2026-10-18
 
 - Remove the on-screen keypad from desktop and give keyboard amount entry a labeled, focused input.
