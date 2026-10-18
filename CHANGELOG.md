@@ -1,5 +1,11 @@
 # FinFlow change summary
 
+## 1.0.3 — 2026-10-18
+
+- Remove the on-screen keypad from desktop and give keyboard amount entry a labeled, focused input.
+- Balance the desktop layout with a compact entry form, grouped monthly summary, recent expenses, and monthly schedules beneath entry.
+- Keep the staged phone keypad and category flow, including drafts when resizing between phone and desktop.
+
 ## 1.0.2 — 2026-10-16
 
 - Condense the README to a short overview; detailed behavior stays in Git history and VERSIONING.md.

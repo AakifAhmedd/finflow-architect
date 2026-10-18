@@ -1,12 +1,12 @@
 # FinFlow
 
-Personal, single-user expense and income tracker. Fixed LKR, offline-first PWA, no build step or dependencies. Current version: **1.0.2**.
+Personal, single-user expense and income tracker. Fixed LKR, offline-first PWA, no build step or dependencies. Current version: **1.0.3**.
 
 [Open FinFlow](https://aakifahmedd.github.io/finflow-architect/)
 
 ## Features
 
-- **Tracks:** fast expense entry: amount keypad, category, subcategory, save. On phones each step gets its own screen. Optional note, date, and Repeat monthly.
+- **Tracks:** fast expense entry: type an amount on desktop, choose a category and subcategory, then save. Desktop pairs a compact form and monthly schedules with the spending overview and recent expenses. Phones keep the keypad and separate entry stages. Optional note, date, and Repeat monthly.
 - **Spending:** monthly totals, comparison with the previous month, category shares, daily chart, and filters by category.
 - **Income:** log income by source; compare with spending. Salary-style income can repeat monthly.
 - **Other cash movements:** refunds, loans, withdrawals, transfers, savings, rollover. Kept separate from income and spending.

@@ -78,9 +78,10 @@ async function palette(page){
   await continueEntry(page);await page.click('[data-category="food"]');await page.click('[data-subcategory="Cafes"]');
   for(const width of [767,768,1440,390]){
    await page.setViewport({width,height:1000});await page.click('#nav-track');assert.equal((await layout(page)).review,width>=768);
-   assert.equal(await page.$eval('.keypad',e=>e.hidden),width<768);assert.equal(await page.$eval('#amount',e=>e.readOnly),width<768);
+   assert.equal(await page.$eval('.keypad',e=>e.hidden),true);assert.equal(await page.$eval('#amount',e=>e.readOnly),width<768);
+   assert.equal(await page.$eval('#amount',e=>e.inputMode),width<768?'none':'decimal');
    assert.equal(await page.$eval('#amount',e=>e.value),'100');assert.equal(await page.$eval('[data-subcategory="Cafes"]',e=>e.getAttribute('aria-pressed')),'true');
-   assert.equal(await page.$eval('#monthly-card',e=>e.parentElement.id),width<768?'mobile-monthly-slot':'');
+   assert.equal(await page.$eval('#monthly-card',e=>e.parentElement.id),width<768?'mobile-monthly-slot':'desktop-monthly-slot');
    if(width<768){await page.click('#nav-spending');assert.equal(await page.$eval('#monthly-card',e=>e.getClientRects().length>0),true);}
    assert.equal(await page.$$eval('#monthly-card',es=>es.length),1);
   }

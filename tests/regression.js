@@ -24,9 +24,10 @@ const {acceptConfirmation,launch,fresh,stored,fill,add,text,check,today,assert,f
    }
    await page.click('#categories-back');await fill(page,'amount','20');await page.$eval('#expense-form',e=>e.requestSubmit());assert.match(await text(page,'form-feedback'),/Choose a main category/);
   });
-  await check('Keypad supports decimal entry, backspace, and two-digit cents',async()=>{
+  await check('Desktop keyboard entry supports decimal amounts, backspace, and two-digit cents without a keypad',async()=>{
    await fill(page,'amount','');
-   for(const key of ['1','2','5','0','.','5','0','7','backspace','0']) await page.click(`[data-key="${key}"]`);
+   assert.equal(await page.$eval('.keypad',e=>e.hidden),true);
+   await page.focus('#amount');await page.keyboard.type('1250.50');await page.keyboard.press('Backspace');await page.keyboard.type('0');
    assert.equal(await page.$eval('#amount',e=>e.value),'1,250.50');
    await page.click('[data-category="sports"]');await page.click('[data-subcategory="Sports Gear"]');await page.click('#save-expense');
    const data=await stored(page);assert.equal(data.expenses.length,1);assert.equal(data.expenses[0].cents,125050);assert.equal(data.expenses[0].subCategory,'Sports Gear');

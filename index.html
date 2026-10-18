@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f6f0">
 <meta name="description" content="FinFlow — personal expense tracking and a clearer view of your spending.">
-<meta name="application-version" content="1.0.2">
+<meta name="application-version" content="1.0.3">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FinFlow">
@@ -139,6 +139,54 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 </style>
 <style>
 .nav button{position:relative}.update-dot{width:7px;height:7px;border-radius:50%;background:#a33b34;position:absolute;right:8px;top:7px}.pwa-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#pwa-card .primary{width:100%}
+.entry-column,.tracker-summary{display:grid;gap:23px;min-width:0}
+#desktop-monthly-slot:empty{display:none}
+/* Desktop entry uses the keyboard, with a compact form beside the monthly overview. */
+@media(min-width:768px){
+ #track-view .tracker-grid{grid-template-columns:minmax(360px,.9fr) minmax(0,1.3fr);gap:28px}
+ #track-view .entry-card{padding:28px;min-width:0}
+ #track-view .entry-card>.card-heading{display:block}
+ #track-view .entry-card .card-heading h2{font-size:21px;margin-bottom:7px}
+ #track-view .entry-card #entry-hint{font-size:12px;line-height:1.6}
+ #track-view .amount-area{position:relative;margin:24px 0 22px;padding:32px 16px 10px;gap:10px;border:1px solid var(--line);border-radius:14px;background:#fafbf8}
+ #track-view .amount-area:focus-within{background:var(--paper);border-color:var(--green);box-shadow:0 0 0 3px var(--green-light)}
+ #track-view .amount-label{position:absolute;top:12px;left:16px;width:auto;height:auto;margin:0;overflow:visible;clip:auto;white-space:normal;font-size:11px;font-weight:600;color:var(--muted)}
+ #track-view #amount{height:60px;font-size:clamp(27px,3.2vw,44px);letter-spacing:-1.5px}
+ #track-view #amount:focus-visible{outline:none}
+ #track-view #amount::placeholder{color:var(--muted)}
+ #track-view .keypad{display:none}
+ #track-view .category-heading{margin-bottom:12px}
+ #track-view .category-heading h3{font-size:14px}
+ #track-view .categories{gap:9px}
+ #track-view .categories .category-button{min-height:65px;font-size:12px;padding:12px;gap:10px;flex-direction:row;justify-content:flex-start;text-align:left}
+ #track-view .category-button .icon{width:20px;height:20px}
+ #track-view .categories.subcategories .category-button{flex-wrap:wrap}
+ #track-view .entry-details{margin-top:21px;border-top:1px solid var(--line);padding-top:10px}
+ #track-view .entry-details summary{min-height:44px;line-height:44px;font-size:12px}
+ #track-view .save-button{margin-top:18px}
+ #track-view .overview{padding:26px 28px}
+ #track-view .mini-card{min-width:0;padding:20px 22px}
+ #track-view .mini-value{overflow-wrap:anywhere}
+ #track-view .expenses-card{padding:24px 26px}
+ #track-view .right-stack{min-width:0}
+ #track-view .overview-bottom{flex-wrap:wrap}
+}
+@media(min-width:1200px){
+ #track-view .tracker-summary{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px}
+ #track-view .tracker-summary .mini-summary{grid-template-columns:1fr;gap:14px}
+ #track-view .overview{display:flex;flex-direction:column}
+ #track-view .total-label{margin-top:24px}
+ #track-view .month-total{font-size:38px;margin-bottom:20px}
+ #track-view .overview-bottom{margin-top:auto;padding-top:14px;gap:8px}
+ #track-view .overview-bottom .text-button{font-size:12px;padding:0}
+ #track-view .mini-value{font-size:21px}
+}
+@media(min-width:768px) and (max-width:1023.98px){
+ #track-view .tracker-grid{grid-template-columns:1fr;gap:24px}
+ #track-view .categories{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #track-view .tracker-summary{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px}
+ #track-view .tracker-summary .mini-summary{grid-template-columns:1fr}
+}
 @media(max-width:767.98px){
  .header{padding-top:env(safe-area-inset-top)}
  body[data-view="track"] .header{padding-top:0}
@@ -165,9 +213,10 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <section id="track-view" aria-labelledby="track-title">
 <div class="page-heading"><div><p class="eyebrow">A little clarity, every day</p><h1 id="track-title">Every expense, in its place.</h1><p class="muted">Add it now. Make sense of it later.</p></div><div class="heading-date" id="today-label"></div></div>
 <div class="tracker-grid">
+<div class="entry-column">
 <form id="expense-form" class="card entry-card" novalidate>
 <div class="card-heading"><h2 id="entry-title">Add an expense</h2><span class="step-label" id="entry-hint">Amount → category → save</span></div>
-<div class="amount-area"><span class="currency" aria-hidden="true">Rs.</span><label for="amount" class="sr-only">Expense amount in LKR</label><input id="amount" type="text" inputmode="none" autocomplete="off" placeholder="0" maxlength="14" aria-describedby="entry-hint form-feedback"><button id="edit-amount" class="text-button" type="button" hidden>Edit amount</button></div>
+<div class="amount-area"><span class="currency" aria-hidden="true">Rs.</span><label for="amount" class="amount-label sr-only">Expense amount in LKR</label><input id="amount" type="text" inputmode="none" autocomplete="off" placeholder="0" maxlength="14" aria-describedby="entry-hint form-feedback"><button id="edit-amount" class="text-button" type="button" hidden>Edit amount</button></div>
 <div class="keypad" aria-label="Amount keypad"><button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button><button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button><button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button><button type="button" data-key="." aria-label="Decimal point">.</button><button type="button" data-key="0">0</button><button type="button" data-key="backspace" aria-label="Delete last digit"><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-backspace"/></svg></button></div>
 <div id="category-picker"><div class="category-heading"><button id="categories-back" class="text-button category-back" type="button" hidden>Back</button><h3 id="category-label">What was it for?</h3><span class="step-label" id="category-step-label">Step 1 of 2</span></div>
 <div class="categories" id="categories" role="group" aria-labelledby="category-label" aria-describedby="category-step-label"></div>
@@ -176,9 +225,13 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <p id="form-feedback" class="form-feedback" role="alert" hidden></p>
 <div class="entry-actions"><button id="continue-amount" class="primary save-button" type="button" disabled hidden>Choose category <svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow"/></svg></button><button id="save-expense" class="primary save-button" type="submit" disabled><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-track"/></svg><span id="save-label">Save expense</span></button><button class="text-button cancel-edit" id="cancel-edit" type="button" hidden>Cancel edit</button></div>
 </form>
+<div id="desktop-monthly-slot"></div>
+</div>
 <div class="right-stack">
+<div class="tracker-summary">
 <section class="card overview" aria-label="Monthly spending summary"><div class="month-controls"><p class="month-title" id="track-month"></p><div class="month-arrows"><button class="icon-button" id="track-prev" aria-label="Previous month" type="button"></button><button class="icon-button" id="track-next" aria-label="Next month" type="button"></button></div></div><p class="total-label">Total spent</p><p class="month-total num"><span class="currency-small">LKR</span><span id="track-total">0</span></p><div class="overview-bottom"><span class="month-count" id="track-count">0 expenses logged</span><button id="see-spending" type="button" class="text-button">See your spending <svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-arrow"/></svg></button></div></section>
 <div class="mini-summary"><div class="card mini-card"><p class="eyebrow">Spent today</p><p class="mini-value num" id="today-total">Rs. 0</p><p class="muted" id="today-count">No expenses yet</p></div><div class="card mini-card"><p class="eyebrow">Top category</p><p class="mini-value" id="top-category">—</p><p class="muted" id="top-category-detail">For the selected month</p></div></div>
+</div>
 <section class="card expenses-card"><div class="expense-heading"><h2>Recent expenses</h2><span class="muted" id="recent-month"></span></div><div id="recent-list" class="expense-list"></div><button id="all-expenses" class="text-button more-button" type="button" hidden>View all expenses</button></section>
 <section id="monthly-card" class="card expenses-card" aria-labelledby="monthly-title"><div class="expense-heading"><h2 id="monthly-title">Monthly expenses</h2><span id="monthly-count" class="muted"></span></div><div id="monthly-list"></div><p class="muted monthly-hint">Set one up under Add details → Repeat monthly. Short months use the last day.</p></section>
 </div></div>
@@ -213,7 +266,7 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <section class="card settings-card" aria-labelledby="files-title"><h2 id="files-title">Import &amp; backup</h2><p class="muted settings-intro">Import a FinFlow transaction file to add records, or restore a complete FinFlow backup. Everything happens in this browser.</p><div class="field"><label for="import-file">FinFlow JSON file</label><input id="import-file" type="file" accept=".json,application/json"></div><p id="import-status" class="muted settings-intro" role="status" aria-live="polite">Choose a file to preview it.</p><button id="apply-import" class="primary" type="button" hidden>Import records</button><button id="download-backup" class="text-button" type="button">Download backup</button><p class="muted monthly-hint">Imports add records and skip previously imported IDs. Existing manual/monthly purchases are not automatically matched; review any overlap. Backups include income, cash movements, and import history, and exclude Gist credentials.</p></section>
 <section class="card settings-card" aria-labelledby="reset-title"><h2 id="reset-title">Reset data</h2><p class="muted settings-intro">Clear all expenses, income, cash movements, import history, monthly expense and income schedules, category changes, and behavior settings stored in this browser. Your Gist connection and the cloud copy are not touched.</p><button id="reset-data" class="delete-button" type="button">Reset local data</button></section></div>
 </div></section>
-<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">1.0.2</span></span></footer>
+<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">1.0.3</span></span></footer>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toast-message"></span><button id="undo" type="button" hidden>Undo</button></div>
 <dialog id="expense-dialog" class="edit-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><div><p class="eyebrow" style="margin-bottom:10px">Expense details</p><h2 id="dialog-title"></h2></div><button id="close-dialog" class="icon-button" type="button" aria-label="Close expense details"></button></div><p id="dialog-amount" class="dialog-amount num"></p><p id="dialog-note" class="dialog-note"></p><p class="muted monthly-hint" id="charge-hint" hidden>Editing or deleting this charge changes only this expense.</p><div class="dialog-actions"><button id="manage-monthly-charge" class="text-button" type="button" hidden>Manage monthly expense</button><button id="edit-expense" class="primary" type="button">Edit expense</button><button id="delete-expense" class="delete-button" type="button">Delete expense</button></div></dialog>
@@ -229,7 +282,7 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <script>
 'use strict';
 // App release version is independent of the additive local data schema.
-const APP_VERSION = '1.0.2';
+const APP_VERSION = '1.0.3';
 const STORAGE_KEY = 'finflow_tracker_v1';
 const LEGACY_KEY = 'finflow_architect_model_v2';
 const LEGACY_CATEGORIES = [
@@ -630,14 +683,15 @@ function renderPhoneEntry(){
  $('expense-form').dataset.entryStep=amountStep?'amount':c&&!directCategory(c)?'subcategory':'category';
  $('expense-form').style.setProperty('--amount-characters',$('amount').value.length||1);
  $('category-picker').hidden=amountStep;
- document.querySelector('.keypad').hidden=phone&&!amountStep;
+ document.querySelector('.keypad').hidden=!amountStep;
  $('edit-amount').hidden=!phone||amountStep;
  $('amount').readOnly=phone&&!amountStep;
+ $('amount').inputMode=phone?'none':'decimal';
  $('continue-amount').hidden=!amountStep;$('continue-amount').disabled=!validAmount();
  $('save-expense').hidden=amountStep;
  $('entry-details').hidden=phone&&(amountStep||!formSelection.subCategory);
  $('categories-back').hidden=phone?false:!c||directCategory(c);
- $('entry-hint').textContent=phone?(amountStep?'Enter an amount, then choose a category.':c&&!directCategory(c)?'Choose a subcategory, then save.':'Choose a category, then save.'):(editingId?'Update the details below':'Amount → category → save');
+ $('entry-hint').textContent=phone?(amountStep?'Enter an amount, then choose a category.':c&&!directCategory(c)?'Choose a subcategory, then save.':'Choose a category, then save.'):(editingId?'Update the amount, category or details below.':'Type an amount, choose a category, and save.');
 }
 function showPhoneAmount(){
  phoneEntryStage='amount';$('form-feedback').hidden=true;renderPhoneEntry();syncMobileLayout();window.scrollTo({top:0,behavior:'instant'});$('amount').focus({preventScroll:true});
@@ -653,7 +707,7 @@ function previousLabel(e){
 }
 function renderExpenses(id,expenses,limit){
  const list=$(id);
- if(!expenses.length){list.innerHTML=`<div class="empty"><div class="empty-icon">${icon('track')}</div><h3>${filter&&id==='spending-list'?'No expenses in this category':'A fresh page for your expenses'}</h3><p>${id==='recent-list'?'Use the keypad to add your first expense. It will appear here.':'There are no logged expenses for this month yet.'}</p></div>`;return;}
+ if(!expenses.length){list.innerHTML=`<div class="empty"><div class="empty-icon">${icon('track')}</div><h3>${filter&&id==='spending-list'?'No expenses in this category':'A fresh page for your expenses'}</h3><p>${id==='recent-list'?'Add your first expense and it will appear here.':'There are no logged expenses for this month yet.'}</p></div>`;return;}
  list.innerHTML=sorted(expenses).slice(0,limit).map(e=>{const c=category(e.category);return `<div class="expense-row"><div class="expense-icon">${icon(Object.hasOwn(c.subIcons,e.subCategory)?c.subIcons[e.subCategory]:c.icon)}</div><div><p class="expense-name">${escapeHtml(e.recurringName||e.subCategory)}${e.recurringId?'<span class="recurring-badge">Monthly</span>':''}</p><p class="expense-meta">${dateLabel(e.date)} · ${e.recurringName?escapeHtml(e.subCategory)+' · ':''}${escapeHtml(e.mainCategory)}${previousLabel(e)?' · '+escapeHtml(previousLabel(e)):''}${e.note?' · '+escapeHtml(e.note):''}</p></div><span class="expense-amount num">${money(e.cents)}</span><button class="icon-button" data-expense="${escapeHtml(e.id)}" type="button" aria-label="${escapeHtml('View '+(e.recurringName||e.mainCategory)+', '+e.subCategory+' expense, '+money(e.cents))}">${icon('edit')}</button></div>`;}).join('');
 }
 function renderTracker(){
@@ -1231,7 +1285,7 @@ document.addEventListener('keydown',event=>{
  const field=['INPUT','TEXTAREA','SELECT'].includes(event.target.tagName);
  if(event.key==='Tab'||event.key.startsWith('Arrow')||['Home','End','PageUp','PageDown','Escape'].includes(event.key)||!field&&['Enter',' '].includes(event.key))document.documentElement.classList.add('keyboard-navigation');
 },true);
-const monthlyHome=$('monthly-card').parentElement;
+const monthlyHome=$('desktop-monthly-slot');
 function syncMobileLayout(){
  const destination=mobileEntry.matches?$('mobile-monthly-slot'):monthlyHome;
  if($('monthly-card').parentElement!==destination)destination.append($('monthly-card'));

@@ -16,11 +16,16 @@ const {launch,fresh,stored,fill,continueEntry,add,text,check,today,assert,ROOT,f
    data.expenses.forEach((e,i)=>e.date=base+'-'+String(Math.max(1,Number(e.date.slice(8))-i)).padStart(2,'0'));
    localStorage.setItem(key,JSON.stringify(data));return data;
   });await page.reload({waitUntil:'load'});
-  await check('Phone and desktop layouts have no horizontal overflow and keypad targets remain touch-sized',async()=>{
+  await check('Layouts have no horizontal overflow; the keypad is phone-only with touch-sized targets',async()=>{
    for(const width of [320,360,390,760,768,1024,1440]){
     await page.setViewport({width,height:900});await page.click('#nav-track');
-    const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth,keys:[...document.querySelectorAll('[data-key]')].map(e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}))}));
+    const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth,keys:[...document.querySelectorAll('[data-key]')].filter(e=>e.getClientRects().length).map(e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}))}));
     assert.equal(layout.overflow,false,`Tracker overflow at ${width}`);assert.ok(layout.keys.every(k=>k.width>=44&&k.height>=44));
+    assert.equal(layout.keys.length,width<768?12:0,`Keypad visibility at ${width}`);
+    if(width>=768){
+     await page.focus('#amount');await page.keyboard.press('Tab');
+     assert.ok(await page.evaluate(()=>document.activeElement.hasAttribute('data-category')),`Desktop tab order at ${width}`);
+    }
     await page.click('#nav-spending');assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`Spending overflow at ${width}`);
    }
   });
