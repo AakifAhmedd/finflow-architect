@@ -1,6 +1,6 @@
 # FinFlow
 
-Personal, single-user expense and income tracker. Fixed LKR, offline-first PWA, no build step or dependencies. Current version: **1.0.4**.
+Personal, single-user expense and income tracker. Fixed LKR, offline-first PWA, no build step or dependencies. Current version: **1.0.5**.
 
 [Open FinFlow](https://aakifahmedd.github.io/finflow-architect/)
 

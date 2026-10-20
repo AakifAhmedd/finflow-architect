@@ -1,5 +1,10 @@
 # FinFlow change summary
 
+## 1.0.5 — 2026-10-20
+
+- Replace the app icon, favicon, and header mark with a bevelled wave-split coin with the F indented into it.
+- Use a flatter, simpler coin for the favicon and header so it stays crisp at small sizes.
+
 ## 1.0.4 — 2026-10-18
 
 - Replace native date/month pickers and every select menu with FinFlow-styled controls, including phone panels and keyboard support.
