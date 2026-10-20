@@ -65,7 +65,7 @@ async function run(browser,name,fn){await check(name,async()=>{const t=await fre
  });
  await run(browser,'An explicitly entered RACK Gist cannot enable FinFlow push or pull and its files remain intact',async page=>{
   await cloud(page);await page.click('#nav-settings');await fill(page,'gist-token',TOKEN);await fill(page,'gist-id','aa777');await page.click('#gist-config-form button[type="submit"]');await page.click('#gist-preview-button');await settled(page);
-  assert.match(await text(page,'gist-status'),/RACK or another app/);assert.equal(await page.$eval('#gist-actions',e=>e.hidden),true);await page.$eval('#gist-push',e=>e.click());await page.$eval('#gist-pull',e=>e.click());const m=await page.evaluate(()=>cloudMock);assert.deepEqual(m.requests.map(r=>r.method),['GET']);assert.equal(m.gists.aa777.files['rack-data.json'].content,'rack-only-data');
+  assert.match(await text(page,'gist-status'),/another app/);assert.equal(await page.$eval('#gist-actions',e=>e.hidden),true);await page.$eval('#gist-push',e=>e.click());await page.$eval('#gist-pull',e=>e.click());const m=await page.evaluate(()=>cloudMock);assert.deepEqual(m.requests.map(r=>r.method),['GET']);assert.equal(m.gists.aa777.files['rack-data.json'].content,'rack-only-data');
  });
  await run(browser,'Existing FinFlow Gists keep unrelated files and descriptions when a confirmed push updates only finflow.json',async page=>{
   await add(page,'4','food');const data=await stored(page),gist={id:'bb888',description:'Older FinFlow backup',public:false,truncated:false,files:{'finflow.json':{content:JSON.stringify({format:'finflow-backup',version:'0.4.1',data})},'rack-data.json':{content:'rack-only-data'}}};await cloud(page,{gists:{bb888:gist}});

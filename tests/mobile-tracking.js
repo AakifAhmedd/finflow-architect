@@ -104,15 +104,16 @@ async function palette(page){
   assert.equal(await page.$eval('#amount',e=>e.value),'8');assert.equal(await page.$eval('#save-expense',e=>e.disabled),false);await page.click('#save-expense');assert.equal((await stored(page)).expenses.length,2);
   await page.click('#nav-spending');assert.equal(await text(page,'spending-total'),'Rs. 131.45');await page.click('#spending-list [data-expense]');await page.click('#edit-expense');
   assert.equal(await text(page,'save-label'),'Save changes');assert.equal(await page.$eval('#save-expense',e=>e.hidden),true);await fill(page,'amount','9');await page.focus('#amount');await page.keyboard.press('Enter');assert.equal((await stored(page)).expenses.at(-1).cents,800);
-  await page.click('#save-expense');assert.equal((await stored(page)).expenses.length,2);assert.equal((await stored(page)).expenses.at(-1).cents,900);assert.equal((await layout(page)).scroll,0);
+  await page.click('#save-expense');assert.equal((await stored(page)).expenses.length,2);assert.equal((await stored(page)).expenses.at(-1).cents,900);assert.equal(await page.$eval('body',e=>e.dataset.view),'spending');assert.ok(await page.evaluate(()=>document.activeElement.hasAttribute('data-expense')));
  });
- await check('Remembered main categories apply after amount entry; canceling an edit restores the amount screen',async()=>{
+ await check('Remembered main categories apply after amount entry; canceling an edit clears the draft and returns to review',async()=>{
   await page.click('#nav-settings');await page.click('#remember-category');await page.click('#behavior-form button[type="submit"]');await page.click('#nav-track');
   await fill(page,'amount','4');await continueEntry(page);await page.click('[data-category="food"]');await page.click('[data-subcategory="Cafes"]');await page.click('#save-expense');
   assert.equal(await page.$eval('#category-picker',e=>e.hidden),true);await fill(page,'amount','5');await continueEntry(page);assert.equal(await text(page,'category-label'),'Food & Dining');assert.equal(await page.$eval('#save-expense',e=>e.disabled),true);
-  await page.click('#nav-spending');await page.click('#spending-list [data-expense]');await page.click('#edit-expense');await page.click('#cancel-edit');assert.equal(await page.$eval('#amount',e=>e.value),'');assert.equal(await page.$eval('#category-picker',e=>e.hidden),true);
+  await page.click('#nav-spending');await page.click('#spending-list [data-expense]');await page.click('#edit-expense');await page.click('#cancel-edit');assert.equal(await page.$eval('#amount',e=>e.value),'');assert.equal(await page.$eval('#category-picker',e=>e.hidden),true);assert.equal(await page.$eval('body',e=>e.dataset.view),'spending');
  });
  await check('Expanded details and very short phones may scroll while actions stay reachable',async()=>{
+  await page.click('#nav-track');
   await page.setViewport({width:320,height:568});await fill(page,'amount','30');await continueEntry(page);await page.click('[data-subcategory="Other"]');
   await page.$eval('#details-summary',e=>e.scrollIntoView({block:'center'}));await page.click('#details-summary');await page.$eval('#repeat-monthly',e=>e.scrollIntoView({block:'center'}));await page.click('#repeat-monthly');
   await page.$eval('#date',e=>e.scrollIntoView({block:'center'}));const l=await layout(page);assert.ok(l.scrollHeight>l.height);assert.equal(l.width,l.viewport);

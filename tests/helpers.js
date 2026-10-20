@@ -28,8 +28,9 @@ async function continueEntry(page) {
   if(await page.$eval('#continue-amount',el=>!el.hidden)) await page.click('#continue-amount');
 }
 async function add(page, amount, category='food', options={}) {
+  if(await page.$eval('body',el=>el.dataset.view!=='track')) await page.click('#nav-track');
   await fill(page,'amount',amount);await continueEntry(page);
-  if(await page.$eval('#categories-back',el=>!el.hidden)) await page.click('#categories-back');
+  if(await page.$eval('#categories',el=>el.classList.contains('subcategories'))) await page.click('#categories-back');
   await page.click(`[data-category="${category}"]`);
   const selector=await page.evaluate(sub=>`[data-subcategory="${CSS.escape(sub)}"]`,options.subCategory||'Other');
   if(category==='other'&&!await page.$(selector)){assert.equal(options.subCategory||'Other','Other');assert.equal(await page.$eval('[data-category="other"]',e=>e.getAttribute('aria-pressed')),'true');}else await page.click(selector);

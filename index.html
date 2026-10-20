@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f6f0">
 <meta name="description" content="FinFlow — personal expense tracking and a clearer view of your spending.">
-<meta name="application-version" content="1.0.5">
+<meta name="application-version" content="1.1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FinFlow">
@@ -218,6 +218,38 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
  .picker-dialog::backdrop{background:#202e264d}.picker-heading{margin-bottom:14px}.picker-heading h3{font-size:14px}.picker-heading .icon-button{min-width:44px;min-height:44px}.choice-options{max-height:min(52dvh,380px)}.choice-option{min-height:48px}.calendar-cell{min-height:44px}.calendar-periods .calendar-cell{min-height:52px}.calendar-heading{font-size:17px}.category-actions button{font-size:13px;min-height:46px}.spending-month .app-choice{flex:1;justify-content:center}.source-options{max-height:184px}
 }
 
+/* Review and entry refinements; financial storage remains unchanged. */
+.expense-row{width:100%;background:transparent;color:inherit;text-align:left;border-radius:0;grid-template-columns:39px minmax(0,1fr) auto 44px;min-height:74px}
+button.expense-row:hover{background:#f4f7ef}button.expense-row:focus-visible{position:relative;z-index:1;border-radius:8px}
+.expense-copy{min-width:0}.expense-copy,.expense-name,.expense-meta{display:block}.expense-action{min-width:44px;min-height:44px}
+.monthly-row{grid-template-columns:minmax(0,1fr) 44px}
+.categories.subcategories .category-button{display:grid;grid-template-columns:22px minmax(0,1fr);column-gap:9px;row-gap:3px;align-content:center;justify-items:start;text-align:left}
+.categories.subcategories .category-button .icon{grid-column:1;grid-row:1/3}
+.categories.subcategories .category-button>span{grid-column:2;min-width:0;overflow-wrap:anywhere}
+.categories.subcategories .category-button small{grid-column:2;white-space:nowrap;overflow-wrap:normal;font-size:10px;color:var(--muted);font-weight:500}
+.edit-context{font-size:12px;line-height:1.5;color:var(--green);padding:8px 0;overflow-wrap:anywhere}
+.phone-amount .edit-context{color:var(--lime)}
+.stats-scope{margin:0 0 10px;font-size:11px;color:var(--muted)}
+.spending-shortcuts{display:flex;flex-wrap:wrap;gap:5px 12px;margin:-8px 0 8px}
+.spending-shortcuts .text-button{padding:0 4px;min-height:44px}
+.spending-grid{margin-top:23px}.filter-status{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 12px;padding-top:14px;border-top:1px solid var(--line);margin-top:14px}
+.filter-status p{flex-basis:100%;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.clear-filter{min-height:44px}.daily-chart [data-day]{cursor:pointer;outline:none}
+.daily-chart [data-day]:hover rect,.daily-chart [data-day][aria-pressed="true"] rect{fill:var(--green)}
+.daily-chart [data-day]:focus-visible path{stroke:var(--green);stroke-width:2;fill:#e9efdd80}
+.daily-explorer{margin-top:12px;display:grid;gap:8px}.daily-explorer .day-selection{display:flex;gap:8px;align-items:end}.daily-explorer .field{flex:1;min-width:0}
+.daily-explorer .text-button{flex-shrink:0}.daily-selection{font-size:12px;line-height:1.6;overflow-wrap:anywhere;color:var(--muted)}
+.income-overview{margin-top:23px}.income-overview[data-has-income="false"] .income-comparison{display:none}
+.income-overview[data-has-income="false"]{grid-template-columns:1fr}.creation-hint{font-size:12px;line-height:1.6;color:var(--green);margin:12px 0}
+.category-actions[data-creating="true"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:767.98px){
+ .expense-row{grid-template-columns:34px minmax(0,1fr) auto 44px;gap:8px}.expense-icon{width:34px;height:34px}
+ .income-overview{grid-template-columns:1fr 1fr;gap:11px}.income-overview .stat-card:first-child{grid-column:1/-1}
+ .income-overview .income-comparison .stat-value{font-size:23px}.spending-grid{margin-top:17px}.income-overview{margin-top:17px}
+ .spending-shortcuts{gap:0 14px;margin-bottom:0}.daily-explorer .day-selection{align-items:stretch;flex-direction:column}.daily-explorer .text-button{text-align:left;padding-left:0}
+}
+@media(max-width:360px){.expense-row{grid-template-columns:minmax(0,1fr) auto 44px}.expense-icon{display:none}}
+
 </style>
 </head>
 <body>
@@ -237,6 +269,7 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <div class="entry-column">
 <form id="expense-form" class="card entry-card" novalidate>
 <div class="card-heading"><h2 id="entry-title">Add an expense</h2><span class="step-label" id="entry-hint">Amount → category → save</span></div>
+<p id="edit-context" class="edit-context" hidden></p>
 <div class="amount-area"><span class="currency" aria-hidden="true">Rs.</span><label for="amount" class="amount-label sr-only">Expense amount in LKR</label><input id="amount" type="text" inputmode="none" autocomplete="off" placeholder="0" maxlength="14" aria-describedby="entry-hint form-feedback"><button id="edit-amount" class="text-button" type="button" hidden>Edit amount</button></div>
 <div class="keypad" aria-label="Amount keypad"><button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button><button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button><button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button><button type="button" data-key="." aria-label="Decimal point">.</button><button type="button" data-key="0">0</button><button type="button" data-key="backspace" aria-label="Delete last digit"><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-backspace"/></svg></button></div>
 <div id="category-picker"><div class="category-heading"><button id="categories-back" class="text-button category-back" type="button" hidden>Back</button><h3 id="category-label">What was it for?</h3><span class="step-label" id="category-step-label">Step 1 of 2</span></div>
@@ -259,13 +292,15 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 </section>
 <section id="spending-view" aria-labelledby="spending-title" hidden>
 <div class="page-heading spending-heading"><div><p class="eyebrow">The bigger picture</p><h1 id="spending-title">Where your money went.</h1><p class="muted">Your actual expenses. A clearer perspective.</p></div><div class="spending-month"><button id="spending-prev" class="icon-button" aria-label="Previous month" type="button"></button><label class="sr-only" for="month-picker">Spending month</label><input id="month-picker" type="month"><button id="spending-next" class="icon-button" aria-label="Next month" type="button"></button></div></div>
-<div class="income-overview"><div class="card stat-card"><div class="card-heading"><p class="eyebrow">Income received</p><button id="add-income-top" class="text-button" type="button">Add income</button></div><p class="stat-value num" id="income-total">Rs. 0</p><p class="muted" id="income-count">0 entries</p></div><div class="card stat-card"><p class="eyebrow">Income minus expenses</p><p class="stat-value num" id="income-difference">Rs. 0</p><p class="muted">Recorded income less purchases, before refunds. This is not an account balance.</p></div><div class="card stat-card"><p class="eyebrow">Income spent</p><p class="stat-value num" id="income-spent-share">—</p><p class="muted" id="income-share-hint">Add income to compare this month.</p></div></div>
+<p class="stats-scope">Monthly totals · All categories</p>
 <div class="stats-grid"><div class="card stat-card"><p class="eyebrow">Total spent</p><p class="stat-value num" id="spending-total">Rs. 0</p><p class="muted" id="month-comparison"></p></div><div class="card stat-card"><p class="eyebrow">Daily average</p><p class="stat-value num" id="daily-average">Rs. 0</p><p class="muted" id="average-caption"></p></div><div class="card stat-card"><p class="eyebrow">Expenses logged</p><p class="stat-value num" id="spending-count">0</p><p class="muted" id="count-caption">Every little expense counts</p></div></div>
-<div class="spending-grid">
-<section class="card chart-card"><div class="chart-heading"><div><h2>By category</h2><p class="muted">Select a category to explore its expenses.</p></div><span class="chart-number" id="category-count">0 categories</span></div><div id="category-chart"></div><div class="breakdown-list" id="breakdown-list"></div><div id="subcategory-breakdown" class="subcategory-breakdown" hidden></div></section>
-<section class="card chart-card"><div class="chart-heading"><div><h2>Day by day</h2><p class="muted" id="daily-month"></p></div><span class="chart-number">LKR</span></div><div id="daily-chart"></div><p class="chart-caption">Daily spending totals. Hover over a bar for its amount.</p><div class="daily-footer"><div><p class="eyebrow">Highest spending day</p><strong id="highest-day">—</strong><p class="muted" id="highest-amount">No expenses yet</p></div><div><p class="eyebrow">Days with expenses</p><strong id="active-days">0 days</strong></div></div></section>
+<nav class="spending-shortcuts" aria-label="Spending sections"><button class="text-button" data-spending-section="transactions" type="button">Transactions</button><button class="text-button" data-spending-section="insights" type="button">Insights</button><button class="text-button" data-spending-section="income" type="button">Income</button><button class="text-button" data-spending-section="monthly" type="button">Monthly expenses</button></nav>
+<section id="spending-transactions" class="card expenses-card spending-expenses" aria-labelledby="spending-list-title"><div class="expense-heading"><div class="filter-title"><h2 id="spending-list-title">All expenses</h2><button id="clear-filter" class="clear-filter" type="button" hidden>Clear filter ×</button></div><span class="muted" id="filtered-count"></span></div><div class="expense-list" id="spending-list"></div><button id="load-more" class="text-button more-button" type="button" hidden>Show more expenses</button></section>
+<div id="spending-insights" class="spending-grid">
+<section class="card chart-card"><div class="chart-heading"><div><h2 id="insights-title">By category</h2><p class="muted">Select a category to explore its expenses.</p></div><span class="chart-number" id="category-count">0 categories</span></div><div id="category-chart"></div><div class="breakdown-list" id="breakdown-list"></div><div id="subcategory-breakdown" class="subcategory-breakdown" hidden></div><div id="category-filter-status" class="filter-status" hidden><p id="category-filter-label" role="status"></p><button id="clear-category-filter" class="clear-filter" type="button">Clear filter ×</button><button id="view-filtered-expenses" class="text-button" type="button">View transactions ↑</button></div></section>
+<section class="card chart-card"><div class="chart-heading"><div><h2>Day by day</h2><p class="muted" id="daily-month"></p></div><span class="chart-number">LKR</span></div><div id="daily-chart"></div><p class="chart-caption">Tap a day or use the day picker to explore its expenses. Use arrow keys to move between bars and Enter to select.</p><div class="daily-explorer"><div class="day-selection"><div class="field"><label for="daily-day">Explore a day</label><select id="daily-day"><option value="">Choose a day</option></select></div><button id="view-day-expenses" class="text-button" type="button" hidden>View transactions ↑</button></div><p id="daily-selection" class="daily-selection" role="status">Select a day to see its amount and transactions.</p></div><div class="daily-footer"><div><p class="eyebrow">Highest spending day</p><strong id="highest-day">—</strong><p class="muted" id="highest-amount">No expenses yet</p></div><div><p class="eyebrow">Days with expenses</p><strong id="active-days">0 days</strong></div></div></section>
 </div>
-<section class="card expenses-card spending-expenses"><div class="expense-heading"><div class="filter-title"><h2 id="spending-list-title">All expenses</h2><button id="clear-filter" class="clear-filter" type="button" hidden>Clear filter ×</button></div><span class="muted" id="filtered-count"></span></div><div class="expense-list" id="spending-list"></div><button id="load-more" class="text-button more-button" type="button" hidden>Show more expenses</button></section>
+<div id="income-overview" class="income-overview" data-has-income="false"><div class="card stat-card"><div class="card-heading"><p class="eyebrow">Income received</p><button id="add-income-top" class="text-button" type="button">Add income</button></div><p class="stat-value num" id="income-total">Rs. 0</p><p class="muted" id="income-count">0 entries</p></div><div class="card stat-card income-comparison"><p class="eyebrow">Income minus expenses</p><p class="stat-value num" id="income-difference">Rs. 0</p><p class="muted">Recorded income less purchases, before refunds. This is not an account balance.</p></div><div class="card stat-card income-comparison"><p class="eyebrow">Income spent</p><p class="stat-value num" id="income-spent-share">—</p><p class="muted" id="income-share-hint">Add income to compare this month.</p></div></div>
 <section class="card expenses-card spending-expenses" aria-labelledby="income-title"><div class="expense-heading"><div><h2 id="income-title">Income this month</h2><p class="muted">Salary, allowances, profit, and other income actually received.</p></div><button id="add-income" class="text-button" type="button">Add income</button></div><div id="income-sources" class="income-sources"></div><div id="income-list" class="expense-list"></div></section>
 <section class="card expenses-card spending-expenses" aria-labelledby="monthly-income-title"><div class="expense-heading"><h2 id="monthly-income-title">Monthly income</h2><span id="monthly-income-count" class="muted"></span></div><div id="monthly-income-list"></div><p class="muted monthly-hint">Add income → Repeat monthly to set up a salary or allowance. Due entries are logged when you open FinFlow; future dates stay out of totals.</p></section>
 <details class="card expenses-card spending-expenses cash-section"><summary>Other cash movements <span id="movement-count" class="muted"></span></summary><p class="muted monthly-hint">Refunds, loans, cash withdrawals, transfers, savings, and rollover are kept separately and excluded from income and spending charts. Purchases show spending before refunds.</p><button id="add-movement" class="text-button" type="button">Add cash movement</button><div id="movement-list" class="expense-list"></div></details>
@@ -276,22 +311,22 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <div class="settings-grid">
 <section class="card settings-card" aria-labelledby="settings-categories-title"><h2 id="settings-categories-title">Categories &amp; subscriptions</h2><p class="muted settings-intro">Remove choices from the picker without losing past spending. Removing a choice stops its monthly schedules.</p>
 <div class="field"><label for="settings-category">Main category</label><select id="settings-category"></select></div>
-<form id="category-settings-form"><div class="field"><label for="category-name">Category name</label><input id="category-name" maxlength="80" required></div><div class="field"><label for="category-icon">Category icon</label><select id="category-icon"></select></div><div id="category-icon-preview" class="icon-preview" aria-hidden="true"></div><div class="settings-actions category-actions"><button class="primary" type="submit" aria-label="Save category"><span class="action-long">Save category</span><span class="action-short" aria-hidden="true">Save</span></button><button id="new-category" aria-label="Add category" class="text-button" type="button"><span class="action-long">Add category</span><span class="action-short" aria-hidden="true">Add</span></button><button id="remove-category" aria-label="Remove category" class="delete-button" type="button"><span class="action-long">Remove category</span><span class="action-short" aria-hidden="true">Remove</span></button><button id="restore-category" aria-label="Restore category" class="text-button" type="button" hidden><span class="action-long">Restore category</span><span class="action-short" aria-hidden="true">Restore</span></button></div></form>
+<p id="category-creation-hint" class="creation-hint" role="status" hidden>New category · Choose a name and icon, then create it.</p><form id="category-settings-form"><div class="field"><label for="category-name">Category name</label><input id="category-name" maxlength="80" required></div><div class="field"><label for="category-icon">Category icon</label><select id="category-icon"></select></div><div id="category-icon-preview" class="icon-preview" aria-hidden="true"></div><div class="settings-actions category-actions"><button id="save-category" class="primary" type="submit" aria-label="Save category"><span class="action-long">Save category</span><span class="action-short" aria-hidden="true">Save</span></button><button id="new-category" aria-label="Add category" class="text-button" type="button"><span class="action-long">Add category</span><span class="action-short" aria-hidden="true">Add</span></button><button id="cancel-new-category" class="text-button" type="button" hidden>Cancel</button><button id="remove-category" aria-label="Remove category" class="delete-button" type="button"><span class="action-long">Remove category</span><span class="action-short" aria-hidden="true">Remove</span></button><button id="restore-category" aria-label="Restore category" class="text-button" type="button" hidden><span class="action-long">Restore category</span><span class="action-short" aria-hidden="true">Restore</span></button></div></form>
 <div class="divider" style="margin:22px 0"></div>
-<div class="field"><label for="settings-subcategory">Subcategory</label><select id="settings-subcategory"></select></div>
-<form id="subcategory-settings-form"><div class="field"><label for="subcategory-name">Subcategory name</label><input id="subcategory-name" maxlength="80" required></div><div class="field"><label for="subcategory-icon">Subcategory icon</label><select id="subcategory-icon"></select></div><div id="subcategory-icon-preview" class="icon-preview" aria-hidden="true"></div><label class="monthly-toggle" for="subcategory-subscription"><input id="subcategory-subscription" type="checkbox">Recurring subscription</label><p class="muted monthly-hint">This choice starts with Repeat monthly enabled. Set the amount and first date once. Existing expenses and schedules stay as they are.</p><div class="settings-actions category-actions"><button class="primary" type="submit" aria-label="Save subcategory"><span class="action-long">Save subcategory</span><span class="action-short" aria-hidden="true">Save</span></button><button id="new-subcategory" aria-label="Add subcategory" class="text-button" type="button"><span class="action-long">Add subcategory</span><span class="action-short" aria-hidden="true">Add</span></button><button id="remove-subcategory" aria-label="Remove subcategory" class="delete-button" type="button"><span class="action-long">Remove subcategory</span><span class="action-short" aria-hidden="true">Remove</span></button><button id="restore-subcategory" aria-label="Restore subcategory" class="text-button" type="button" hidden><span class="action-long">Restore subcategory</span><span class="action-short" aria-hidden="true">Restore</span></button></div></form><p id="category-settings-feedback" class="form-feedback" role="alert" hidden></p>
+<div id="subcategory-editor"><div class="field"><label for="settings-subcategory">Subcategory</label><select id="settings-subcategory"></select></div>
+<p id="subcategory-creation-hint" class="creation-hint" role="status" hidden>New subcategory · Choose a name and icon, then create it.</p><form id="subcategory-settings-form"><div class="field"><label for="subcategory-name">Subcategory name</label><input id="subcategory-name" maxlength="80" required></div><div class="field"><label for="subcategory-icon">Subcategory icon</label><select id="subcategory-icon"></select></div><div id="subcategory-icon-preview" class="icon-preview" aria-hidden="true"></div><label class="monthly-toggle" for="subcategory-subscription"><input id="subcategory-subscription" type="checkbox">Recurring subscription</label><p class="muted monthly-hint">This choice starts with Repeat monthly enabled. Set the amount and first date once. Existing expenses and schedules stay as they are.</p><div class="settings-actions category-actions"><button id="save-subcategory" class="primary" type="submit" aria-label="Save subcategory"><span class="action-long">Save subcategory</span><span class="action-short" aria-hidden="true">Save</span></button><button id="new-subcategory" aria-label="Add subcategory" class="text-button" type="button"><span class="action-long">Add subcategory</span><span class="action-short" aria-hidden="true">Add</span></button><button id="cancel-new-subcategory" class="text-button" type="button" hidden>Cancel</button><button id="remove-subcategory" aria-label="Remove subcategory" class="delete-button" type="button"><span class="action-long">Remove subcategory</span><span class="action-short" aria-hidden="true">Remove</span></button><button id="restore-subcategory" aria-label="Restore subcategory" class="text-button" type="button" hidden><span class="action-long">Restore subcategory</span><span class="action-short" aria-hidden="true">Restore</span></button></div></form></div><p id="category-settings-feedback" class="form-feedback" role="alert" hidden></p>
 </section>
 <div class="settings-stack"><section class="card settings-card" aria-labelledby="behavior-title"><h2 id="behavior-title">App behavior</h2><form id="behavior-form"><div class="field"><label for="start-view">Open FinFlow on</label><select id="start-view"><option value="track">Tracks</option><option value="spending">Spending</option><option value="settings">Settings</option></select></div><label class="monthly-toggle" for="remember-category"><input id="remember-category" type="checkbox">Remember the last main category after saving</label><label class="monthly-toggle" for="reduce-motion"><input id="reduce-motion" type="checkbox">Reduce motion</label><label class="monthly-toggle" for="monthly-posting"><input id="monthly-posting" type="checkbox">Log due monthly expenses and income automatically</label><p class="muted monthly-hint">When paused, schedules are kept. Turning this on catches up missed months.</p><button class="primary" type="submit">Save behavior</button></form></section>
 <section id="pwa-card" class="card settings-card" aria-labelledby="pwa-title"><h2 id="pwa-title">Install &amp; updates</h2><p id="pwa-status" class="muted settings-intro" role="status" aria-live="polite">Open the hosted app to enable offline use.</p><button id="install-app" class="primary" type="button" hidden>Install FinFlow</button><p id="install-help" class="muted monthly-hint">iPhone/iPad: open in Safari → Share → Add to Home Screen → Open as Web App (if shown) → Add. Android/desktop: use your browser’s Install app or Add to Home screen menu. Allow the first online download to finish before going offline.</p><p class="muted monthly-hint">Saved data stays in this browser or installed app. Keep a JSON backup; another browser or installation may have separate storage. Cloud sync needs internet.</p><div class="pwa-actions"><button id="check-update" class="text-button" type="button">Check for updates</button><button id="apply-update" class="primary" type="button" hidden>Update and reload</button></div></section>
-<section class="card settings-card" aria-labelledby="gist-title"><h2 id="gist-title">Cloud sync (optional)</h2><p class="muted settings-intro">Leave Gist ID blank to find or create a separate secret Gist named finflow-data. Creating it uploads your current FinFlow backup. A Gist is stored on GitHub and is not encrypted; anyone with its link can read it.</p><form id="gist-config-form"><div class="field"><label for="gist-token">GitHub personal access token (needs &quot;gist&quot; scope)</label><input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="GitHub personal access token"></div><div class="field"><label for="gist-id">Gist ID <span class="muted">(leave blank to create one)</span></label><input id="gist-id" autocomplete="off" spellcheck="false" placeholder="Leave blank to create finflow-data" aria-describedby="gist-id-help"><p id="gist-id-help" class="muted monthly-hint">Enter an existing FinFlow Gist ID or link, or leave blank for automatic setup. RACK’s data stays separate.</p></div><p class="muted monthly-hint">Fine-grained tokens can use Gists read/write permission. Your token and Gist ID are saved in this browser. Disconnect removes them. Your token is excluded from backups. Save connection, then Preview cloud before choosing Push to cloud or Pull from cloud. Sync replaces a whole snapshot; it does not merge devices.</p><div class="settings-actions"><button class="primary" type="submit">Save connection</button><button id="gist-disconnect" class="delete-button" type="button">Disconnect</button></div></form><button id="gist-preview-button" class="text-button" type="button">Preview cloud</button><p id="gist-status" class="muted settings-intro" role="status" aria-live="polite">No cloud preview loaded.</p><div id="gist-actions" class="settings-actions" hidden><button id="gist-push" class="delete-button" type="button">Push to cloud</button><button id="gist-pull" class="delete-button" type="button">Pull from cloud</button></div></section>
+<section class="card settings-card" aria-labelledby="gist-title"><h2 id="gist-title">Cloud sync (optional)</h2><p class="muted settings-intro">Leave Gist ID blank to find or create a separate secret Gist named finflow-data. Creating it uploads your current FinFlow backup. A Gist is stored on GitHub and is not encrypted; anyone with its link can read it.</p><form id="gist-config-form"><div class="field"><label for="gist-token">GitHub personal access token (needs &quot;gist&quot; scope)</label><input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="GitHub personal access token"></div><div class="field"><label for="gist-id">Gist ID <span class="muted">(leave blank to create one)</span></label><input id="gist-id" autocomplete="off" spellcheck="false" placeholder="Leave blank to create finflow-data" aria-describedby="gist-id-help"><p id="gist-id-help" class="muted monthly-hint">Enter an existing FinFlow Gist ID or link, or leave blank for automatic setup.</p></div><p class="muted monthly-hint">Fine-grained tokens can use Gists read/write permission. Your token and Gist ID are saved in this browser. Disconnect removes them. Your token is excluded from backups. Save connection, then Preview cloud before choosing Push to cloud or Pull from cloud. Sync replaces a whole snapshot; it does not merge devices.</p><div class="settings-actions"><button class="primary" type="submit">Save connection</button><button id="gist-disconnect" class="delete-button" type="button">Disconnect</button></div></form><button id="gist-preview-button" class="text-button" type="button">Preview cloud</button><p id="gist-status" class="muted settings-intro" role="status" aria-live="polite">No cloud preview loaded.</p><div id="gist-actions" class="settings-actions" hidden><button id="gist-push" class="delete-button" type="button">Push to cloud</button><button id="gist-pull" class="delete-button" type="button">Pull from cloud</button></div></section>
 <section class="card settings-card" aria-labelledby="files-title"><h2 id="files-title">Import &amp; backup</h2><p class="muted settings-intro">Import a FinFlow transaction file to add records, or restore a complete FinFlow backup. Everything happens in this browser.</p><div class="field"><label for="import-file">FinFlow JSON file</label><input id="import-file" type="file" accept=".json,application/json"></div><p id="import-status" class="muted settings-intro" role="status" aria-live="polite">Choose a file to preview it.</p><button id="apply-import" class="primary" type="button" hidden>Import records</button><button id="download-backup" class="text-button" type="button">Download backup</button><p class="muted monthly-hint">Imports add records and skip previously imported IDs. Existing manual/monthly purchases are not automatically matched; review any overlap. Backups include income, cash movements, and import history, and exclude Gist credentials.</p></section>
 <section class="card settings-card" aria-labelledby="reset-title"><h2 id="reset-title">Reset data</h2><p class="muted settings-intro">Clear all expenses, income, cash movements, import history, monthly expense and income schedules, category changes, and behavior settings stored in this browser. Your Gist connection and the cloud copy are not touched.</p><button id="reset-data" class="delete-button" type="button">Reset local data</button></section></div>
 </div></section>
-<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">1.0.5</span></span></footer>
+<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">1.1.0</span></span></footer>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toast-message"></span><button id="undo" type="button" hidden>Undo</button></div>
 <dialog id="expense-dialog" class="edit-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><div><p class="eyebrow" style="margin-bottom:10px">Expense details</p><h2 id="dialog-title"></h2></div><button id="close-dialog" class="icon-button" type="button" aria-label="Close expense details"></button></div><p id="dialog-amount" class="dialog-amount num"></p><p id="dialog-note" class="dialog-note"></p><p class="muted monthly-hint" id="charge-hint" hidden>Editing or deleting this charge changes only this expense.</p><div class="dialog-actions"><button id="manage-monthly-charge" class="text-button" type="button" hidden>Manage monthly expense</button><button id="edit-expense" class="primary" type="button">Edit expense</button><button id="delete-expense" class="delete-button" type="button">Delete expense</button></div></dialog>
-<dialog id="income-dialog" class="edit-dialog monthly-dialog" aria-labelledby="income-dialog-title"><form id="income-form" novalidate><div class="dialog-top"><h2 id="income-dialog-title">Add income</h2><button id="close-income" class="icon-button" aria-label="Close income editor" type="button">×</button></div><div class="details-fields"><div class="field"><label id="income-source-label" for="income-source">Income source</label><div class="source-combo"><input id="income-source" maxlength="80" autocomplete="off" placeholder="Choose or type a source" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="income-source-options" aria-describedby="income-source-help" required><button id="source-toggle" class="source-toggle" type="button" aria-label="Choose income source" aria-haspopup="listbox" aria-controls="income-source-options" aria-expanded="false"></button><div id="income-source-options" class="source-options" role="listbox" aria-label="Income source suggestions" hidden></div></div><p id="income-source-help" class="muted source-help">Choose a suggestion or type your own source.</p></div><div id="movement-type-field" class="field" hidden><label for="movement-type">Movement type</label><select id="movement-type"></select></div><div class="field"><label for="income-amount">Amount in LKR</label><input id="income-amount" inputmode="decimal" maxlength="14" required></div><div class="field"><label id="income-date-label" for="income-date">Date received</label><input id="income-date" type="date" required></div><div class="field"><label for="income-note">Note (optional)</label><input id="income-note" maxlength="240"></div><div id="income-repeat-field"><label class="monthly-toggle" for="income-repeat"><input id="income-repeat" type="checkbox">Repeat monthly</label><p id="income-repeat-hint" class="muted monthly-hint" hidden>Log this amount automatically from the first date, then on that day each month. Short months use the last day. Reopening catches up missed months. Check the posted amount against your actual pay.</p></div><p id="income-schedule-hint" class="muted" hidden>Changing this entry affects only this month. Manage the schedule to change future income.</p><p id="income-provenance" class="muted" hidden></p></div><p id="income-feedback" class="form-feedback" role="alert" hidden></p><div class="dialog-actions" style="margin-top:20px"><button id="save-income" class="primary" type="submit">Save entry</button><button id="manage-income-schedule" class="text-button" type="button" hidden>Manage monthly income</button><button id="delete-income" class="delete-button" type="button" hidden>Delete entry</button></div></form></dialog>
+<dialog id="income-dialog" class="edit-dialog monthly-dialog" aria-labelledby="income-dialog-title"><form id="income-form" novalidate><div class="dialog-top"><h2 id="income-dialog-title">Add income</h2><button id="close-income" class="icon-button" aria-label="Close income editor" type="button">×</button></div><div class="details-fields"><div class="field"><label id="income-source-label" for="income-source">Income source</label><div class="source-combo"><input id="income-source" maxlength="80" autocomplete="off" placeholder="Choose or type a source" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="income-source-options" aria-describedby="income-source-help" required><button id="source-toggle" class="source-toggle" type="button" aria-label="Choose income source" aria-haspopup="listbox" aria-controls="income-source-options" aria-expanded="false"></button><div id="income-source-options" class="source-options" role="listbox" aria-label="Income source suggestions" hidden></div></div><p id="income-source-help" class="muted source-help">Choose a suggestion or type your own source.</p></div><div id="movement-type-field" class="field" hidden><label for="movement-type">Movement type</label><select id="movement-type"></select></div><div class="field"><label for="income-amount">Amount in LKR</label><input id="income-amount" inputmode="decimal" maxlength="14" required></div><div class="field"><label id="income-date-label" for="income-date">Date received</label><input id="income-date" type="date" aria-describedby="income-date-context" required><p id="income-date-context" class="muted source-help"></p></div><div class="field"><label for="income-note">Note (optional)</label><input id="income-note" maxlength="240"></div><div id="income-repeat-field"><label class="monthly-toggle" for="income-repeat"><input id="income-repeat" type="checkbox">Repeat monthly</label><p id="income-repeat-hint" class="muted monthly-hint" hidden>Log this amount automatically from the first date, then on that day each month. Short months use the last day. Reopening catches up missed months. Check the posted amount against your actual pay.</p></div><p id="income-schedule-hint" class="muted" hidden>Changing this entry affects only this month. Manage the schedule to change future income.</p><p id="income-provenance" class="muted" hidden></p></div><p id="income-feedback" class="form-feedback" role="alert" hidden></p><div class="dialog-actions" style="margin-top:20px"><button id="save-income" class="primary" type="submit">Save entry</button><button id="manage-income-schedule" class="text-button" type="button" hidden>Manage monthly income</button><button id="delete-income" class="delete-button" type="button" hidden>Delete entry</button></div></form></dialog>
 <dialog id="income-rule-dialog" class="edit-dialog monthly-dialog" aria-labelledby="income-rule-title"><form id="income-rule-form" novalidate><div class="dialog-top"><h2 id="income-rule-title">Manage monthly income</h2><button id="close-income-rule" class="icon-button" type="button" aria-label="Close monthly income settings">×</button></div><p class="muted monthly-hint">Changes apply to future entries. Past income stays as recorded.</p><div class="details-fields"><div class="field"><label for="income-rule-label">Income source</label><input id="income-rule-label" maxlength="80" required></div><div class="field"><label for="income-rule-amount">Amount in LKR</label><input id="income-rule-amount" inputmode="decimal" maxlength="14" required></div><div class="field"><label for="income-rule-day">Day of the month</label><input id="income-rule-day" type="number" min="1" max="31" step="1" required></div><div class="field"><label for="income-rule-note">Note (optional)</label><input id="income-rule-note" maxlength="240"></div></div><p id="income-rule-feedback" class="form-feedback" role="alert" hidden></p><div class="dialog-actions" style="margin-top:20px"><button class="primary" type="submit">Save monthly changes</button><button id="stop-income-rule" class="delete-button" type="button">Stop monthly income</button></div></form></dialog>
 <dialog id="monthly-dialog" class="edit-dialog monthly-dialog" aria-labelledby="monthly-dialog-title"><form id="monthly-form" novalidate>
 <div class="dialog-top"><div><p class="eyebrow" style="margin-bottom:10px">Repeat monthly</p><h2 id="monthly-dialog-title">Manage monthly expense</h2></div><button id="close-monthly" class="icon-button" type="button" aria-label="Close monthly expense settings"></button></div>
@@ -303,7 +338,7 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 <script>
 'use strict';
 // App release version is independent of the additive local data schema.
-const APP_VERSION = '1.0.5';
+const APP_VERSION = '1.1.0';
 const STORAGE_KEY = 'finflow_tracker_v1';
 const LEGACY_KEY = 'finflow_architect_model_v2';
 const LEGACY_CATEGORIES = [
@@ -355,10 +390,12 @@ function monthLabel(key, short=false){return new Date(`${key}-01T12:00:00`).toLo
 function dateLabel(key){return new Date(`${key}T12:00:00`).toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
 function shiftMonth(key,delta){const [y,m]=key.split('-').map(Number);return localDate(new Date(y,m-1+delta,1)).slice(0,7);}
 function money(cents){return `Rs. ${number(cents)}`;}
+function countLabel(count,singular,plural=singular+'s'){return `${count} ${count===1?singular:plural}`;}
+function snapshotCounts(data){return `${countLabel(data.expenses.length,'expense')}, ${countLabel(data.incomes.length,'income entry','income entries')}, ${countLabel(data.movements.length,'other cash movement')}`;}
 function number(cents){return (cents/100).toLocaleString('en-GB',{minimumFractionDigits:cents%100?2:0,maximumFractionDigits:2});}
 function freshState(){return {schema:1,categorizationVersion:1,categorySettingsVersion:1,taxonomyVersion:1,categories:clone(DEFAULT_CATEGORIES),expenses:[],incomes:[],movements:[],importLedger:[],recurringRules:[],recurringIncomeRules:[],settings:clone(DEFAULT_SETTINGS)};}
 let state=freshState(),formSelection={mainCategory:null,subCategory:null},editingId=null,dialogId=null,phoneEntryStage='amount';
-let month=localDate().slice(0,7),view='track',filter=null,listLimit=30,undoState=null,toastTimer;
+let month=localDate().slice(0,7),view='track',filter=null,dayFilter=null,listLimit=30,undoState=null,toastTimer,expenseEditReturn=null;
 let storageBlocked=false,storageSnapshot=null,monthlyDialogId=null;
 function warning(message){$('storage-warning-text').textContent=message;$('storage-warning').hidden=false;}
 function validateState(data, hierarchical=false){
@@ -695,6 +732,11 @@ function formatAmountInput(event){
  const displayPosition=position=>{let index=0;while(index<formatted.length&&position>0){if(formatted[index]!==',')position--;index++;}return index;};
  input.value=formatted;input.setSelectionRange(displayPosition(logicalPosition(start)),displayPosition(logicalPosition(end)));
 }
+function amountError(value=$('amount').value,paste=false){
+ const raw=rawAmount(value);
+ if(/^\d{10,}(?:\.\d*)?$/.test(raw))return 'Enter an amount no greater than Rs. 999,999,999.99.';
+ return paste?'Paste an amount with up to two decimal places and correctly grouped commas.':'Enter an amount greater than zero, with up to two decimal places.';
+}
 function validAmount(value=$('amount').value){const raw=rawAmount(value);return /^\d{1,9}(\.\d{1,2})?$/.test(raw)&&Number(raw)>0;}
 function renderPhoneEntry(){
  const phone=mobileEntry.matches,c=category(formSelection.mainCategory),amountStep=phone&&phoneEntryStage==='amount';
@@ -703,6 +745,9 @@ function renderPhoneEntry(){
  document.querySelector('meta[name="theme-color"]').content=getComputedStyle(document.documentElement).getPropertyValue(darkAmount?'--green':'--bg').trim();
  $('expense-form').dataset.entryStep=amountStep?'amount':c&&!directCategory(c)?'subcategory':'category';
  $('expense-form').style.setProperty('--amount-characters',$('amount').value.length||1);
+ $('edit-context').hidden=!editingId;
+ const edited=state.expenses.find(e=>e.id===editingId);
+ $('edit-context').textContent=edited?`Editing ${edited.recurringName||edited.subCategory} · ${dateLabel(edited.date)} ${edited.date.slice(0,4)}`:'';
  $('category-picker').hidden=amountStep;
  document.querySelector('.keypad').hidden=!amountStep;
  $('edit-amount').hidden=!phone||amountStep;
@@ -718,7 +763,7 @@ function showPhoneAmount(){
  phoneEntryStage='amount';$('form-feedback').hidden=true;renderPhoneEntry();syncMobileLayout();window.scrollTo({top:0,behavior:'instant'});$('amount').focus({preventScroll:true});
 }
 function continueAmount(){
- if(!validAmount()){feedback('Enter an amount greater than zero, with up to two decimal places.','amount');return;}
+ if(!validAmount()){feedback(amountError(),'amount');return;}
  phoneEntryStage='category';$('form-feedback').hidden=true;renderPhoneEntry();syncMobileLayout();window.scrollTo({top:0,behavior:'instant'});
  ($('categories').querySelector('[aria-pressed="true"]')||$('categories').querySelector('button'))?.focus({preventScroll:true});
 }
@@ -728,8 +773,8 @@ function previousLabel(e){
 }
 function renderExpenses(id,expenses,limit){
  const list=$(id);
- if(!expenses.length){list.innerHTML=`<div class="empty"><div class="empty-icon">${icon('track')}</div><h3>${filter&&id==='spending-list'?'No expenses in this category':'A fresh page for your expenses'}</h3><p>${id==='recent-list'?'Add your first expense and it will appear here.':'There are no logged expenses for this month yet.'}</p></div>`;return;}
- list.innerHTML=sorted(expenses).slice(0,limit).map(e=>{const c=category(e.category);return `<div class="expense-row"><div class="expense-icon">${icon(Object.hasOwn(c.subIcons,e.subCategory)?c.subIcons[e.subCategory]:c.icon)}</div><div><p class="expense-name">${escapeHtml(e.recurringName||e.subCategory)}${e.recurringId?'<span class="recurring-badge">Monthly</span>':''}</p><p class="expense-meta">${dateLabel(e.date)} · ${e.recurringName?escapeHtml(e.subCategory)+' · ':''}${escapeHtml(e.mainCategory)}${previousLabel(e)?' · '+escapeHtml(previousLabel(e)):''}${e.note?' · '+escapeHtml(e.note):''}</p></div><span class="expense-amount num">${money(e.cents)}</span><button class="icon-button" data-expense="${escapeHtml(e.id)}" type="button" aria-label="${escapeHtml('View '+(e.recurringName||e.mainCategory)+', '+e.subCategory+' expense, '+money(e.cents))}">${icon('edit')}</button></div>`;}).join('');
+ if(!expenses.length){list.innerHTML=`<div class="empty"><div class="empty-icon">${icon('track')}</div><h3>${(filter||dayFilter)&&id==='spending-list'?'No expenses match this filter':'A fresh page for your expenses'}</h3><p>${id==='recent-list'?'Add your first expense and it will appear here.':filter||dayFilter?'Choose another category or day, or clear the filter.':'There are no logged expenses for this month yet.'}</p></div>`;return;}
+ list.innerHTML=sorted(expenses).slice(0,limit).map(e=>{const c=category(e.category);return `<button class="expense-row" data-expense="${escapeHtml(e.id)}" type="button" aria-label="${escapeHtml('View '+(e.recurringName||e.mainCategory)+', '+e.subCategory+' expense, '+money(e.cents))}"><span class="expense-icon">${icon(Object.hasOwn(c.subIcons,e.subCategory)?c.subIcons[e.subCategory]:c.icon)}</span><span class="expense-copy"><span class="expense-name">${escapeHtml(e.recurringName||e.subCategory)}${e.recurringId?'<span class="recurring-badge">Monthly</span>':''}</span><span class="expense-meta">${dateLabel(e.date)} · ${e.recurringName?escapeHtml(e.subCategory)+' · ':''}${escapeHtml(e.mainCategory)}${previousLabel(e)?' · '+escapeHtml(previousLabel(e)):''}${e.note?' · '+escapeHtml(e.note):''}</span></span><span class="expense-amount num">${money(e.cents)}</span><span class="icon-button expense-action" aria-hidden="true">${icon('edit')}</span></button>`;}).join('');
 }
 function renderTracker(){
  const expenses=monthExpenses(),sum=total(expenses),top=categoryTotals(expenses)[0],todayExpenses=state.expenses.filter(e=>e.date===localDate());
@@ -755,19 +800,25 @@ function renderSpending(){
  $('subcategory-breakdown').hidden=!filter;
  if(filter){const c=category(filter);$('subcategory-breakdown').innerHTML=`<h3>Within ${escapeHtml(c.name)}</h3>`+c.subcategories.map(sub=>({sub,cents:total(expenses.filter(e=>e.category===c.id&&e.subCategory===sub))})).filter(x=>x.cents>0).map(x=>`<div class="subcategory-row"><span>${escapeHtml(x.sub)}</span><span class="num">${money(x.cents)}</span></div>`).join('');}
  $('breakdown-list').innerHTML=totals.map(({c,cents})=>`<button class="breakdown-button" type="button" data-filter="${escapeHtml(c.id)}" aria-pressed="${filter===c.id}"><span class="swatch" style="background:${c.color}"></span><span class="breakdown-name">${escapeHtml(c.name)}</span><span class="breakdown-amount num">${money(cents)}<span class="breakdown-percent">${(cents/sum*100).toFixed(1)}%</span></span></button>`).join('');
- const daily=Array.from({length:days},(_,i)=>total(expenses.filter(e=>Number(e.date.slice(8))===i+1))),max=Math.max(...daily),peak=daily.indexOf(max)+1;
- $('daily-month').textContent=monthLabel(month);$('highest-day').textContent=max?dateLabel(`${month}-${String(peak).padStart(2,'0')}`):'—';$('highest-amount').textContent=max?money(max):'No expenses yet';
+ const categoryExpenses=filter?expenses.filter(e=>e.category===filter):expenses;
+ const daily=Array.from({length:days},(_,i)=>total(categoryExpenses.filter(e=>Number(e.date.slice(8))===i+1))),max=Math.max(...daily),peak=daily.indexOf(max)+1;
+ $('daily-month').textContent=`${monthLabel(month)} · ${filter?category(filter).name:'All categories'}`;$('highest-day').textContent=max?dateLabel(`${month}-${String(peak).padStart(2,'0')}`):'—';$('highest-amount').textContent=max?money(max):'No expenses yet';
  const active=daily.filter(v=>v>0).length;$('active-days').textContent=`${active} day${active===1?'':'s'}`;
  if(max){
   const width=480,height=285,left=60,right=12,top=18,bottom=37,plot=height-top-bottom,step=(width-left-right)/days;
   const ceiling=max*1.15;
   const grid=[0,.5,1].map(p=>{const y=top+plot*(1-p);return `<line x1="${left}" x2="${width-right}" y1="${y}" y2="${y}" stroke="#e2e6dd"/><text x="${left-8}" y="${y+4}" text-anchor="end">${(ceiling*p/100).toLocaleString('en-GB',{notation:'compact',maximumFractionDigits:1})}</text>`;}).join('');
-  const bars=daily.map((cents,i)=>{const h=cents/ceiling*plot;return `<rect x="${left+i*step+step*.17}" y="${top+plot-h}" width="${step*.66}" height="${h}" rx="2" fill="${i+1===peak?'#2c513e':'#a9ba90'}"><title>${i+1} ${monthLabel(month,true)}: ${money(cents)}</title></rect>`;}).join('');
+  const bars=daily.map((cents,i)=>{const h=cents/ceiling*plot;const day=String(i+1).padStart(2,'0'),label=`${i+1} ${monthLabel(month,true)}: ${money(cents)}`;return `<g role="button" tabindex="${Number(dayFilter||peak)===i+1?'0':'-1'}" data-day="${day}" aria-pressed="${dayFilter===day}" aria-label="${escapeHtml(label+'. View expenses')}"><title>${label}</title><path d="M${left+i*step},${top}h${step}v${plot}h${-step}Z" fill="transparent"/><rect x="${left+i*step+step*.17}" y="${top+plot-h}" width="${step*.66}" height="${h}" rx="2" fill="${i+1===peak?'#2c513e':'#a9ba90'}"/></g>`;}).join('');
   const labels=[1,5,10,15,20,25,days].map(d=>`<text x="${left+(d-.5)*step}" y="${height-10}" text-anchor="middle">${d}</text>`).join('');
-  $('daily-chart').innerHTML=`<svg class="daily-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Daily spending in ${monthLabel(month)}. Highest day: ${dateLabel(`${month}-${String(peak).padStart(2,'0')}`)}, ${money(max)}."><title>${daily.map((v,i)=>`${i+1}: ${money(v)}`).join('; ')}</title>${grid}${bars}${labels}</svg>`;
+  $('daily-chart').innerHTML=`<svg class="daily-chart" viewBox="0 0 ${width} ${height}" role="group" aria-label="Daily spending in ${monthLabel(month)}. Highest day: ${dateLabel(`${month}-${String(peak).padStart(2,'0')}`)}, ${money(max)}."><title>${daily.map((v,i)=>`${i+1}: ${money(v)}`).join('; ')}</title>${grid}${bars}${labels}</svg>`;
  }else $('daily-chart').innerHTML='<div class="empty" style="min-height:240px"><div class="empty-icon">'+icon('chart')+'</div><h3>No spending to plot yet</h3><p>Your daily totals will appear as you track expenses.</p></div>';
- const filtered=filter?expenses.filter(e=>e.category===filter):expenses;
- $('spending-list-title').textContent=filter?category(filter).name:'All expenses';$('clear-filter').hidden=!filter;$('filtered-count').textContent=`${filtered.length} expense${filtered.length===1?'':'s'}`;
+ const filtered=dayFilter?categoryExpenses.filter(e=>e.date===`${month}-${dayFilter}`):categoryExpenses;
+ const scope=filter?category(filter).name:'All categories',selectedDate=dayFilter?`${month}-${dayFilter}`:null;
+ $('daily-day').innerHTML='<option value="">Choose a day</option>'+daily.map((cents,i)=>`<option value="${String(i+1).padStart(2,'0')}">${i+1} ${monthLabel(month,true)} · ${money(cents)}</option>`).join('');$('daily-day').value=dayFilter||'';
+ $('daily-selection').textContent=selectedDate?`${dateLabel(selectedDate)} ${year} · ${money(daily[Number(dayFilter)-1])} · ${countLabel(filtered.length,'expense')} · ${scope}`:'Select a day to see its amount and transactions.';
+ $('view-day-expenses').hidden=!dayFilter;$('category-filter-status').hidden=!filter&&!dayFilter;
+ $('category-filter-label').textContent=`Showing ${scope}${selectedDate?' · '+dateLabel(selectedDate)+' '+year:''} · ${countLabel(filtered.length,'expense')}. Monthly totals above include all categories.`;
+ $('spending-list-title').textContent=(filter?category(filter).name:'All expenses')+(selectedDate?' · '+dateLabel(selectedDate):'');$('clear-filter').hidden=!filter&&!dayFilter;$('filtered-count').textContent=`${filtered.length} expense${filtered.length===1?'':'s'}`;
  renderExpenses('spending-list',filtered,listLimit);$('load-more').hidden=filtered.length<=listLimit;
 }
 function render(){
@@ -779,13 +830,13 @@ function switchView(next,focus=true){
  render();syncMobileLayout();window.scrollTo({top:0,behavior:'instant'});
  if(focus){if(next==='track'&&mobileEntry.matches){(phoneEntryStage==='amount'?$('amount'):$('categories-back')).focus({preventScroll:true});}else{const heading=$(next==='track'?'track-title':next==='spending'?'spending-title':'settings-title');heading.tabIndex=-1;heading.focus({preventScroll:true});}}
 }
-function changeMonth(delta){const next=shiftMonth(month,delta);if(next<'1900-01'||next>localDate().slice(0,7))return;month=next;filter=null;listLimit=30;render();}
+function changeMonth(delta){const next=shiftMonth(month,delta);if(next<'1900-01'||next>localDate().slice(0,7))return;month=next;filter=null;dayFilter=null;listLimit=30;render();}
 function feedback(message,focus){$('form-feedback').textContent=message;$('form-feedback').hidden=false;if(focus)focusFormControl(focus);}
-function resetForm(){phoneEntryStage='amount';const remembered=state.settings.rememberCategory?category(formSelection.mainCategory):null;editingId=null;$('amount').value='';$('note').value='';$('date').value=localDate();formSelection={mainCategory:remembered&&!remembered.removed&&!directCategory(remembered)?remembered.name:null,subCategory:null};$('entry-title').textContent='Add an expense';$('save-label').textContent='Save expense';$('entry-hint').textContent='Amount → category → save';$('cancel-edit').hidden=true;$('form-feedback').hidden=true;$('entry-details').open=false;$('repeat-monthly').checked=false;$('recurring-name').value='';updateRepeatUI();renderCategories();}
+function resetForm(){phoneEntryStage='amount';const remembered=state.settings.rememberCategory?category(formSelection.mainCategory):null;editingId=null;expenseEditReturn=null;$('amount').value='';$('note').value='';$('date').value=localDate();formSelection={mainCategory:remembered&&!remembered.removed&&!directCategory(remembered)?remembered.name:null,subCategory:null};$('entry-title').textContent='Add an expense';$('save-label').textContent='Save expense';$('entry-hint').textContent='Amount → category → save';$('cancel-edit').hidden=true;$('form-feedback').hidden=true;$('entry-details').open=false;$('repeat-monthly').checked=false;$('recurring-name').value='';updateRepeatUI();renderCategories();}
 function updateDateSummary(){const date=$('date').value;$('details-summary').textContent=`${date===localDate()?'Today':validDate(date)?dateLabel(date):'Choose date'} · ${$('repeat-monthly').checked&&!editingId?'Repeats monthly':'Add details or repeat monthly'}`;}
 function saveExpense(event){
  event.preventDefault();if(mobileEntry.matches&&phoneEntryStage==='amount'){continueAmount();return;}const raw=rawAmount(),repeat=$('repeat-monthly').checked&&!editingId;
- if(!validAmount()){if(mobileEntry.matches)showPhoneAmount();feedback('Enter an amount greater than zero, with up to two decimal places.','amount');return;}
+ if(!validAmount()){if(mobileEntry.matches)showPhoneAmount();feedback(amountError(),'amount');return;}
  const c=category(formSelection.mainCategory);
  if(!c||!c.subcategories.includes(formSelection.subCategory)||!editingId&&(c.removed||c.removedSubs.includes(formSelection.subCategory))){feedback('Choose a main category and a subcategory first.');$('categories').querySelector('button')?.focus();return;}
  const date=$('date').value;
@@ -800,15 +851,16 @@ function saveExpense(event){
   if(editingId){const index=next.expenses.findIndex(e=>e.id===editingId);if(index<0){feedback('This expense is no longer available. Cancel the edit and reload your expenses.');return;}next.expenses[index]=expense;}else next.expenses.push(expense);
  }
  addDueMonthly(next);
- const priorMonth=month;month=repeat?localDate().slice(0,7):date.slice(0,7);filter=null;
+ const priorMonth=month;month=repeat?localDate().slice(0,7):date.slice(0,7);filter=null;dayFilter=null;
  const message=repeat?'Monthly expense set up':editingId?'Expense updated':'Expense saved';
- if(commit(next,message)){resetForm();if(mobileEntry.matches){toast(message,true,3000);window.scrollTo({top:0,behavior:'instant'});$('expense-form').querySelector('[data-key]').focus({preventScroll:true});}else $('amount').focus({preventScroll:true});}else month=priorMonth;
+ const returnView=expenseEditReturn,editedId=editingId;
+ if(commit(next,message)){resetForm();if(editedId&&returnView==='spending'){switchView('spending',false);const row=$('spending-list').querySelector(`[data-expense="${CSS.escape(editedId)}"]`);if(row){row.focus({preventScroll:true});row.scrollIntoView({block:'center',behavior:'instant'});}else focusSpendingSection('spending-list-title');}else if(mobileEntry.matches){toast(message,true,3000);window.scrollTo({top:0,behavior:'instant'});$('expense-form').querySelector('[data-key]').focus({preventScroll:true});}else $('amount').focus({preventScroll:true});}else month=priorMonth;
 }
 function showExpense(id){const e=state.expenses.find(e=>e.id===id);if(!e)return;dialogId=id;$('dialog-title').textContent=e.recurringName||e.subCategory;$('dialog-amount').textContent=money(e.cents);$('dialog-note').textContent=`${dateLabel(e.date)} ${e.date.slice(0,4)} · ${e.mainCategory}${e.recurringId?' · '+e.subCategory+' · Monthly':''}${previousLabel(e)?' · '+previousLabel(e):''}${e.note?' · '+e.note:''}${e.source?' · Imported from '+(e.source.sheet||'source')+' '+(e.source.range||'')+' · Original category: '+(e.source.originalLabel||''):''}`;$('charge-hint').hidden=!e.recurringId;$('manage-monthly-charge').hidden=!state.recurringRules.some(r=>r.id===e.recurringId&&r.active);$('expense-dialog').showModal();}
-function editExpense(){const e=state.expenses.find(e=>e.id===dialogId);if(!e)return;$('expense-dialog').close();phoneEntryStage='amount';editingId=e.id;formSelection={mainCategory:e.mainCategory,subCategory:e.subCategory};$('amount').value=formatAmount(String(e.cents/100));$('note').value=e.note;$('date').value=e.date;$('entry-title').textContent='Edit expense';$('save-label').textContent='Save changes';$('entry-hint').textContent='Update the details below';$('cancel-edit').hidden=false;$('form-feedback').hidden=true;$('entry-details').open=true;$('repeat-monthly').checked=false;updateRepeatUI();switchView('track',false);$('amount').focus({preventScroll:true});}
+function editExpense(){const e=state.expenses.find(e=>e.id===dialogId);if(!e)return;$('expense-dialog').close();expenseEditReturn=view;phoneEntryStage='amount';editingId=e.id;formSelection={mainCategory:e.mainCategory,subCategory:e.subCategory};$('amount').value=formatAmount(String(e.cents/100));$('note').value=e.note;$('date').value=e.date;$('entry-title').textContent='Edit expense';$('save-label').textContent='Save changes';$('entry-hint').textContent='Update the details below';$('cancel-edit').hidden=false;$('form-feedback').hidden=true;$('entry-details').open=true;$('repeat-monthly').checked=false;updateRepeatUI();switchView('track',false);$('amount').focus({preventScroll:true});}
 $('expense-form').addEventListener('submit',saveExpense);
-$('amount').addEventListener('input',event=>{formatAmountInput(event);$('form-feedback').hidden=true;renderPhoneEntry();});
-$('amount').addEventListener('paste',event=>{const pasted=event.clipboardData?.getData('text');if(pasted!==undefined&&!/^\d{1,9}(\.\d{0,2})?$/.test(rawAmount(pasted))){event.preventDefault();feedback('Paste an amount with up to two decimal places and correctly grouped commas.');}});
+$('amount').addEventListener('input',event=>{formatAmountInput(event);$('form-feedback').hidden=true;if(/^\d{10,}(?:\.\d*)?$/.test(rawAmount()))feedback(amountError());renderPhoneEntry();});
+$('amount').addEventListener('paste',event=>{const pasted=event.clipboardData?.getData('text');if(pasted!==undefined&&!/^\d{1,9}(\.\d{0,2})?$/.test(rawAmount(pasted))){event.preventDefault();feedback(amountError(pasted,true));}});
 $('amount').addEventListener('keydown',event=>{
  if(event.key==='Enter'&&mobileEntry.matches&&phoneEntryStage==='amount'){event.preventDefault();continueAmount();return;}
  const input=$('amount'),position=input.selectionStart;if(input.readOnly||position!==input.selectionEnd||event.ctrlKey||event.metaKey||event.altKey)return;
@@ -831,12 +883,34 @@ $('categories-back').innerHTML=icon('left')+'Back';
 $('categories-back').addEventListener('click',()=>{const previous=category(formSelection.mainCategory);if(mobileEntry.matches&&(!previous||directCategory(previous))){showPhoneAmount();return;}formSelection={mainCategory:null,subCategory:null};$('form-feedback').hidden=true;renderCategories();$('categories').querySelector(`[data-category="${CSS.escape(previous.id)}"]`)?.focus({preventScroll:true});});
 $('nav-settings').addEventListener('click',()=>switchView('settings'));
 $('nav-track').addEventListener('click',()=>switchView('track'));
-['nav-spending','see-spending','all-expenses'].forEach(id=>$(id).addEventListener('click',()=>{filter=null;listLimit=30;switchView('spending');}));
+['nav-spending','see-spending','all-expenses'].forEach(id=>$(id).addEventListener('click',()=>{filter=null;dayFilter=null;listLimit=30;switchView('spending');}));
 ['track','spending'].forEach(prefix=>{['prev','next'].forEach(direction=>{const b=$(`${prefix}-${direction}`);b.innerHTML=icon(direction==='prev'?'left':'right');b.addEventListener('click',()=>changeMonth(direction==='prev'?-1:1));});});
-$('month-picker').addEventListener('change',event=>{const next=event.target.value;if(/^\d{4}-\d{2}$/.test(next)&&validDate(`${next}-01`)&&next>='1900-01'&&next<=localDate().slice(0,7)){month=next;filter=null;listLimit=30;render();}else event.target.value=month;});
+$('month-picker').addEventListener('change',event=>{const next=event.target.value;if(/^\d{4}-\d{2}$/.test(next)&&validDate(`${next}-01`)&&next>='1900-01'&&next<=localDate().slice(0,7)){month=next;filter=null;dayFilter=null;listLimit=30;render();}else event.target.value=month;});
 ['recent-list','spending-list'].forEach(id=>$(id).addEventListener('click',event=>{const b=event.target.closest('[data-expense]');if(b)showExpense(b.dataset.expense);}));
-$('breakdown-list').addEventListener('click',event=>{const b=event.target.closest('[data-filter]');if(!b)return;const id=b.dataset.filter;filter=filter===id?null:id;listLimit=30;renderSpending();$('breakdown-list').querySelector(`[data-filter="${CSS.escape(id)}"]`)?.focus({preventScroll:true});});
-$('clear-filter').addEventListener('click',()=>{filter=null;listLimit=30;renderSpending();$('spending-list-title').tabIndex=-1;$('spending-list-title').focus({preventScroll:true});});
+$('breakdown-list').addEventListener('click',event=>{const b=event.target.closest('[data-filter]');if(!b)return;const id=b.dataset.filter;filter=filter===id?null:id;dayFilter=null;listLimit=30;renderSpending();$('breakdown-list').querySelector(`[data-filter="${CSS.escape(id)}"]`)?.focus({preventScroll:true});});
+function focusSpendingSection(id){const heading=$(id);heading.tabIndex=-1;heading.focus({preventScroll:true});heading.scrollIntoView({block:'start',behavior:'instant'});}
+function clearSpendingFilter(){filter=null;dayFilter=null;listLimit=30;renderSpending();focusSpendingSection('spending-list-title');}
+['clear-filter','clear-category-filter'].forEach(id=>$(id).addEventListener('click',clearSpendingFilter));
+['view-filtered-expenses','view-day-expenses'].forEach(id=>$(id).addEventListener('click',()=>focusSpendingSection('spending-list-title')));
+$('spending-view').addEventListener('click',event=>{const button=event.target.closest('[data-spending-section]');if(!button)return;const section=button.dataset.spendingSection;
+ if(section==='monthly'&&!mobileEntry.matches)switchView('track',false);
+ focusSpendingSection({transactions:'spending-list-title',insights:'insights-title',income:'income-title',monthly:'monthly-title'}[section]);
+});
+function selectSpendingDay(day,focusBar=false){
+ const days=new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate();
+ if(day!==''&&(!/^\d{2}$/.test(day)||Number(day)<1||Number(day)>days))return;
+ dayFilter=day||null;listLimit=30;renderSpending();syncFormChoices();
+ if(focusBar)$('daily-chart').querySelector(`[data-day="${day}"]`)?.focus({preventScroll:true});
+}
+$('daily-day').addEventListener('change',event=>selectSpendingDay(event.target.value));
+$('daily-chart').addEventListener('click',event=>{const bar=event.target.closest('[data-day]');if(bar)selectSpendingDay(bar.dataset.day,true);});
+$('daily-chart').addEventListener('keydown',event=>{
+ const bar=event.target.closest('[data-day]');if(!bar)return;
+ if(event.key==='Enter'||event.key===' '){event.preventDefault();selectSpendingDay(bar.dataset.day,true);return;}
+ const bars=[...$('daily-chart').querySelectorAll('[data-day]')],index=bars.indexOf(bar);
+ const target={ArrowLeft:index-1,ArrowRight:index+1,ArrowUp:index-1,ArrowDown:index+1,Home:0,End:bars.length-1}[event.key];
+ if(target===undefined)return;event.preventDefault();bars.forEach(b=>b.tabIndex=-1);const next=bars[Math.max(0,Math.min(bars.length-1,target))];next.tabIndex=0;next.focus({preventScroll:true});
+});
 $('load-more').addEventListener('click',()=>{listLimit+=30;renderSpending();});
 $('close-dialog').innerHTML=icon('close');$('close-dialog').addEventListener('click',()=>$('expense-dialog').close());
 $('expense-dialog').addEventListener('click',event=>{if(event.target===$('expense-dialog')){const r=event.target.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)event.target.close();}});
@@ -847,7 +921,7 @@ $('delete-expense').addEventListener('click',()=>{
   const next=clone(state);next.expenses=next.expenses.filter(e=>e.id!==id);if(!commit(next,'Expense deleted'))return false;$('expense-dialog').close();if(editingId===id)resetForm();return true;
  });
 });
-$('cancel-edit').addEventListener('click',resetForm);
+$('cancel-edit').addEventListener('click',()=>{const origin=expenseEditReturn;resetForm();if(origin==='spending'){switchView('spending',false);focusSpendingSection('spending-list-title');}});
 function undo(){if(!undoState)return;const previous=undoState;if(commit(previous,'Change undone',false)){if(editingId&&!state.expenses.some(e=>e.id===editingId))resetForm();}}
 $('undo').addEventListener('click',undo);
 document.addEventListener('keydown',event=>{if($('confirm-dialog').open)return;if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName)){event.preventDefault();undo();}});
@@ -869,20 +943,28 @@ $('stop-monthly').addEventListener('click',()=>{
  requestConfirmation('Stop this monthly expense?',`Stop future automatic charges for ${r.name} (${money(r.cents)} per month)? Previously logged charges stay in your spending. You can undo this change in this session.`,'Stop monthly expense',()=>{const next=clone(state),rule=next.recurringRules.find(r=>r.id===id);if(!rule)return false;rule.active=false;if(!commit(next,'Monthly expense stopped; past charges kept'))return false;$('monthly-dialog').close();return true;});
 });
 // Financial settings sync; remembered credentials are a separate device-only record.
-let settingsCategoryId=null,settingsSubName=null,gistToken='',gistPreview=null,gistBusy=false,pendingGistSetup=null,gistCreationUncertain=false,gistCredentialSnapshot=null,gistTokenEdited=false;
+let settingsCategoryId=null,settingsSubName=null,settingsCreatingCategory=false,settingsCreatingSubcategory=false,gistToken='',gistPreview=null,gistBusy=false,pendingGistSetup=null,gistCreationUncertain=false,gistCredentialSnapshot=null,gistTokenEdited=false;
 const GIST_CONNECTION_KEY='finflow_gist_connection_v1';
 const FINFLOW_GIST_NAME='finflow-data';
 function applyBehavior(){document.body.classList.toggle('reduce-motion',state.settings.reducedMotion);}
 function settingsCategory(){return state.categories.find(c=>c.id===settingsCategoryId);}
 function settingsError(message){$('category-settings-feedback').textContent=message;$('category-settings-feedback').hidden=false;}
 function iconOptions(inherit=false){return (inherit?'<option value="">Use main category icon</option>':'')+ICONS.map(i=>`<option value="${i}">${i==='other'?'General':i[0].toUpperCase()+i.slice(1)}</option>`).join('');}
+function updateCreationActions(kind,creating){
+ const button=$('save-'+kind),label=(creating?'Create ':'Save ')+kind;
+ button.setAttribute('aria-label',label);button.querySelector('.action-long').textContent=label;button.querySelector('.action-short').textContent=creating?'Create':'Save';
+ button.parentElement.dataset.creating=String(creating);$('new-'+kind).hidden=creating;$('cancel-new-'+kind).hidden=!creating;
+}
 function renderSettings(){
  if(!state.categories.some(c=>c.id===settingsCategoryId))settingsCategoryId=state.categories.find(c=>!c.removed).id;
  const c=settingsCategory();
  $('settings-category').innerHTML=state.categories.map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}${c.removed?' (removed)':''}</option>`).join('');
- $('settings-category').value=c.id;$('category-name').value=c.name;
- $('category-icon').innerHTML=iconOptions();$('category-icon').value=c.icon;$('category-icon-preview').innerHTML=icon(c.icon);
- $('remove-category').hidden=c.removed;$('restore-category').hidden=!c.removed;
+ $('settings-category').value=c.id;$('category-name').value=settingsCreatingCategory?'':c.name;
+ if(settingsCreatingCategory){$('settings-category').insertAdjacentHTML('afterbegin','<option value="" disabled>New category</option>');$('settings-category').value='';}
+ $('category-creation-hint').hidden=!settingsCreatingCategory;$('subcategory-editor').hidden=settingsCreatingCategory;
+ updateCreationActions('category',settingsCreatingCategory);
+ $('category-icon').innerHTML=iconOptions();$('category-icon').value=settingsCreatingCategory?'other':c.icon;$('category-icon-preview').innerHTML=icon(c.icon);
+ $('remove-category').hidden=settingsCreatingCategory||c.removed;$('restore-category').hidden=settingsCreatingCategory||!c.removed;
  renderSubSettings();
  $('start-view').value=state.settings.startView;$('remember-category').checked=state.settings.rememberCategory;$('reduce-motion').checked=state.settings.reducedMotion;$('monthly-posting').checked=state.settings.monthlyPosting;
  $('gist-id').value=pendingGistSetup?.response.id||state.settings.gistId;
@@ -892,11 +974,13 @@ function renderSubSettings(){
  const c=settingsCategory();if(!c)return;
  if(!c.subcategories.includes(settingsSubName))settingsSubName=c.subcategories.find(sub=>!c.removedSubs.includes(sub))||c.subcategories[0];
  $('settings-subcategory').innerHTML=c.subcategories.map(sub=>`<option value="${escapeHtml(sub)}">${escapeHtml(sub)}${c.removedSubs.includes(sub)?' (removed)':''}</option>`).join('');
- $('settings-subcategory').value=settingsSubName;$('subcategory-name').value=settingsSubName;
- $('subcategory-icon').innerHTML=iconOptions(true);$('subcategory-icon').value=Object.hasOwn(c.subIcons,settingsSubName)?c.subIcons[settingsSubName]:'';
+ $('settings-subcategory').value=settingsSubName;$('subcategory-name').value=settingsCreatingSubcategory?'':settingsSubName;
+ if(settingsCreatingSubcategory){$('settings-subcategory').insertAdjacentHTML('afterbegin','<option value="" disabled>New subcategory</option>');$('settings-subcategory').value='';}
+ $('subcategory-creation-hint').hidden=!settingsCreatingSubcategory;updateCreationActions('subcategory',settingsCreatingSubcategory);
+ $('subcategory-icon').innerHTML=iconOptions(true);$('subcategory-icon').value=!settingsCreatingSubcategory&&Object.hasOwn(c.subIcons,settingsSubName)?c.subIcons[settingsSubName]:'';
  $('subcategory-icon-preview').innerHTML=icon($('subcategory-icon').value||c.icon);
- $('subcategory-subscription').checked=c.subscriptions.includes(settingsSubName);
- $('remove-subcategory').hidden=c.removedSubs.includes(settingsSubName);$('restore-subcategory').hidden=!c.removedSubs.includes(settingsSubName);
+ $('subcategory-subscription').checked=!settingsCreatingSubcategory&&c.subscriptions.includes(settingsSubName);
+ $('remove-subcategory').hidden=settingsCreatingSubcategory||c.removedSubs.includes(settingsSubName);$('restore-subcategory').hidden=settingsCreatingSubcategory||!c.removedSubs.includes(settingsSubName);
 }
 function finishCategoryChange(next,message){
  if(commit(next,message)){
@@ -904,25 +988,27 @@ function finishCategoryChange(next,message){
   if(editingId&&!state.expenses.some(e=>e.id===editingId))resetForm();return true;
  }return false;
 }
-$('settings-category').addEventListener('change',()=>{settingsCategoryId=$('settings-category').value;settingsSubName=null;renderSettings();$('category-settings-feedback').hidden=true;});
-$('settings-subcategory').addEventListener('change',()=>{settingsSubName=$('settings-subcategory').value;renderSubSettings();$('category-settings-feedback').hidden=true;});
+$('settings-category').addEventListener('change',()=>{settingsCreatingCategory=false;settingsCreatingSubcategory=false;settingsCategoryId=$('settings-category').value;settingsSubName=null;renderSettings();$('category-settings-feedback').hidden=true;});
+$('settings-subcategory').addEventListener('change',()=>{settingsCreatingSubcategory=false;settingsSubName=$('settings-subcategory').value;renderSubSettings();$('category-settings-feedback').hidden=true;});
 $('category-icon').addEventListener('change',()=>$('category-icon-preview').innerHTML=icon($('category-icon').value));
 $('subcategory-icon').addEventListener('change',()=>$('subcategory-icon-preview').innerHTML=icon($('subcategory-icon').value||settingsCategory()?.icon||'other'));
-$('new-category').addEventListener('click',()=>{settingsCategoryId=null;$('category-name').value='';$('category-icon').value='other';$('category-name').focus();$('remove-category').hidden=true;$('restore-category').hidden=true;$('category-settings-feedback').hidden=true;});
+$('new-category').addEventListener('click',()=>{settingsCreatingCategory=true;settingsCreatingSubcategory=false;renderSettings();syncFormChoices();$('category-name').focus();$('category-settings-feedback').hidden=true;});
+$('cancel-new-category').addEventListener('click',()=>{settingsCreatingCategory=false;renderSettings();syncFormChoices();$('category-settings-feedback').hidden=true;$('new-category').focus();});
 $('category-settings-form').addEventListener('submit',event=>{
  event.preventDefault();const name=$('category-name').value.trim(),i=$('category-icon').value;
- if(!name||name.length>80||state.categories.some(c=>c.name===name&&c.id!==settingsCategoryId)||!ICONS.includes(i)){settingsError('Use a unique category name of up to 80 characters and an icon.');return;}
- const next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);
+ if(!name||name.length>80||state.categories.some(c=>c.name===name&&(settingsCreatingCategory||c.id!==settingsCategoryId))||!ICONS.includes(i)){settingsError('Use a unique category name of up to 80 characters and an icon.');return;}
+ const next=clone(state),creating=settingsCreatingCategory,previousId=settingsCategoryId,previousSub=settingsSubName,c=creating?null:next.categories.find(c=>c.id===settingsCategoryId);
  if(c){const old=c.name;c.name=name;c.short=name;c.icon=i;next.expenses.filter(e=>e.category===c.id).forEach(e=>e.mainCategory=name);next.recurringRules.filter(r=>r.category===c.id).forEach(r=>r.mainCategory=name);if(formSelection.mainCategory===old)formSelection.mainCategory=name;}
  else{const id=crypto.randomUUID();next.categories.push({id,name,short:name,icon:i,color:'#648f8a',items:['Other'],subcategories:['Other'],removed:false,removedSubs:[],subscriptions:[],subIcons:{}});settingsCategoryId=id;settingsSubName='Other';}
- finishCategoryChange(next,'Category saved');
+ settingsCreatingCategory=false;if(!finishCategoryChange(next,creating?'Category created':'Category saved')){settingsCreatingCategory=creating;settingsCategoryId=previousId;settingsSubName=previousSub;}
 });
-$('new-subcategory').addEventListener('click',()=>{if(!settingsCategory()){settingsError('Save the main category first.');return;}settingsSubName=null;$('subcategory-name').value='';$('subcategory-icon').value='';$('subcategory-subscription').checked=false;$('remove-subcategory').hidden=true;$('restore-subcategory').hidden=true;$('subcategory-name').focus();});
+$('new-subcategory').addEventListener('click',()=>{if(settingsCreatingCategory||!settingsCategory()){settingsError('Save the main category first.');return;}settingsCreatingSubcategory=true;renderSubSettings();syncFormChoices();$('subcategory-name').focus();$('category-settings-feedback').hidden=true;});
+$('cancel-new-subcategory').addEventListener('click',()=>{settingsCreatingSubcategory=false;renderSubSettings();syncFormChoices();$('category-settings-feedback').hidden=true;$('new-subcategory').focus();});
 $('subcategory-settings-form').addEventListener('submit',event=>{
  event.preventDefault();const name=$('subcategory-name').value.trim(),i=$('subcategory-icon').value,next=clone(state),c=next.categories.find(c=>c.id===settingsCategoryId);
  if(!c){settingsError('Save the main category first.');return;}
- if(!name||name.length>80||c.subcategories.some(sub=>sub===name&&sub!==settingsSubName)||i&&!ICONS.includes(i)){settingsError('Use a unique subcategory name of up to 80 characters and an available icon.');return;}
- const old=settingsSubName,index=c.subcategories.indexOf(old);
+ if(!name||name.length>80||c.subcategories.some(sub=>sub===name&&(settingsCreatingSubcategory||sub!==settingsSubName))||i&&!ICONS.includes(i)){settingsError('Use a unique subcategory name of up to 80 characters and an available icon.');return;}
+ const creating=settingsCreatingSubcategory,previousSub=settingsSubName,old=creating?null:settingsSubName,index=c.subcategories.indexOf(old);
  if(index<0)c.subcategories.push(name);
  else{
   c.subcategories[index]=name;c.removedSubs=c.removedSubs.map(sub=>sub===old?name:sub);c.subscriptions=c.subscriptions.filter(sub=>sub!==old);delete c.subIcons[old];
@@ -932,7 +1018,7 @@ $('subcategory-settings-form').addEventListener('submit',event=>{
  }
  c.items=[...c.subcategories];if($('subcategory-subscription').checked&&!c.subscriptions.includes(name))c.subscriptions.push(name);
  if(i)Object.defineProperty(c.subIcons,name,{value:i,writable:true,enumerable:true,configurable:true});
- settingsSubName=name;finishCategoryChange(next,'Subcategory saved');
+ settingsCreatingSubcategory=false;settingsSubName=name;if(!finishCategoryChange(next,creating?'Subcategory created':'Subcategory saved')){settingsCreatingSubcategory=creating;settingsSubName=previousSub;}
 });
 $('remove-category').addEventListener('click',()=>{
  const c=settingsCategory();if(!c||c.removed)return;
@@ -1061,7 +1147,7 @@ async function findFinFlowGist(token){
 function showGistPreview(response,prefix=''){
  const raw=gistContent(response),remote=parseRemote(raw);
  gistPreview={id:response.id,raw,remote,localSnapshot:storageSnapshot,credentialSnapshot:gistCredentialSnapshot};
- $('gist-status').textContent=prefix+`Gist: ${remote.expenses.length} expenses, ${remote.incomes.length} income entries, ${remote.movements.length} other cash movements, ${[...remote.recurringRules,...remote.recurringIncomeRules].filter(r=>r.active).length} active monthly schedules. This browser: ${state.expenses.length} expenses, ${state.incomes.length} income entries, ${state.movements.length} other cash movements. Choose which snapshot to keep.`;
+ $('gist-status').textContent=prefix+`Gist: ${snapshotCounts(remote)}, ${countLabel([...remote.recurringRules,...remote.recurringIncomeRules].filter(r=>r.active).length,'active monthly schedule')}. This browser: ${snapshotCounts(state)}. Choose which snapshot to keep.`;
  $('gist-pull').hidden=false;$('gist-actions').hidden=false;
 }
 function finishGistSetup(setup){
@@ -1095,7 +1181,7 @@ async function setupFinFlowGist(token,credentialSnapshot=gistCredentialSnapshot)
  }finally{setGistBusy(false);}
 }
 function gistContent(data){
- const file=data.files?.['finflow.json'];if(!file)throw Error('This Gist has no FinFlow backup. It may belong to RACK or another app. Leave Gist ID blank to set up a separate finflow-data Gist.');
+ const file=data.files?.['finflow.json'];if(!file)throw Error('This Gist has no FinFlow backup. It may belong to another app. Leave Gist ID blank to set up a separate finflow-data Gist.');
  if(file.truncated||typeof file.content!=='string'||file.content.length>1000000)throw Error('finflow.json is too large or incomplete. No data was replaced.');
  return file.content;
 }
@@ -1120,7 +1206,7 @@ $('gist-preview-button').addEventListener('click',async()=>{
 function confirmGist(action){
  if(gistBusy||!gistPreview)return;const preview=gistPreview;
  requestConfirmation(action==='pull'?'Replace this browser’s data?':'Replace the Gist snapshot?',
- action==='pull'?`Keep the Gist’s ${preview.remote.expenses.length} expenses, ${preview.remote.incomes.length} income entries, and ${preview.remote.movements.length} cash movements instead of this browser’s ${state.expenses.length} expenses, ${state.incomes.length} income entries, and ${state.movements.length} cash movements? Income, other cash movements, import history, categories, monthly schedules, and general preferences will also be replaced. Undo can restore this browser’s snapshot in this session.`:`Upload this browser’s ${state.expenses.length} expenses, ${state.incomes.length} income entries, ${state.movements.length} other cash movements, import history, categories, monthly schedules, and general preferences to finflow.json? This replaces that file on GitHub. The Gist is not encrypted and GitHub keeps its history.`,
+ action==='pull'?`Keep the Gist’s ${countLabel(preview.remote.expenses.length,'expense')}, ${countLabel(preview.remote.incomes.length,'income entry','income entries')}, and ${countLabel(preview.remote.movements.length,'cash movement')} instead of this browser’s ${countLabel(state.expenses.length,'expense')}, ${countLabel(state.incomes.length,'income entry','income entries')}, and ${countLabel(state.movements.length,'cash movement')}? Income, other cash movements, import history, categories, monthly schedules, and general preferences will also be replaced. Undo can restore this browser’s snapshot in this session.`:`Upload this browser’s ${snapshotCounts(state)}, import history, categories, monthly schedules, and general preferences to finflow.json? This replaces that file on GitHub. The Gist is not encrypted and GitHub keeps its history.`,
  action==='pull'?'Replace browser data':'Replace Gist snapshot',()=>executeGist(action,preview));
 }
 $('gist-pull').addEventListener('click',()=>confirmGist('pull'));$('gist-push').addEventListener('click',()=>confirmGist('push'));
@@ -1135,7 +1221,7 @@ async function executeGist(action,preview){
   if(action==='pull'){
    const next=clone(preview.remote);next.settings.gistId=id;addDueMonthly(next);
    if(!commit(next,'Gist data restored'))throw Error('Browser data was not replaced. Resolve the storage warning and preview again.');
-   formSelection={mainCategory:null,subCategory:null};resetForm();filter=null;settingsCategoryId=null;settingsSubName=null;render();
+   formSelection={mainCategory:null,subCategory:null};resetForm();filter=null;dayFilter=null;settingsCategoryId=null;settingsSubName=null;settingsCreatingCategory=false;settingsCreatingSubcategory=false;render();
   }else{
    const content=gistBackupContent();
    await gistRequest(id,'PATCH',{files:{'finflow.json':{content}}});
@@ -1170,27 +1256,31 @@ function validateCashState(data){
 }
 function cashRecords(kind,data=state){return kind==='income'?data.incomes:data.movements;}
 function renderCashList(id,records,kind){
- $(id).innerHTML=records.length?sorted(records).map(r=>`<div class="expense-row"><div class="expense-icon">${icon(kind==='income'?'work':'arrow')}</div><div><p class="expense-name">${escapeHtml(r.label)}${r.recurringId?'<span class="recurring-badge">Monthly</span>':''}</p><p class="expense-meta">${dateLabel(r.date)}${kind==='movement'?' · '+escapeHtml(CASH_TYPES[r.movementType][0]):''}${r.source?' · Imported':''}${r.note?' · '+escapeHtml(r.note):''}</p></div><span class="expense-amount num">${kind==='movement'&&r.direction==='out'?'− ':''}${money(r.cents)}</span><button class="icon-button" data-cash-kind="${kind}" data-cash-id="${escapeHtml(r.id)}" type="button" aria-label="${escapeHtml('Edit '+r.label+', '+money(r.cents))}">${icon('edit')}</button></div>`).join(''):`<p class="muted" style="padding:16px 0">${kind==='income'?'No income recorded for this month.':'No other cash movements recorded for this month.'}</p>`;
+ $(id).innerHTML=records.length?sorted(records).map(r=>`<button class="expense-row" data-cash-kind="${kind}" data-cash-id="${escapeHtml(r.id)}" type="button" aria-label="${escapeHtml('Edit '+r.label+', '+money(r.cents))}"><span class="expense-icon">${icon(kind==='income'?'work':'arrow')}</span><span class="expense-copy"><span class="expense-name">${escapeHtml(r.label)}${r.recurringId?'<span class="recurring-badge">Monthly</span>':''}</span><span class="expense-meta">${dateLabel(r.date)}${kind==='movement'?' · '+escapeHtml(CASH_TYPES[r.movementType][0]):''}${r.source?' · Imported':''}${r.note?' · '+escapeHtml(r.note):''}</span></span><span class="expense-amount num">${kind==='movement'&&r.direction==='out'?'− ':''}${money(r.cents)}</span><span class="icon-button expense-action" aria-hidden="true">${icon('edit')}</span></button>`).join(''):`<p class="muted" style="padding:16px 0">${kind==='income'?'No income recorded for this month.':'No other cash movements recorded for this month.'}</p>`;
 }
 function renderIncome(){
  const entries=state.incomes.filter(r=>r.date.startsWith(month)),income=total(entries),spent=total(monthExpenses()),movements=state.movements.filter(r=>r.date.startsWith(month));
  $('income-total').textContent=money(income);$('income-count').textContent=entries.length+' income entr'+(entries.length===1?'y':'ies');$('income-difference').textContent=money(income-spent);
  $('income-spent-share').textContent=income?(spent/income*100).toFixed(1)+'%':'—';$('income-share-hint').textContent=income?'Recorded expenses as a share of this month’s income.':'Add income to compare this month.';
  const sources=new Map();entries.forEach(r=>sources.set(r.label,(sources.get(r.label)||0)+r.cents));$('income-sources').innerHTML=[...sources].map(([label,cents])=>`<span>${escapeHtml(label)}: ${money(cents)}</span>`).join('');
- renderMonthlyIncome();$('movement-count').textContent=movements.length+' records';renderCashList('income-list',entries,'income');renderCashList('movement-list',movements,'movement');
+ $('income-overview').dataset.hasIncome=String(entries.length>0);
+ renderMonthlyIncome();$('movement-count').textContent=countLabel(movements.length,'record');renderCashList('income-list',entries,'income');renderCashList('movement-list',movements,'movement');
 }
 let cashEditingId=null,cashEditingKind='income';
 function openCashEntry(kind='income',id=null){
  const r=id?cashRecords(kind).find(r=>r.id===id):null;if(id&&!r)return;cashEditingId=id;cashEditingKind=kind;
  $('movement-type-field').hidden=kind!=='movement';$('movement-type').innerHTML=Object.entries(CASH_TYPES).map(([id,v])=>`<option value="${id}">${v[0]}</option>`).join('');$('movement-type').value=r?.movementType||'refund';$('income-date-label').textContent=kind==='movement'?'Date':'Date received';
  $('income-source-label').textContent=kind==='movement'?'Label':'Income source';closeSourceOptions();
- $('income-dialog-title').textContent=kind==='movement'?(id?'Edit cash movement':'Add cash movement'):id?'Edit income':'Add income';$('income-source').value=r?.label||'';$('income-amount').value=r?formatAmount(String(r.cents/100)):'';$('income-date').value=r?.date||localDate();$('income-date').max=localDate();$('income-date').min='1900-01-01';$('income-note').value=r?.note||'';
+ $('income-dialog-title').textContent=kind==='movement'?(id?'Edit cash movement':'Add cash movement'):id?'Edit income':'Add income';$('income-source').value=r?.label||'';$('income-amount').value=r?formatAmount(String(r.cents/100)):'';$('income-date').value=r?.date||(month===localDate().slice(0,7)?localDate():monthlyDate(month,Number(localDate().slice(8))));$('income-date').max=localDate();$('income-date').min='1900-01-01';$('income-note').value=r?.note||'';
  $('income-provenance').hidden=!r?.source;$('income-provenance').textContent=r?.source?`Imported from ${r.source.sheet||'source'} ${r.source.range||''}. Original label: ${r.source.originalLabel||r.label}.` : '';
  $('income-repeat').checked=false;$('income-repeat-field').hidden=kind!=='income'||!!id;updateIncomeRepeat();$('income-schedule-hint').hidden=!r?.recurringId;$('manage-income-schedule').hidden=!r?.recurringId||!state.recurringIncomeRules.some(rule=>rule.id===r.recurringId&&rule.active);
  $('delete-income').hidden=!id;$('income-feedback').hidden=true;syncFormChoices();$('income-dialog').showModal();$('income-source').focus({preventScroll:true});
 }
 function incomeError(message){$('income-feedback').textContent=message;$('income-feedback').hidden=false;}
+function updateCashDateContext(){const date=$('income-date').value;$('income-date-context').textContent=validDate(date)?`Recorded in ${monthLabel(date.slice(0,7))}`:'';}
+$('income-date').addEventListener('change',updateCashDateContext);
 function updateIncomeRepeat(){
+ updateCashDateContext();
  const repeat=cashEditingKind==='income'&&!cashEditingId&&$('income-repeat').checked;
  $('income-repeat-hint').hidden=!repeat;$('income-date-label').textContent=repeat?'First income date':cashEditingKind==='movement'?'Date':'Date received';
  if(repeat)$('income-date').removeAttribute('max');else $('income-date').max=localDate();
@@ -1239,7 +1329,9 @@ $('income-form').addEventListener('submit',event=>{
  const next=clone(state),entries=cashRecords(cashEditingKind,next),r=cashEditingId?entries.find(r=>r.id===cashEditingId):{id:crypto.randomUUID()};
  if(!r){incomeError('This entry is no longer available. Close the editor and reload.');return;}
  Object.assign(r,{label,date,cents:Math.round(Number(rawAmount($('income-amount').value))*100),note:$('income-note').value.trim()});if(cashEditingKind==='movement'){const type=$('movement-type').value;if(!Object.hasOwn(CASH_TYPES,type)){incomeError('Choose a cash movement type.');return;}r.movementType=type;r.direction=CASH_TYPES[type][1];}if(!cashEditingId)entries.push(r);
- const priorMonth=month;month=date.slice(0,7);if(commit(next,cashEditingId?'Entry updated':cashEditingKind==='movement'?'Cash movement saved':'Income saved'))$('income-dialog').close();else{month=priorMonth;incomeError('The entry was not saved. Resolve the storage warning and try again.');}
+ const priorMonth=month,priorFilter=filter,priorDay=dayFilter;month=date.slice(0,7);
+ if(month!==priorMonth){filter=null;dayFilter=null;}
+ if(commit(next,cashEditingId?'Entry updated':cashEditingKind==='movement'?'Cash movement saved':'Income saved'))$('income-dialog').close();else{month=priorMonth;filter=priorFilter;dayFilter=priorDay;incomeError('The entry was not saved. Resolve the storage warning and try again.');}
 });
 $('delete-income').addEventListener('click',()=>{
  const id=cashEditingId,kind=cashEditingKind,r=cashRecords(kind).find(r=>r.id===id);if(!r)return;
@@ -1282,16 +1374,16 @@ $('import-file').addEventListener('change',async()=>{
  try{
   if(file.size>5000000)throw Error('Choose a JSON file smaller than 5 MB.');const raw=await file.text();if(generation!==fileReadGeneration)return;
   const plan=planFileImport(raw);if(storageSnapshot!==snapshot)throw Error('Browser data changed while reading the file. Choose it again.');filePreview={plan,snapshot};
-  const c=plan.counts;$('import-status').textContent=`${plan.mode==='restore'?'Restore':'Add'} ${c.expense} expenses, ${c.income} income entries, and ${c.movement} other cash movements. ${plan.skipped} already imported IDs will be skipped. ${plan.review} incomplete source rows stay in the file for review.`;
+  const c=plan.counts;$('import-status').textContent=`${plan.mode==='restore'?'Restore':'Add'} ${countLabel(c.expense,'expense')}, ${countLabel(c.income,'income entry','income entries')}, and ${countLabel(c.movement,'other cash movement')}. ${plan.skipped} already imported IDs will be skipped. ${plan.review} incomplete source rows stay in the file for review.`;
   $('apply-import').textContent=plan.mode==='restore'?'Restore backup':'Import records';$('apply-import').hidden=plan.mode==='merge'&&!Object.values(c).some(Boolean);
  }catch(error){if(generation===fileReadGeneration)$('import-status').textContent=error instanceof SyntaxError?'The file is not valid JSON.':error.message;}
 });
 $('apply-import').addEventListener('click',()=>{
  const preview=filePreview;if(!preview)return;if(preview.snapshot!==storageSnapshot){filePreview=null;$('apply-import').hidden=true;$('import-status').textContent='Browser data changed after preview. Choose the file again.';return;}
  const p=preview.plan,c=p.counts,restore=p.mode==='restore';
- requestConfirmation(restore?'Replace local financial data?':'Import these records?',restore?`Replace this browser’s expenses, income, cash movements, categories, schedules, preferences, and import history with the backup? The saved Gist connection and credentials stay on this device. Undo can restore the previous data.`:`Add ${c.expense} expenses, ${c.income} income entries, and ${c.movement} other cash movements? ${p.skipped} previously imported IDs will be skipped. Existing records stay in place. Manual/monthly purchases are not automatically matched; review any overlap first. Undo can remove this import.`,restore?'Restore backup':'Import records',()=>{
+ requestConfirmation(restore?'Replace local financial data?':'Import these records?',restore?`Replace this browser’s expenses, income, cash movements, categories, schedules, preferences, and import history with the backup? The saved Gist connection and credentials stay on this device. Undo can restore the previous data.`:`Add ${countLabel(c.expense,'expense')}, ${countLabel(c.income,'income entry','income entries')}, and ${countLabel(c.movement,'other cash movement')}? ${p.skipped} previously imported IDs will be skipped. Existing records stay in place. Manual/monthly purchases are not automatically matched; review any overlap first. Undo can remove this import.`,restore?'Restore backup':'Import records',()=>{
   const next=clone(p.next);if(restore)addDueMonthly(next);if(!commit(next,restore?'Backup restored':'Records imported'))return false;
-  if(restore){resetForm();filter=null;settingsCategoryId=null;settingsSubName=null;render();}
+  if(restore){resetForm();filter=null;dayFilter=null;settingsCategoryId=null;settingsSubName=null;settingsCreatingCategory=false;settingsCreatingSubcategory=false;render();}
   filePreview=null;$('apply-import').hidden=true;$('import-file').value='';$('import-status').textContent=restore?'Backup restored. The device’s Gist connection is unchanged.':'Records imported. Re-importing this file will skip the same IDs.';return true;
  });
 });

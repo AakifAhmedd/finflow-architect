@@ -49,7 +49,7 @@ const {launch,fresh,stored,fill,continueEntry,add,text,check,today,assert,ROOT,f
   });
   await check('Charts have meaningful month-specific text alternatives and exact category amounts',async()=>{
    assert.equal(await page.$eval('.donut',e=>e.getAttribute('role')),'img');assert.match(await page.$eval('.donut',e=>e.getAttribute('aria-label')),/Exact amounts/);
-   assert.equal(await page.$eval('.daily-chart',e=>e.getAttribute('role')),'img');assert.match(await page.$eval('.daily-chart',e=>e.getAttribute('aria-label')),/Highest day/);
+   assert.equal(await page.$eval('.daily-chart',e=>e.getAttribute('role')),'group');assert.match(await page.$eval('.daily-chart',e=>e.getAttribute('aria-label')),/Highest day/);
    assert.equal(await page.$$eval('[data-filter]',e=>e.length),5);assert.match(await text(page,'breakdown-list'),/Rs\. 10,000/);
   });
   await check('Navigation state, dialogs, focus return, and Escape support keyboard use',async()=>{

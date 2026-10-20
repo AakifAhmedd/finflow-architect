@@ -7,6 +7,7 @@ const {launch,fresh,stored,fill,continueEntry,text,check,today,assert,KEY}=requi
   await page.click('#nav-spending');await page.click('#spending-list [data-expense]');await page.click('#edit-expense');assert.equal(await page.$eval('[data-category="other"]',e=>e.getAttribute('aria-pressed')),'true');await fill(page,'amount','7100');await continueEntry(page);await page.click('#save-expense');assert.equal((await stored(page)).expenses.length,1);assert.equal((await stored(page)).expenses[0].cents,710000);
  });
  await check('Direct Other can be replaced by a normal category and category memory does not preselect another Other purchase',async()=>{
+  await page.click('#nav-track');
   await fill(page,'amount','12');await continueEntry(page);await page.click('[data-category="other"]');await page.click('[data-category="transport"]');assert.equal(await page.$eval('#save-expense',e=>e.disabled),true);await page.click('[data-subcategory="Parking"]');await page.click('#categories-back');
   await page.click('#nav-settings');await page.$eval('#remember-category',e=>e.checked=true);await page.click('#behavior-form button[type="submit"]');await page.click('#nav-track');await fill(page,'amount','12');await continueEntry(page);await page.click('[data-category="other"]');await page.click('#save-expense');assert.equal(await page.$eval('#save-expense',e=>e.disabled),true);assert.equal(await page.$$eval('[data-category]',es=>es.length),6);
  });

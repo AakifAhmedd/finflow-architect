@@ -1,5 +1,15 @@
 # FinFlow change summary
 
+## 1.1.0 — 2026-10-20
+
+- Lead Spending with totals and transactions, add section shortcuts, and condense income comparisons on phones and when income is absent.
+- Make expense, income, and cash-movement rows full-size buttons; show the expense being edited and return to review after saving or canceling.
+- Scope the daily chart to the selected category, add persistent filter feedback, and explore individual days through touch, keyboard navigation, or the day picker.
+- Default new income and cash movements to the selected reporting month, clamping dates for short months and keeping explicit dates intact.
+- Keep subscription badges readable beside long labels and make new category/subcategory creation explicit with Create and Cancel actions.
+- Correct singular/plural counts, amount-limit feedback, and unrelated cloud-help copy. Keep financial storage, backup formats, credentials, and manual sync semantics compatible.
+- Add regression coverage for the audited flows and update the offline shell release together with the app.
+
 ## 1.0.5 — 2026-10-20
 
 - Replace the app icon, favicon, and header mark with a bevelled wave-split coin with the F indented into it.

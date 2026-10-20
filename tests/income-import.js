@@ -21,10 +21,10 @@ const record=(id,kind='income',cents=10000)=>({id,kind,date:today(),cents,label:
  });
  const imported=payload([record('sheet-expense','expense',5000),record('sheet-income'),record('sheet-refund','movement',900000)]);
  await check('File preview is read-only; confirmed import adds all three kinds while refunds stay out of income and expense charts',async()=>{
-  const before=await stored(p);await upload(p,imported);assert.deepEqual(await stored(p),before);assert.match(await text(p,'import-status'),/1 expenses, 1 income entries, and 1 other cash movements/);assert.match(await text(p,'import-status'),/1 incomplete/);
+  const before=await stored(p);await upload(p,imported);assert.deepEqual(await stored(p),before);assert.match(await text(p,'import-status'),/1 expense, 1 income entry, and 1 other cash movement/);assert.match(await text(p,'import-status'),/1 incomplete/);
   await p.click('#apply-import');await p.keyboard.press('Escape');assert.deepEqual(await stored(p),before);await p.click('#apply-import');await acceptConfirmation(p);
   const data=await stored(p);assert.equal(data.expenses.length,2);assert.equal(data.incomes.length,3);assert.equal(data.movements.length,1);assert.equal(data.importLedger.length,3);
-  await p.click('#nav-spending');assert.equal(await text(p,'spending-total'),'Rs. 75');assert.equal(await text(p,'income-total'),'Rs. 1,100.40');assert.equal(await text(p,'movement-count'),'1 records');
+  await p.click('#nav-spending');assert.equal(await text(p,'spending-total'),'Rs. 75');assert.equal(await text(p,'income-total'),'Rs. 1,100.40');assert.equal(await text(p,'movement-count'),'1 record');
  });
  await check('Repeated imports skip originals, retain manual edits, and do not resurrect a deleted imported record',async()=>{
   await upload(p,imported);assert.match(await text(p,'import-status'),/3 already imported/);assert.equal(await p.$eval('#apply-import',e=>e.hidden),true);

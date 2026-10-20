@@ -6,7 +6,7 @@ async function pickerFits(page){const r=await page.$eval('#form-picker',e=>{cons
  const {page,context,errors}=await fresh(browser);await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
  await check('Every select and calendar is replaced by a labeled in-app control',async()=>{
   const controls=await page.evaluate(()=>[...document.querySelectorAll('select,input[type="date"],input[type="month"]')].map(e=>({id:e.id,hidden:e.hidden,button:!!document.getElementById(e.id+'-control')?.getAttribute('aria-labelledby')})));
-  assert.equal(controls.length,11);assert.ok(controls.every(c=>c.hidden&&c.button));
+  assert.equal(controls.length,12);assert.ok(controls.every(c=>c.hidden&&c.button));
   await page.click('#nav-settings');await chooseOption(page,'settings-category','food');assert.equal(await page.$eval('#category-name',e=>e.value),'Food & Dining');
   await chooseOption(page,'category-icon','work');await page.click('#category-settings-form button[type="submit"]');assert.equal((await stored(page)).categories.find(c=>c.id==='food').icon,'work');
   await chooseOption(page,'settings-subcategory','Cafes');assert.equal(await page.$eval('#subcategory-name',e=>e.value),'Cafes');

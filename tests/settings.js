@@ -76,7 +76,7 @@ async function mockGist(page,data){await page.evaluate(data=>{window.gistMock={d
  const raw=JSON.stringify(remote),gist={id:'abc123',public:false,files:{'finflow.json':{content:raw,truncated:false},'notes.txt':{content:'keep this'}},truncated:false};
  await mockGist(page,gist);
  await check('Gist preview is read-only, replacements require confirmation, and cancellation writes nothing',async()=>{
-  const before=await stored(page);await page.click('#gist-preview-button');assert.match(await text(page,'gist-status'),/Gist: 1 expenses/);assert.deepEqual(await stored(page),before);
+  const before=await stored(page);await page.click('#gist-preview-button');assert.match(await text(page,'gist-status'),/Gist: 1 expense/);assert.deepEqual(await stored(page),before);
   await page.click('#gist-pull');assert.equal(await page.$eval('#confirm-dialog',e=>e.open),true);await page.keyboard.press('Escape');assert.deepEqual(await stored(page),before);
  });
  await check('Changed remote and local snapshots block replacement after preview',async()=>{

@@ -19,7 +19,7 @@ async function run(browser,name,fn){await check(name,async()=>{const t=await fre
 (async()=>{const browser=await launch();try{
  await run(browser,'Saving a connection remembers the masked key and ID across reload and new tabs, and authenticated sync works without retyping',async({page,context})=>{
   await connect(page);assert.deepEqual(await credential(page),{gistId:'abc123',token:TOKEN});assert.equal(await page.$eval('#gist-token',e=>e.type),'password');
-  const remote=await gist(page);await page.reload();await page.click('#nav-settings');assert.equal(await page.$eval('#gist-token',e=>e.value),TOKEN);assert.equal(await page.$eval('#gist-id',e=>e.value),'abc123');await mock(page,remote);await preview(page);assert.match(await text(page,'gist-status'),/Gist: 1 expenses/);
+  const remote=await gist(page);await page.reload();await page.click('#nav-settings');assert.equal(await page.$eval('#gist-token',e=>e.value),TOKEN);assert.equal(await page.$eval('#gist-id',e=>e.value),'abc123');await mock(page,remote);await preview(page);assert.match(await text(page,'gist-status'),/Gist: 1 expense/);
   await page.click('#gist-push');await acceptConfirmation(page);assert.match(await text(page,'gist-status'),/uploaded/);
   const requests=await page.evaluate(()=>connectionMock.requests);assert.ok(requests.some(r=>r.method==='PATCH'));assert.ok(!JSON.stringify(requests).includes(TOKEN));assert.ok(!JSON.stringify(await stored(page)).includes(TOKEN));
   const other=await context.newPage();await other.goto(URL,{waitUntil:'load'});assert.equal(await other.$eval('#gist-token',e=>e.value),TOKEN);assert.equal(await other.$eval('#gist-id',e=>e.value),'abc123');await other.close();await page.bringToFront();

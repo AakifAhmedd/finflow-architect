@@ -60,6 +60,7 @@ const {acceptConfirmation,launch,fresh,stored,fill,add,text,check,today,assert,f
    await page.click('#undo');assert.equal(await text(page,'track-total'),'1,450.80');
   });
   await check('Delete and undo restore the expense and corresponding totals',async()=>{
+   await page.click('#nav-track');
    await page.click('#recent-list [data-expense]');await page.click('#delete-expense');await acceptConfirmation(page);
    assert.equal((await stored(page)).expenses.length,3);await page.click('#undo');
    assert.equal((await stored(page)).expenses.length,4);assert.equal(await text(page,'track-total'),'1,450.80');
@@ -123,7 +124,7 @@ const {acceptConfirmation,launch,fresh,stored,fill,add,text,check,today,assert,f
    await g.click('[data-category="food"]');await g.click('[data-subcategory="Other"]');await g.click('#save-expense');assert.equal((await stored(g)).expenses[0].cents,1234550);
    await g.click('#nav-spending');await g.click('#spending-list [data-expense]');await g.click('#edit-expense');assert.equal(await g.$eval('#amount',e=>e.value),'12,345.5');
    await fill(g,'amount','1234567.00');await g.click('#continue-amount');await g.click('#save-expense');assert.equal((await stored(g)).expenses.length,1);assert.equal((await stored(g)).expenses[0].cents,123456700);
-   await fill(g,'amount','999999999.99');assert.equal(await g.$eval('#amount',e=>e.value),'999,999,999.99');await g.click('[data-key="1"]');assert.equal(await g.$eval('#amount',e=>e.value),'999,999,999.99');
+   await g.click('#nav-track');await fill(g,'amount','999999999.99');assert.equal(await g.$eval('#amount',e=>e.value),'999,999,999.99');await g.click('[data-key="1"]');assert.equal(await g.$eval('#amount',e=>e.value),'999,999,999.99');
    await g.click('#continue-amount');await g.click('[data-category="food"]');await g.click('[data-subcategory="Other"]');await g.click('#save-expense');assert.equal((await stored(g)).expenses.at(-1).cents,99999999999);
    await g.reload({waitUntil:'load'});assert.equal((await stored(g)).expenses.at(-1).cents,99999999999);
   });
