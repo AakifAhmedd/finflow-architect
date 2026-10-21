@@ -9,11 +9,13 @@ npm install
 npm test
 ```
 
-This runs `node tests/regression.js`, `node tests/regression-a11y-colour.js`, `node tests/categories.js`, `node tests/monthly.js`, `node tests/settings.js`, `node tests/confirmations.js`, `node tests/mobile-tracking.js`, `node tests/taxonomy.js`, `node tests/gist-setup.js`, `node tests/gist-credentials.js`, `node tests/income-import.js`, `node tests/recurring-income.js`, `node tests/pwa.js`, `node tests/form-controls.js`, and `node tests/ux-audit.js`. All fifteen resolve files relative to the repository and use isolated synthetic browser profiles. Fourteen open `index.html` using `file://`; the PWA suite starts its own temporary loopback HTTP server to exercise real service workers and browser restarts, then removes its temporary profile. No external network, backend, build, or real financial data is used. The loopback port is assigned automatically.
+This runs `node tests/regression.js`, `node tests/regression-a11y-colour.js`, `node tests/categories.js`, `node tests/monthly.js`, `node tests/settings.js`, `node tests/confirmations.js`, `node tests/mobile-tracking.js`, `node tests/taxonomy.js`, `node tests/gist-setup.js`, `node tests/gist-credentials.js`, `node tests/income-import.js`, `node tests/recurring-income.js`, `node tests/pwa.js`, `node tests/form-controls.js`, `node tests/ux-audit.js`, and `node tests/sankey.js`. All sixteen resolve files relative to the repository and use isolated synthetic browser profiles. Fifteen open `index.html` using `file://`; the PWA suite starts its own temporary loopback HTTP server to exercise real service workers and browser restarts, then removes its temporary profile. No external network, backend, build, or real financial data is used. The loopback port is assigned automatically.
 
 The default Chrome path is `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. Set the `CHROME` environment variable for a different executable. Browser dates use Asia/Colombo.
 
 ## Coverage
+
+- Desktop Sankey: exact cents and conservation at every internal node, empty and income-only months, income gaps, unspent income, custom-label safety, exclusion of cash movements, full-month totals during transaction filtering, month changes, mobile hiding and desktop resize recovery.
 
 - UX audit: full-row pointer/keyboard actions; edit context and return to review; transaction-first layout and shortcuts; category/day chart scope, keyboard exploration, day picker and filter reset; selected-month income/cash dates; category Create/Cancel; narrow subscription badges; amount-limit feedback; responsive review controls.
 

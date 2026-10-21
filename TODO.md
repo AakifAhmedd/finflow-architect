@@ -13,7 +13,7 @@ FinFlow remains a personal, single-user expense and income tracker with spending
 - [x] Add category breakdowns, daily spending charts, and monthly navigation.
 - [x] Add recurring monthly income with due dates, month-end handling, catch-up, edit/stop/Undo, and separate schedule management.
 - [x] Track received income separately, compare it with monthly expenses, and keep refunds, loans, withdrawals, transfers, savings and rollover in a separate movement ledger.
-- [ ] Explore a future Sankey of income and expenditure after validating the cash-flow classifications; Sankey remains deferred after 1.0.0.
+- [x] Restore a desktop-only monthly Sankey under Spending → Insights: pooled recorded income, explicit income gaps/unspent income, category/subcategory expenses, and an exact-amount table; exclude separate cash movements.
 - [x] Support expense editing, deletion, and undo.
 - [x] Set up named monthly expenses once, catch up due charges, and manage or stop future recurrence.
 - [x] Preserve personal defaults and migrate existing logged expenses without changing the original saved data.

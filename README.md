@@ -1,6 +1,6 @@
 # FinFlow
 
-Personal, single-user expense and income tracker. Fixed LKR, offline-first PWA, no build step or dependencies. Current version: **1.1.0**.
+Personal, single-user expense and income tracker. Fixed LKR, offline-first PWA, no build step or dependencies. Current version: **1.2.0**.
 
 [Open FinFlow](https://aakifahmedd.github.io/finflow-architect/)
 
@@ -8,6 +8,7 @@ Personal, single-user expense and income tracker. Fixed LKR, offline-first PWA, 
 
 - **Tracks:** fast expense entry: type an amount on desktop, choose a category and subcategory, then save. Desktop pairs a compact form and monthly schedules with the spending overview and recent expenses. Phones keep the keypad and separate entry stages. Optional note, date, and Repeat monthly.
 - **Spending:** monthly totals and transactions first, section shortcuts, category shares, and an interactive daily chart. Filter by category or day using touch, the day picker, or keyboard navigation.
+- **Desktop Sankey:** Spending → Insights shows monthly recorded income, pooled flow, spending categories and subcategories, with exact amounts and explicit income gaps/unspent income. Hidden below 768 px; works offline without runtime libraries. Always shows the full selected month, independently of transaction filters.
 - **Income:** log income by source in the selected month; compare with spending. Salary-style income can repeat monthly.
 - **Other cash movements:** refunds, loans, withdrawals, transfers, savings, rollover. Kept separate from income and spending.
 - **Monthly schedules:** recurring expenses and income post on their day each month (last day for shorter months) and catch up when the app opens.
@@ -30,7 +31,7 @@ Open the hosted app, wait for **Ready to open offline** in Settings → Install 
 
 ## Roadmap
 
-Sankey view is deferred. **2.0.0** targets automatic spending from bank SMS, which is not implemented and needs a proven device integration. See [TODO.md](TODO.md).
+**2.0.0** targets automatic spending from bank SMS, which is not implemented and needs a proven device integration. See [TODO.md](TODO.md).
 
 ## Development
 

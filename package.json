@@ -1,10 +1,10 @@
 {
   "name": "finflow-tests",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "Dev-only browser regression tests for the self-contained FinFlow app.",
   "scripts": {
-    "test": "node tests/regression.js && node tests/regression-a11y-colour.js && node tests/categories.js && node tests/monthly.js && node tests/settings.js && node tests/confirmations.js && node tests/mobile-tracking.js && node tests/taxonomy.js && node tests/gist-setup.js && node tests/gist-credentials.js && node tests/income-import.js && node tests/recurring-income.js && node tests/pwa.js && node tests/form-controls.js && node tests/ux-audit.js"
+    "test": "node tests/regression.js && node tests/regression-a11y-colour.js && node tests/categories.js && node tests/monthly.js && node tests/settings.js && node tests/confirmations.js && node tests/mobile-tracking.js && node tests/taxonomy.js && node tests/gist-setup.js && node tests/gist-credentials.js && node tests/income-import.js && node tests/recurring-income.js && node tests/pwa.js && node tests/form-controls.js && node tests/ux-audit.js && node tests/sankey.js"
   },
   "devDependencies": {
     "puppeteer-core": "^23.0.0"

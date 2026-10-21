@@ -1,5 +1,12 @@
 # FinFlow change summary
 
+## 1.2.0 — 2026-10-21
+
+- Restore a desktop-only monthly Sankey in Spending → Insights, with recorded income, pooled monthly flow, spending categories and subcategories.
+- Label spending above recorded income as an income gap and income without expenses as unspent income, without inferring funding sources or account balances. Separate cash movements are excluded.
+- Include an accessible exact-amount table, empty-month state, safe custom labels, and proportional flows. Keep the chart hidden and unrendered below 768 px; regenerate when switching to desktop.
+- Keep the full-month chart independent of transaction filters and bundle it inline for offline use without new runtime dependencies.
+
 ## 1.1.0 — 2026-10-20
 
 - Lead Spending with totals and transactions, add section shortcuts, and condense income comparisons on phones and when income is absent.

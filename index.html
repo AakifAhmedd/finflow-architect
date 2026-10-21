@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f6f0">
 <meta name="description" content="FinFlow — personal expense tracking and a clearer view of your spending.">
-<meta name="application-version" content="1.1.0">
+<meta name="application-version" content="1.2.0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FinFlow">
@@ -136,6 +136,8 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 }
 .income-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:23px}.income-overview .stat-card{background:var(--paper);color:var(--ink)}.income-overview .stat-card .stat-value{font-size:27px}.income-sources{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.income-sources span{font-size:12px;background:var(--green-light);color:var(--green);border-radius:8px;padding:8px 10px}.cash-section summary{cursor:pointer;min-height:44px;line-height:1.7;font-weight:600}.cash-section summary span{margin-left:8px}#income-dialog .field input{max-width:100%;min-width:0}#income-dialog .dialog-top h2{font-size:19px}#income-provenance{overflow-wrap:anywhere}
 @media(max-width:767.98px){.income-overview{grid-template-columns:1fr;gap:11px;margin-bottom:17px}.income-overview .stat-card{padding:20px}.income-overview .stat-value{margin:8px 0}.income-overview .stat-card .stat-value{font-size:28px}}
+.sankey-card{grid-column:1/-1;min-width:0}.sankey-card .chart-heading{margin-bottom:14px}.sankey-scroll{overflow-x:auto;max-width:100%;border-radius:10px}.sankey-chart{display:block;width:100%;min-width:1080px;height:auto}.sankey-chart text{font-family:inherit;font-size:12px;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:4px;stroke-linejoin:round}.sankey-chart .sankey-amount{font-size:11px;fill:var(--muted)}.sankey-chart .sankey-column{font-size:11px;font-weight:600;letter-spacing:1px;fill:var(--muted)}.sankey-link{opacity:.24}.sankey-link:hover{opacity:.5}.sankey-table summary{cursor:pointer;min-height:44px;align-content:center;font-size:12px;font-weight:600}.sankey-table table{width:100%;border-collapse:collapse;font-size:12px}.sankey-table th,.sankey-table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;overflow-wrap:anywhere}.sankey-table th:last-child,.sankey-table td:last-child{text-align:right;white-space:nowrap}.sankey-table caption{text-align:left;padding:8px 12px;color:var(--muted)}
+@media(max-width:767.98px){.sankey-card{display:none}}
 </style>
 <style>
 .nav button{position:relative}.update-dot{width:7px;height:7px;border-radius:50%;background:#a33b34;position:absolute;right:8px;top:7px}.pwa-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#pwa-card .primary{width:100%}
@@ -297,6 +299,7 @@ button.expense-row:hover{background:#f4f7ef}button.expense-row:focus-visible{pos
 <nav class="spending-shortcuts" aria-label="Spending sections"><button class="text-button" data-spending-section="transactions" type="button">Transactions</button><button class="text-button" data-spending-section="insights" type="button">Insights</button><button class="text-button" data-spending-section="income" type="button">Income</button><button class="text-button" data-spending-section="monthly" type="button">Monthly expenses</button></nav>
 <section id="spending-transactions" class="card expenses-card spending-expenses" aria-labelledby="spending-list-title"><div class="expense-heading"><div class="filter-title"><h2 id="spending-list-title">All expenses</h2><button id="clear-filter" class="clear-filter" type="button" hidden>Clear filter ×</button></div><span class="muted" id="filtered-count"></span></div><div class="expense-list" id="spending-list"></div><button id="load-more" class="text-button more-button" type="button" hidden>Show more expenses</button></section>
 <div id="spending-insights" class="spending-grid">
+<section id="sankey-card" class="card chart-card sankey-card" aria-labelledby="sankey-title"><div class="chart-heading"><div><h2 id="sankey-title">Monthly money flow</h2><p class="muted" id="sankey-month"></p></div><span class="chart-number">LKR</span></div><p id="sankey-description" class="chart-caption">Recorded income → monthly flow → spending categories → subcategories. Widths represent amounts; flows pool income without assigning individual sources to purchases. Other cash movements are excluded.</p><div id="sankey-chart" class="sankey-scroll" tabindex="0" role="region" aria-label="Monthly money flow chart" aria-describedby="sankey-description"></div><p id="sankey-balance" class="chart-caption"></p><details id="sankey-table" class="sankey-table"><summary>View exact flow amounts</summary><div class="sankey-scroll"><table><caption id="sankey-table-caption"></caption><thead><tr><th scope="col">Flow</th><th scope="col">From</th><th scope="col">To</th><th scope="col">Amount (LKR)</th></tr></thead><tbody id="sankey-rows"></tbody></table></div></details></section>
 <section class="card chart-card"><div class="chart-heading"><div><h2 id="insights-title">By category</h2><p class="muted">Select a category to explore its expenses.</p></div><span class="chart-number" id="category-count">0 categories</span></div><div id="category-chart"></div><div class="breakdown-list" id="breakdown-list"></div><div id="subcategory-breakdown" class="subcategory-breakdown" hidden></div><div id="category-filter-status" class="filter-status" hidden><p id="category-filter-label" role="status"></p><button id="clear-category-filter" class="clear-filter" type="button">Clear filter ×</button><button id="view-filtered-expenses" class="text-button" type="button">View transactions ↑</button></div></section>
 <section class="card chart-card"><div class="chart-heading"><div><h2>Day by day</h2><p class="muted" id="daily-month"></p></div><span class="chart-number">LKR</span></div><div id="daily-chart"></div><p class="chart-caption">Tap a day or use the day picker to explore its expenses. Use arrow keys to move between bars and Enter to select.</p><div class="daily-explorer"><div class="day-selection"><div class="field"><label for="daily-day">Explore a day</label><select id="daily-day"><option value="">Choose a day</option></select></div><button id="view-day-expenses" class="text-button" type="button" hidden>View transactions ↑</button></div><p id="daily-selection" class="daily-selection" role="status">Select a day to see its amount and transactions.</p></div><div class="daily-footer"><div><p class="eyebrow">Highest spending day</p><strong id="highest-day">—</strong><p class="muted" id="highest-amount">No expenses yet</p></div><div><p class="eyebrow">Days with expenses</p><strong id="active-days">0 days</strong></div></div></section>
 </div>
@@ -322,7 +325,7 @@ button.expense-row:hover{background:#f4f7ef}button.expense-row:focus-visible{pos
 <section class="card settings-card" aria-labelledby="files-title"><h2 id="files-title">Import &amp; backup</h2><p class="muted settings-intro">Import a FinFlow transaction file to add records, or restore a complete FinFlow backup. Everything happens in this browser.</p><div class="field"><label for="import-file">FinFlow JSON file</label><input id="import-file" type="file" accept=".json,application/json"></div><p id="import-status" class="muted settings-intro" role="status" aria-live="polite">Choose a file to preview it.</p><button id="apply-import" class="primary" type="button" hidden>Import records</button><button id="download-backup" class="text-button" type="button">Download backup</button><p class="muted monthly-hint">Imports add records and skip previously imported IDs. Existing manual/monthly purchases are not automatically matched; review any overlap. Backups include income, cash movements, and import history, and exclude Gist credentials.</p></section>
 <section class="card settings-card" aria-labelledby="reset-title"><h2 id="reset-title">Reset data</h2><p class="muted settings-intro">Clear all expenses, income, cash movements, import history, monthly expense and income schedules, category changes, and behavior settings stored in this browser. Your Gist connection and the cloud copy are not touched.</p><button id="reset-data" class="delete-button" type="button">Reset local data</button></section></div>
 </div></section>
-<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">1.1.0</span></span></footer>
+<footer class="footer"><span><svg class="icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-lock"/></svg>Stored in this browser · Just for you</span><span>FinFlow <span id="app-version">1.2.0</span></span></footer>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toast-message"></span><button id="undo" type="button" hidden>Undo</button></div>
 <dialog id="expense-dialog" class="edit-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><div><p class="eyebrow" style="margin-bottom:10px">Expense details</p><h2 id="dialog-title"></h2></div><button id="close-dialog" class="icon-button" type="button" aria-label="Close expense details"></button></div><p id="dialog-amount" class="dialog-amount num"></p><p id="dialog-note" class="dialog-note"></p><p class="muted monthly-hint" id="charge-hint" hidden>Editing or deleting this charge changes only this expense.</p><div class="dialog-actions"><button id="manage-monthly-charge" class="text-button" type="button" hidden>Manage monthly expense</button><button id="edit-expense" class="primary" type="button">Edit expense</button><button id="delete-expense" class="delete-button" type="button">Delete expense</button></div></dialog>
@@ -338,7 +341,7 @@ button.expense-row:hover{background:#f4f7ef}button.expense-row:focus-visible{pos
 <script>
 'use strict';
 // App release version is independent of the additive local data schema.
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 const STORAGE_KEY = 'finflow_tracker_v1';
 const LEGACY_KEY = 'finflow_architect_model_v2';
 const LEGACY_CATEGORIES = [
@@ -783,6 +786,56 @@ function renderTracker(){
  $('top-category').textContent=top?top.c.short:'—';$('top-category-detail').textContent=top?`${Math.round(top.cents/sum*100)}% of this month's spending`:'For the selected month';
  $('recent-month').textContent=monthLabel(month,true);renderExpenses('recent-list',expenses,5);$('all-expenses').hidden=expenses.length<=5;
 }
+// A pooled, acyclic Sankey of recorded monthly amounts; no inferred funding sources.
+function monthlyFlow(){
+ const expenses=monthExpenses(),spent=total(expenses),sources=new Map();
+ state.incomes.filter(r=>r.date.startsWith(month)).forEach(r=>sources.set(r.label,(sources.get(r.label)||0)+r.cents));
+ const income=[...sources.values()].reduce((sum,cents)=>sum+cents,0),amount=Math.max(income,spent),columns=[[],[],[],[]],links=[];
+ const node=(column,label,cents,color,kind)=>{const n={label,cents,color,kind,column};columns[column].push(n);return n;};
+ const link=(from,to,cents)=>links.push({from,to,cents});
+ if(!amount)return {columns,links,income,spent,amount};
+ const pool=node(1,'Monthly flow',amount,'#2c513e','pool');
+ [...sources].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).forEach(([label,cents])=>link(node(0,label,cents,'#42634d','income'),pool,cents));
+ if(spent>income)link(node(0,'Income gap',spent-income,'#a16145','gap'),pool,spent-income);
+ categoryTotals(expenses).forEach(({c,cents})=>{
+  const main=node(2,c.name,cents,c.color,'category');link(pool,main,cents);
+  const subs=new Map();expenses.filter(e=>e.category===c.id).forEach(e=>subs.set(e.subCategory,(subs.get(e.subCategory)||0)+e.cents));
+  [...subs].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).forEach(([label,value])=>link(main,node(3,label,value,c.color,'subcategory'),value));
+ });
+ if(income>spent)link(pool,node(2,'Unspent income',income-spent,'#7a8d62','remainder'),income-spent);
+ return {columns,links,income,spent,amount};
+}
+function renderSankey(){
+ const host=$('sankey-chart');
+ // Do not build a hidden chart on phones; regenerate when crossing to desktop.
+ if(window.matchMedia('(max-width:767.98px)').matches){host.replaceChildren();$('sankey-rows').replaceChildren();return;}
+ const {columns,links,income,spent,amount}=monthlyFlow();
+ $('sankey-month').textContent=`${monthLabel(month)} · All categories · Full month`;
+ $('sankey-table-caption').textContent=`${monthLabel(month)} · Amounts at each stage (do not add stages together)`;
+ $('sankey-table').hidden=!amount;
+ $('sankey-balance').textContent=spent>income?`Income gap: ${money(spent-income)} of spending exceeds recorded income. This does not identify its funding source.`:income>spent?`Unspent income: ${money(income-spent)} of recorded income has no recorded expense. This is not an account balance.`:amount?'Recorded income equals recorded spending.':'No income or expenses recorded for this month.';
+ if(!amount){host.innerHTML='<div class="empty"><div class="empty-icon">'+icon('chart')+'</div><h3>No money flow yet</h3><p>Record income or an expense to see this month’s flow.</p></div>';$('sankey-rows').replaceChildren();return;}
+ const width=1160,top=52,gap=16,plotHeight=Math.max(360,...columns.map(col=>col.length*54)),height=plotHeight+top+24,x=[12,312,602,912],bar=12;
+ // One scale for every ribbon. Reserve label space without inflating tiny amounts.
+ let low=0,high=plotHeight/amount;
+ for(let i=0;i<40;i++){const scale=(low+high)/2;if(columns.every(col=>col.reduce((sum,n)=>sum+Math.max(34,n.cents*scale),0)+Math.max(0,col.length-1)*gap<=plotHeight))low=scale;else high=scale;}
+ const scale=low;
+ columns.forEach((col,index)=>{
+  const used=col.reduce((sum,n)=>sum+Math.max(34,n.cents*scale),0)+Math.max(0,col.length-1)*gap;let cursor=top+(plotHeight-used)/2;
+  col.forEach(n=>{n.x=x[index];n.h=n.cents*scale;const slot=Math.max(34,n.h);n.y=cursor+(slot-n.h)/2;n.inset=0;n.outset=0;cursor+=slot+gap;});
+ });
+ const ribbons=links.map(l=>{
+  const a=l.from,b=l.to,h=l.cents*scale,x1=a.x+bar,x2=b.x,mid=(x1+x2)/2,y1=a.y+a.outset,y2=b.y+b.inset;a.outset+=h;b.inset+=h;
+  return `<path class="sankey-link" fill="${b.color}" d="M${x1},${y1}C${mid},${y1} ${mid},${y2} ${x2},${y2}L${x2},${y2+h}C${mid},${y2+h} ${mid},${y1+h} ${x1},${y1+h}Z"><title>${escapeHtml(a.label)} → ${escapeHtml(b.label)}: ${money(l.cents)}</title></path>`;
+ }).join('');
+ const nodes=columns.flat().map(n=>{
+  const full=n.label,label=Array.from(full).length>30?Array.from(full).slice(0,27).join('')+'…':full,cy=n.y+n.h/2;
+  return `<g><title>${escapeHtml(full)}: ${money(n.cents)}</title><rect x="${n.x}" y="${n.y}" width="${bar}" height="${n.h}" fill="${n.color}"/><text x="${n.x+bar+8}" y="${cy-3}">${escapeHtml(label)}</text><text class="sankey-amount" x="${n.x+bar+8}" y="${cy+13}">${money(n.cents)}</text></g>`;
+ }).join('');
+ const headings=['Recorded income','Monthly flow','Spending categories','Subcategories'].map((label,i)=>`<text class="sankey-column" x="${x[i]}" y="22">${label}</text>`).join('');
+ host.innerHTML=`<svg class="sankey-chart" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="sankey-svg-title sankey-svg-description"><title id="sankey-svg-title">Monthly money flow for ${monthLabel(month)}</title><desc id="sankey-svg-description">Recorded income ${money(income)}. Recorded spending ${money(spent)}. ${escapeHtml($('sankey-balance').textContent)} Exact flow amounts are available in the table below.</desc>${headings}${ribbons}${nodes}</svg>`;
+ $('sankey-rows').innerHTML=links.map(l=>`<tr><td>${l.from.column===0?(l.from.kind==='gap'?'Income gap':'Recorded income'):l.from.column===1?(l.to.kind==='remainder'?'Unspent income':'Spending'):'Subcategory'}</td><td>${escapeHtml(l.from.label)}</td><td>${escapeHtml(l.to.label)}</td><td class="num">${money(l.cents)}</td></tr>`).join('');
+}
 function renderSpending(){
  const expenses=monthExpenses(),sum=total(expenses),totals=categoryTotals(expenses);
  const [year,mon]=month.split('-').map(Number),days=new Date(year,mon,0).getDate();
@@ -819,7 +872,7 @@ function renderSpending(){
  $('view-day-expenses').hidden=!dayFilter;$('category-filter-status').hidden=!filter&&!dayFilter;
  $('category-filter-label').textContent=`Showing ${scope}${selectedDate?' · '+dateLabel(selectedDate)+' '+year:''} · ${countLabel(filtered.length,'expense')}. Monthly totals above include all categories.`;
  $('spending-list-title').textContent=(filter?category(filter).name:'All expenses')+(selectedDate?' · '+dateLabel(selectedDate):'');$('clear-filter').hidden=!filter&&!dayFilter;$('filtered-count').textContent=`${filtered.length} expense${filtered.length===1?'':'s'}`;
- renderExpenses('spending-list',filtered,listLimit);$('load-more').hidden=filtered.length<=listLimit;
+ renderExpenses('spending-list',filtered,listLimit);$('load-more').hidden=filtered.length<=listLimit;renderSankey();
 }
 function render(){
  renderCategories();renderTracker();renderSpending();renderIncome();renderMonthly();renderSettings();applyBehavior();syncFormChoices();
@@ -1408,7 +1461,7 @@ function syncMobileLayout(){
   if(view==='track')document.body.style.setProperty('--mobile-actions-height',document.querySelector('.entry-actions').getBoundingClientRect().height+'px');
  }
 }
-mobileEntry.addEventListener('change',()=>{renderPhoneEntry();syncMobileLayout();});
+mobileEntry.addEventListener('change',()=>{renderPhoneEntry();syncMobileLayout();renderSankey();});
 const entryLayoutObserver=new ResizeObserver(syncMobileLayout);
 entryLayoutObserver.observe(document.querySelector('.nav'),{box:'border-box'});entryLayoutObserver.observe(document.querySelector('.entry-actions'),{box:'border-box'});
 // Installation and app updates never write to financial or credential storage.
